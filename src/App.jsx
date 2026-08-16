@@ -22,7 +22,7 @@ export default function App() {
   // Modals state
   const [selectedOutingModal, setSelectedOutingModal] = useState(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [rsvpStatus, setRsvpStatus] = useState({ o_maternity_coffee: true, o_postwork_pottery: true, o_tea: true, o_sauna: true });
+  const [rsvpStatus, setRsvpStatus] = useState({ o_dance_wednesday: true, o_sunday_salon: true, o_maternity_coffee: true, o_sauna: true });
 
   const handleToggleRsvp = (outingId) => {
     setRsvpStatus(prev => ({
@@ -60,15 +60,15 @@ export default function App() {
     setIsPlanModalOpen(true);
   };
 
-  // Lifestyle Cohort & Category filter logic
+  // Lifestyle Routine & Category filter logic
   const filteredOutings = outings.filter(outing => {
     let matchesCategory = true;
-    if (selectedCategory === 'maternity') {
+    if (selectedCategory === 'wed_dance') {
+      matchesCategory = outing.lifestyleTag?.includes('Wed Office');
+    } else if (selectedCategory === 'sun_salon') {
+      matchesCategory = outing.lifestyleTag?.includes('Sun Salon');
+    } else if (selectedCategory === 'maternity') {
       matchesCategory = outing.lifestyleTag?.includes('Maternity');
-    } else if (selectedCategory === 'postwork') {
-      matchesCategory = outing.lifestyleTag?.includes('Post-Work');
-    } else if (selectedCategory === 'squad_core') {
-      matchesCategory = outing.connectionType === 'Core Squad';
     } else if (selectedCategory !== 'all') {
       matchesCategory = outing.category === selectedCategory;
     }
@@ -122,14 +122,14 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
-                      Lifestyle Cohorts & Schedule-Matched Outings
+                      Routine-Matched Outings in Dublin
                     </h2>
                     <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
-                      {filteredOutings.length} Ideas
+                      {filteredOutings.length} Featured
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-[#6C5E58] font-medium mt-1">
-                    Matched for <strong className="text-[#2C221E]">Maternity Leave Morning Coffee</strong> & <strong className="text-[#2C221E]">Post-Work 9-5 Evening Unwinds</strong> in Dublin
+                    Matched for <strong className="text-[#2C221E]">Wed Night Dance Classes (Post-Office)</strong> & <strong className="text-[#2C221E]">Sunday Post-Salon Town Meetups</strong>
                   </p>
                 </div>
 
@@ -147,9 +147,9 @@ export default function App() {
               {/* Grid */}
               {filteredOutings.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5]">
-                  <div className="text-4xl mb-2">☕</div>
-                  <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this filter</h3>
-                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another lifestyle cohort filter!</p>
+                  <div className="text-4xl mb-2">💃</div>
+                  <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this routine filter</h3>
+                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another routine filter!</p>
                   <button
                     onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
                     className="btn btn-secondary text-xs font-bold"
@@ -212,8 +212,8 @@ export default function App() {
         {/* Squad Friends List View */}
         {activeView === 'squad' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Profiles & Lifestyles</h2>
-            <p className="text-xs text-[#6C5E58] mb-6">Schedule types (Maternity Leave vs Post-Work 9-5 vs Freelance)</p>
+            <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Profiles & Weekly Routines</h2>
+            <p className="text-xs text-[#6C5E58] mb-6">Real schedules (Wednesday Office & Dance Night, Sunday Salon Catchups)</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {FRIENDS_DATA.map(friend => (
                 <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">

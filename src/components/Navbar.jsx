@@ -20,7 +20,7 @@ export default function Navbar({
       {/* Top Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
         
-        {/* Brand Logo with Feminine Rose Accent */}
+        {/* Brand Logo */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setActiveView('explore')}
@@ -51,7 +51,7 @@ export default function Navbar({
             <Search className="w-4 h-4 text-[#C85A65]" />
             <input
               type="text"
-              placeholder="Search early lunch, dance, pottery, afternoon tea..."
+              placeholder="Search dinner out, concerts, retreats, trips abroad..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] placeholder:text-[#9E8E87] font-medium"
@@ -109,10 +109,10 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Category Pills Bar */}
+      {/* Category Pills Bar with Google Material Symbols */}
       <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
-          {CATEGORY_PILLS.filter(p => p.id !== 'ux_research').map((pill) => (
+          {CATEGORY_PILLS.map((pill) => (
             <button
               key={pill.id}
               onClick={() => {
@@ -125,6 +125,9 @@ export default function Navbar({
                   : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
               }`}
             >
+              <span className="material-symbols-outlined text-base leading-none">
+                {pill.icon}
+              </span>
               <span>{pill.label}</span>
             </button>
           ))}

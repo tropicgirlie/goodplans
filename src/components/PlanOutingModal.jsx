@@ -1,306 +1,302 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Users, Check, UserCheck } from 'lucide-react';
+import { X, Calendar, MapPin, Sparkles, Heart, Users, CheckCircle2 } from 'lucide-react';
+import { FRIENDS_DATA, CATEGORIES_LIST } from '../data/mockData';
 import confetti from 'canvas-confetti';
-import { FRIENDS_DATA } from '../data/mockData';
 
 export default function PlanOutingModal({ isOpen, onClose, onCreateOuting, selectedFriends }) {
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Coffee & Chill');
-  const [connectionType, setConnectionType] = useState('Core Squad');
-  const [date, setDate] = useState('Sat, Aug 30 • 11:30 AM');
-  const [location, setLocation] = useState('Grafton Street & Stephen’s Green, Dublin');
-  const [price, setPrice] = useState('Free');
-  const [handwrittenTag, setHandwrittenTag] = useState('dublin coffee stroll');
-  const [invitedFriends, setInvitedFriends] = useState(selectedFriends);
-  const [metBeforeMap, setMetBeforeMap] = useState({ f1: true, f2: true, f3: true, f4: false, f5: false });
-  const [selectedImage, setSelectedImage] = useState('/images/scrapbook_coffee_walk.jpg');
-  const [description, setDescription] = useState('A low-pressure Dublin gathering for specialty pour-overs, fresh pastries, and warm conversations!');
+  const [formData, setFormData] = useState({
+    title: '',
+    category: 'Dinner Out',
+    date: '',
+    time: '18:30',
+    location: '',
+    price: '€25 / person',
+    connectionType: 'Mixed Circle',
+    description: '',
+    invitedFriendIds: ['f1', 'f2'],
+    metBeforeTags: { f1: true, f2: true }
+  });
+
+  const [createdSuccess, setCreatedSuccess] = useState(false);
 
   if (!isOpen) return null;
 
-  const toggleFriendInvite = (fId) => {
-    if (invitedFriends.includes(fId)) {
-      if (invitedFriends.length > 1) {
-        setInvitedFriends(invitedFriends.filter(id => id !== fId));
-      }
+  const handleFriendToggle = (id) => {
+    if (formData.invitedFriendIds.includes(id)) {
+      setFormData({
+        ...formData,
+        invitedFriendIds: formData.invitedFriendIds.filter(fId => fId !== id)
+      });
     } else {
-      setInvitedFriends([...invitedFriends, fId]);
+      setFormData({
+        ...formData,
+        invitedFriendIds: [...formData.invitedFriendIds, id]
+      });
     }
   };
 
-  const toggleMetBefore = (fId) => {
-    setMetBeforeMap(prev => ({ ...prev, [fId]: !prev[fId] }));
-  };
-
-  const calculateDynamicScore = () => {
-    return Math.min(99, 88 + invitedFriends.length * 2.2);
+  const handleMetBeforeToggle = (id) => {
+    setFormData({
+      ...formData,
+      metBeforeTags: {
+        ...formData.metBeforeTags,
+        [id]: !formData.metBeforeTags[id]
+      }
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
 
-    const badgeLabel = 
-      connectionType === 'Core Squad' ? '👯 Core Squad • Long-Time Besties' :
-      connectionType === '1:1 Outing' ? '☕ 1:1 Catchup • Deep Conversation' :
-      '🔀 Mixed Circle • Intros & Met Before';
+    const selectedCategoryObj = CATEGORIES_LIST.find(c => c.id === formData.category) || CATEGORIES_LIST[0];
 
     const newOuting = {
-      id: 'o_' + Date.now(),
-      title: title.trim(),
-      category,
-      connectionType,
-      connectionBadge: badgeLabel,
-      image: selectedImage,
-      date,
-      location,
+      id: 'o_custom_' + Date.now(),
+      title: formData.title || 'Special Outing with Friends',
+      category: formData.category,
+      lifestyleTag: `${formData.category} (Wraps by 8:30 PM)`,
+      connectionType: formData.connectionType,
+      connectionBadge: `${formData.connectionType} • Outing`,
+      iconName: selectedCategoryObj.icon,
+      image: '/images/scrapbook_pizza_games.jpg',
+      date: formData.date ? `${formData.date} • ${formData.time}` : 'Upcoming Outing',
+      location: formData.location || 'Dublin City Center',
       host: FRIENDS_DATA[0],
-      affinityScore: Math.round(calculateDynamicScore()),
-      familiarityBreakdown: {
-        squadType: connectionType,
-        metBeforeCount: `${invitedFriends.filter(id => metBeforeMap[id]).length} of ${invitedFriends.length} have met before`,
-        comfortLevel: 'Warm & Welcoming • Low Pressure',
-        vibeSync: `${category} (100%), Friendship Connection (95%)`
-      },
-      handwrittenTag,
-      stickerType: 'custom',
-      price: price || 'Free',
-      attendees: FRIENDS_DATA.filter(f => invitedFriends.includes(f.id)).map(f => ({
-        ...f,
-        metBefore: !!metBeforeMap[f.id],
-        relationNote: metBeforeMap[f.id] ? 'Met Before ✓' : 'First Time Intro 👋'
-      })),
-      maxAttendees: 8,
-      description,
-      itinerary: [
-        { time: 'Start Time', detail: 'Meet up at Dublin venue' },
-        { time: '+45 mins', detail: 'Activity & photos' },
-        { time: '+1.5 hours', detail: 'Casual wrap up & coffee chat' }
-      ],
+      affinityScore: Math.floor(Math.random() * 8) + 92,
+      price: formData.price || 'Free',
+      handwrittenTag: formData.title.toLowerCase() || 'fun outing',
+      attendees: formData.invitedFriendIds.map(fId => {
+        const friend = FRIENDS_DATA.find(f => f.id === fId);
+        return {
+          ...friend,
+          metBefore: formData.metBeforeTags[fId] ?? true,
+          relationNote: formData.metBeforeTags[fId] ? 'Met Before ✓' : 'First Time Intro 👋'
+        };
+      }),
+      description: formData.description || 'Join us for a wonderful outing in Dublin!',
       comments: []
     };
 
     onCreateOuting(newOuting);
 
+    // Fire Confetti
     confetti({
       particleCount: 80,
       spread: 70,
       origin: { y: 0.6 }
     });
 
-    onClose();
+    setCreatedSuccess(true);
+    setTimeout(() => {
+      setCreatedSuccess(false);
+      onClose();
+    }, 1200);
   };
-
-  const imageOptions = [
-    { label: '☕ Coffee & Walk', src: '/images/scrapbook_coffee_walk.jpg' },
-    { label: '🎨 Craft & Pottery', src: '/images/scrapbook_pottery.jpg' },
-    { label: '🌲 Cliff & Sea Hike', src: '/images/scrapbook_sunset_hike.jpg' },
-    { label: '🍕 Pizza & Games', src: '/images/scrapbook_pizza_games.jpg' }
-  ];
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content p-6 sm:p-8">
+      <div className="modal-content max-w-xl">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#F3ECE0] mb-6">
+        <div className="flex items-center justify-between p-5 border-b border-[#F3ECE0]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#C85A65] text-white flex items-center justify-center font-bold">
-              <Sparkles className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-extrabold font-display text-[#2C221E]">
-                Plan a Dublin Outing
-              </h2>
-              <p className="text-xs text-[#6C5E58]">
-                Set circle connection tier & tag whether friends have met before
-              </p>
-            </div>
+            <span className="material-symbols-outlined text-[#C85A65] text-xl">auto_awesome</span>
+            <h2 className="text-xl font-bold font-display text-[#2C221E]">
+              Plan a New Outing with Friends
+            </h2>
           </div>
-
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FAF6F0] hover:bg-[#F3ECE0] text-[#6C5E58] flex items-center justify-center border border-[#E0D4C5] cursor-pointer"
+            className="p-1 rounded-full text-[#6C5E58] hover:bg-[#F3ECE0] transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          
-          {/* Outing Title */}
-          <div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-1.5">
-              Outing Title *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Ranelagh Matcha Catchup & Craft Walk"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium text-[#2C221E] bg-[#FAF6F0]"
-            />
-          </div>
-
-          {/* Connection Tier & Category */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-1.5">
-                Circle Connection Tier
-              </label>
-              <select
-                value={connectionType}
-                onChange={(e) => setConnectionType(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium text-[#2C221E] bg-[#FAF6F0]"
-              >
-                <option value="Core Squad">👯 Core Squad (Long-Time Besties)</option>
-                <option value="Mixed Circle">🔀 Mixed Circle (Friends & Intros)</option>
-                <option value="1:1 Outing">☕ 1:1 Catchup (Intimate Duo)</option>
-              </select>
+        {/* Form Body */}
+        {createdSuccess ? (
+          <div className="p-10 text-center space-y-3">
+            <div className="w-14 h-14 bg-[#E8F5E9] text-[#2E7D32] rounded-full flex items-center justify-center mx-auto text-2xl">
+              ✓
             </div>
-
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-1.5">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium text-[#2C221E] bg-[#FAF6F0]"
-              >
-                <option value="Coffee & Chill">☕ Coffee & Strolls</option>
-                <option value="Creative Workshops">🎨 Creative & Pottery</option>
-                <option value="Outdoors">🌲 Dublin Hikes & Sea</option>
-                <option value="Games & Food">🍕 Board Games & Pizza</option>
-              </select>
-            </div>
+            <h3 className="text-xl font-bold font-display text-[#2C221E]">Outing Created & Invites Sent!</h3>
+            <p className="text-xs text-[#6C5E58]">Your friends have been notified with 1-click calendar sync.</p>
           </div>
-
-          {/* Handwritten Tag & Venue Location */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            
+            {/* Title */}
             <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-1.5">
-                Handwritten Scrapbook Tag
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                Outing Title
               </label>
               <input
                 type="text"
-                placeholder="e.g. ranelagh matcha, howth walk"
-                value={handwrittenTag}
-                onChange={(e) => setHandwrittenTag(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-handwriting text-base font-bold text-[#C85A65] bg-[#FAF6F0]"
+                required
+                placeholder="e.g. Friday Early Dinner & Wine, Concert Night, Retreat..."
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0]"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-1.5">
-                Dublin Venue / Location
-              </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border-2 border-[#E0D4C5] focus:border-[#C85A65] outline-none text-xs font-medium text-[#2C221E] bg-[#FAF6F0]"
-              />
-            </div>
-          </div>
-
-          {/* Image Style Picker */}
-          <div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E] mb-2">
-              Select Scrapbook Image Style
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {imageOptions.map((opt, i) => (
-                <div
-                  key={i}
-                  onClick={() => setSelectedImage(opt.src)}
-                  className={`p-1.5 rounded-lg border-2 cursor-pointer transition-all text-center ${
-                    selectedImage === opt.src
-                      ? 'border-[#C85A65] bg-[#FFF0F2]'
-                      : 'border-[#E0D4C5] hover:border-[#2C221E]'
-                  }`}
+            {/* Category Select (Clean labels without emojis, using Material Symbols in UI) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                  Category
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0] text-[#2C221E]"
                 >
-                  <img src={opt.src} alt={opt.label} className="w-full h-16 object-cover rounded mb-1" />
-                  <span className="text-[11px] font-bold text-[#2C221E]">{opt.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+                  {CATEGORIES_LIST.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Friends Invite & Met-Before Tagging */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#2C221E]">
-                Invite Friends & Tag "Met Before" Status
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                  Connection Tier
+                </label>
+                <select
+                  value={formData.connectionType}
+                  onChange={(e) => setFormData({ ...formData, connectionType: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0] text-[#2C221E]"
+                >
+                  <option value="Core Squad">Core Squad (Close Friends)</option>
+                  <option value="Mixed Circle">Mixed Circle (Friends + Intros)</option>
+                  <option value="1:1 Outing">1:1 Outing (Duo Catchup)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Date & Location */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                  Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                  Dublin Venue / Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="Coppinger Row, Whelan's, Powerscourt..."
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0]"
+                />
+              </div>
+            </div>
+
+            {/* Price */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                Estimated Cost per Person
               </label>
-              <span className="bg-[#C85A65] text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 font-display">
-                <Heart className="w-3 h-3 fill-white" />
-                {Math.round(calculateDynamicScore())}% Vibe Synergy
-              </span>
+              <input
+                type="text"
+                placeholder="e.g. €25 / person, Free, €65 / ticket"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0]"
+              />
             </div>
 
-            <div className="space-y-2">
-              {FRIENDS_DATA.map((friend) => {
-                const isInvited = invitedFriends.includes(friend.id);
-                const hasMet = metBeforeMap[friend.id];
-                return (
-                  <div key={friend.id} className="flex items-center justify-between p-2 rounded-xl bg-[#FAF6F0] border border-[#E0D4C5]">
-                    <div className="flex items-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => toggleFriendInvite(friend.id)}
-                        className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold transition-all cursor-pointer ${
-                          isInvited
-                            ? 'bg-[#2C221E] text-white border-[#2C221E]'
-                            : 'bg-white text-[#6C5E58] border-[#E0D4C5]'
-                        }`}
-                      >
-                        <img src={friend.avatar} alt={friend.name} className="w-5 h-5 rounded-full object-cover" />
-                        <span>{friend.name}</span>
-                        {isInvited && <Check className="w-3.5 h-3.5 text-[#F9E076]" />}
-                      </button>
-                      <span className="text-[10px] text-[#6C5E58] font-mono">({friend.mbti})</span>
+            {/* Friend Tagging with Met Before Status */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-2">
+                Invite Friends & Tag Familiarity
+              </label>
+              <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                {FRIENDS_DATA.map(friend => {
+                  const isInvited = formData.invitedFriendIds.includes(friend.id);
+                  const isMetBefore = formData.metBeforeTags[friend.id] ?? true;
+
+                  return (
+                    <div key={friend.id} className="flex items-center justify-between p-2.5 rounded-xl bg-[#FAF6F0] border border-[#E0D4C5]">
+                      <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handleFriendToggle(friend.id)}>
+                        <input
+                          type="checkbox"
+                          checked={isInvited}
+                          onChange={() => {}}
+                          className="accent-[#C85A65] w-4 h-4"
+                        />
+                        <img src={friend.avatar} alt={friend.name} className="w-7 h-7 rounded-full object-cover" />
+                        <div>
+                          <span className="text-xs font-bold text-[#2C221E]">{friend.name}</span>
+                          <span className="text-[10px] text-[#6C5E58] font-mono block">{friend.mbti} • {friend.lifestyle}</span>
+                        </div>
+                      </div>
+
+                      {isInvited && (
+                        <button
+                          type="button"
+                          onClick={() => handleMetBeforeToggle(friend.id)}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                            isMetBefore
+                              ? 'bg-[#7B9E87] text-white border-[#7B9E87]'
+                              : 'bg-[#F9E076] text-[#4A3E00] border-[#E0C855]'
+                          }`}
+                        >
+                          {isMetBefore ? 'Met Before ✓' : 'First Time Intro 👋'}
+                        </button>
+                      )}
                     </div>
-
-                    {isInvited && (
-                      <button
-                        type="button"
-                        onClick={() => toggleMetBefore(friend.id)}
-                        className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                          hasMet
-                            ? 'bg-[#7B9E87] text-white border-[#7B9E87]'
-                            : 'bg-[#F9E076] text-[#4A3E00] border-[#E0D4C5]'
-                        }`}
-                      >
-                        {hasMet ? 'Met Before ✓' : 'First Time Intro 👋'}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Submit CTA */}
-          <div className="pt-3 border-t border-[#F3ECE0] flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary px-6 py-3 shadow-md"
-            >
-              <Sparkles className="w-4.5 h-4.5" />
-              Publish Outing Card ✨
-            </button>
-          </div>
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
+                Vibe & Activity Notes
+              </label>
+              <textarea
+                rows={2}
+                placeholder="What are we doing? Mention schedule notes or what to bring..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-4 py-2 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-xs font-medium bg-[#FAF6F0]"
+              />
+            </div>
 
-        </form>
+            {/* Submit */}
+            <div className="pt-2 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn btn-secondary text-xs font-bold px-5"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary text-xs font-bold px-6 shadow-md"
+              >
+                <Sparkles className="w-4 h-4" />
+                Publish Outing
+              </button>
+            </div>
+
+          </form>
+        )}
 
       </div>
     </div>

@@ -40,19 +40,19 @@ export default function HeroSection({
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F2]/50 via-[#FAF6F0] to-[#FAF6F0] pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Editorial Moodboard Hero Grid */}
+        {/* Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Left Column: Headlines & Personality Engine */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Editorial Brand Tag */}
+            {/* Brand Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#2C221E] text-xs font-bold shadow-xs border border-[#E0D4C5]">
               <span className="w-2 h-2 rounded-full bg-[#C85A65] animate-pulse"></span>
               <span className="font-mono tracking-widest uppercase text-[11px]">AFFINITA • DUBLIN EDITION</span>
             </div>
 
-            {/* Title with Serif Editorial Typography */}
+            {/* Title */}
             <h1 className="text-4xl sm:text-6xl font-black font-display tracking-tight text-[#2C221E] leading-[1.1]">
               A Life Curated. <br />
               <span className="font-serif italic font-normal text-[#C85A65]">Elevating Every Outing</span>
@@ -190,38 +190,37 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Clean Editorial Lifestyle Moodboard */}
+          {/* Right Column: Reverted Polaroid Scrapbook Collage */}
           <div className="lg:col-span-5 relative flex justify-center">
             
-            {/* Clean Editorial Photo Frame */}
-            <div className="relative w-full max-w-md">
-              <div className="p-3 bg-white rounded-2xl border border-[#E0D4C5] shadow-xl space-y-3">
+            <div className="relative w-full max-w-sm">
+              
+              {/* Tape */}
+              <div className="tape-strip tape-top-center"></div>
+
+              {/* Hero Image Card */}
+              <div className="polaroid-frame transform rotate-2 hover:rotate-0 transition-transform duration-300 shadow-xl">
                 <img
-                  src="/images/affinita_editorial_hero.jpg"
-                  alt="Affinita Editorial Moodboard"
-                  className="w-full rounded-xl object-cover aspect-[4/3] shadow-xs"
+                  src="/images/scrapbook_afternoon_tea.jpg"
+                  alt="Afternoon Tea in Dublin"
+                  className="polaroid-img aspect-[4/3]"
                 />
-
-                <div className="p-2 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-serif font-bold text-[#2C221E] uppercase tracking-wider block">
-                      Affinita Dublin
-                    </span>
-                    <span className="text-[11px] text-[#6C5E58] font-medium">
-                      Curated Outings • Zero Friction
-                    </span>
-                  </div>
-
-                  <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
-                    EST. DUBLIN
+                
+                <div className="handwritten-caption mt-2 flex items-center justify-between">
+                  <span className="text-xl">shelbourne tea & pamper 💕</span>
+                  <span className="text-xs font-mono font-bold bg-[#C85A65] text-white px-2 py-0.5 rounded-full">
+                    99% Match
                   </span>
                 </div>
               </div>
 
-              {/* Subtle Glassmorphic Overlay Badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white/90 backdrop-blur-md text-[#2C221E] px-4 py-2 rounded-xl text-xs font-extrabold shadow-lg border border-[#E0D4C5] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#7B9E87]"></span>
-                <span>👯 Met Before ✓ Tagging</span>
+              {/* Floating Badges */}
+              <div className="absolute -top-4 -right-4 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg border-2 border-white transform rotate-12 font-handwriting text-base">
+                ✨ Zero Chat Fatigue!
+              </div>
+
+              <div className="absolute -bottom-6 -left-4 bg-[#7B9E87] text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border-2 border-white transform -rotate-6">
+                👯 Met Before ✓ Tagging
               </div>
 
             </div>

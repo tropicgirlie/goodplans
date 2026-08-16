@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap, Plus } from 'lucide-react';
+import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap } from 'lucide-react';
 import { FRIENDS_DATA } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
@@ -15,6 +15,7 @@ export default function HeroSection({
   setAppMode
 }) {
   const [availabilityPolled, setAvailabilityPolled] = useState(false);
+  const [activeCollageTab, setActiveCollageTab] = useState('girl_club'); // 'girl_club' or 'nature'
 
   const toggleFriend = (id) => {
     if (selectedFriends.includes(id)) {
@@ -131,7 +132,7 @@ export default function HeroSection({
                 )}
               </div>
 
-              {/* Friend Avatars Toggle List vs Empty State */}
+              {/* Friend Avatars Toggle List */}
               {friendsList.length === 0 ? (
                 <div className="p-4 rounded-xl bg-[#FAF6F0] border border-dashed border-[#E0D4C5] text-center space-y-2">
                   <p className="text-xs font-bold text-[#2C221E]">Your personal squad roster is clean.</p>
@@ -212,37 +213,72 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Reverted Polaroid Scrapbook Collage */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          {/* Right Column: Aesthetic Paper Cutout Scrapbook Moodboard */}
+          <div className="lg:col-span-5 relative flex flex-col items-center">
             
-            <div className="relative w-full max-w-sm">
-              
-              {/* Tape */}
-              <div className="tape-strip tape-top-center"></div>
+            {/* Collage Selector Switcher */}
+            <div className="flex items-center gap-2 mb-3 bg-white p-1 rounded-full border border-[#E0D4C5] shadow-xs">
+              <button
+                onClick={() => setActiveCollageTab('girl_club')}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  activeCollageTab === 'girl_club'
+                    ? 'bg-[#C85A65] text-white shadow-xs'
+                    : 'text-[#6C5E58] hover:text-[#2C221E]'
+                }`}
+              >
+                🎀 Girl Club Aesthetic
+              </button>
 
-              {/* Hero Image Card */}
-              <div className="polaroid-frame transform rotate-2 hover:rotate-0 transition-transform duration-300 shadow-xl">
+              <button
+                onClick={() => setActiveCollageTab('nature')}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  activeCollageTab === 'nature'
+                    ? 'bg-[#7B9E87] text-white shadow-xs'
+                    : 'text-[#6C5E58] hover:text-[#2C221E]'
+                }`}
+              >
+                🌿 Retreat & Nature
+              </button>
+            </div>
+
+            {/* Paper Cutout Collage Display Frame */}
+            <div className="relative w-full max-w-md">
+              
+              {/* Paper Washi Tape Strip */}
+              <div className="tape-strip tape-top-center z-20"></div>
+
+              {/* Cutout Scrapbook Frame */}
+              <div className="p-3.5 bg-white rounded-3xl border-4 border-white shadow-2xl ring-1 ring-black/5 transform rotate-1 hover:rotate-0 transition-transform duration-300 relative overflow-hidden">
                 <img
-                  src="/images/scrapbook_afternoon_tea.jpg"
-                  alt="Afternoon Tea in Dublin"
-                  className="polaroid-img aspect-[4/3]"
+                  src={activeCollageTab === 'girl_club' ? '/images/girl_club_moodboard.png' : '/images/nature_waterfall_moodboard.png'}
+                  alt="Amiga Aesthetic Cutout Collage"
+                  className="w-full rounded-2xl object-cover aspect-[4/3] shadow-inner"
                 />
                 
-                <div className="handwritten-caption mt-2 flex items-center justify-between">
-                  <span className="text-xl">shelbourne tea & pamper 💕</span>
-                  <span className="text-xs font-mono font-bold bg-[#C85A65] text-white px-2 py-0.5 rounded-full">
+                {/* Handwritten Cutout Sticker Caption */}
+                <div className="mt-3 px-1 flex items-center justify-between">
+                  <div>
+                    <span className="text-xl font-handwriting text-[#2C221E] block">
+                      {activeCollageTab === 'girl_club' ? 'The Girl Club • Amiga Dublin 💕' : 'You’re it, you’re my person 🌿'}
+                    </span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#6C5E58]">
+                      Aesthetic Cutout Scrapbook
+                    </span>
+                  </div>
+
+                  <span className="text-xs font-mono font-bold bg-[#FAF6F0] text-[#C85A65] px-2.5 py-1 rounded-full border border-[#E0D4C5]">
                     99% Match
                   </span>
                 </div>
               </div>
 
-              {/* Floating Badges */}
-              <div className="absolute -top-4 -right-4 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg border-2 border-white transform rotate-12 font-handwriting text-base">
-                ✨ Zero Chat Fatigue!
+              {/* Floating Paper Cutout Stickers */}
+              <div className="absolute -top-3 -right-3 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-xl border-2 border-white transform rotate-12 font-handwriting text-base z-30">
+                🎀 Flawless Vibes
               </div>
 
-              <div className="absolute -bottom-6 -left-4 bg-[#7B9E87] text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border-2 border-white transform -rotate-6">
-                👯 Met Before ✓ Tagging
+              <div className="absolute -bottom-5 -left-3 bg-[#C85A65] text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-xl border-2 border-white transform -rotate-6 z-30">
+                ✨ Girls Don’t Cry
               </div>
 
             </div>

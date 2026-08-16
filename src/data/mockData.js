@@ -1,4 +1,4 @@
-// Mock data for MeetFriends Planner - Dublin Edition with Google Material Symbols & UX Validation
+// Mock data for MeetFriends Planner - Dublin Edition with Google Material Symbols & luana.systems Architecture
 
 export const FRIENDS_DATA = [
   {
@@ -10,6 +10,7 @@ export const FRIENDS_DATA = [
     lifestyle: 'Maternity Leave / New Mom',
     preferredTime: 'Weekday Mornings (10:30 AM)',
     ageGroup: '28 (Millennial)',
+    socialBatteryLevel: 'balanced',
     interests: ['Afternoon Tea', 'Trips Abroad', 'Concerts', 'Coffee Walks'],
     color: '#C85A65'
   },
@@ -22,6 +23,7 @@ export const FRIENDS_DATA = [
     lifestyle: 'Working Professional (Office Days Wed)',
     preferredTime: 'Dinner Out & Post-Office (Before 8:30 PM)',
     ageGroup: '29 (Millennial)',
+    socialBatteryLevel: 'balanced',
     interests: ['Dinner Out', 'Workshops', 'Trips Abroad', 'Wellness Retreats'],
     color: '#7B9E87'
   },
@@ -34,6 +36,7 @@ export const FRIENDS_DATA = [
     lifestyle: 'Hybrid Freelance / Consultant',
     preferredTime: 'Early Afternoon (12:00 - 3:00 PM)',
     ageGroup: '32 (Millennial)',
+    socialBatteryLevel: 'cozy',
     interests: ['Concerts', 'Retreats', 'Trips Abroad', 'Dinner Out'],
     color: '#9B870C'
   },
@@ -46,6 +49,7 @@ export const FRIENDS_DATA = [
     lifestyle: 'Working Professional (Office Days Wed)',
     preferredTime: 'Sunset Hours & Concerts',
     ageGroup: '24 (Gen Z)',
+    socialBatteryLevel: 'high',
     interests: ['Concerts', 'Trips Abroad', 'Wellness Retreats', 'Dinner Out'],
     color: '#F9E076'
   },
@@ -58,6 +62,7 @@ export const FRIENDS_DATA = [
     lifestyle: 'Maternity Leave / Part-Time',
     preferredTime: 'Weekend Afternoon Tea (2:00 PM)',
     ageGroup: '29 (Millennial)',
+    socialBatteryLevel: 'cozy',
     interests: ['Afternoon Tea', 'Retreats', 'Trips Abroad', 'Workshops'],
     color: '#B388EB'
   }
@@ -80,8 +85,11 @@ export const INITIAL_OUTINGS = [
     category: 'Dinner Out',
     lifestyleTag: 'Early Dinner (6:30 PM - Safe Dublin Hours)',
     accessibilityTag: '💳 Revolut / Split Bill Ready',
+    socialBattery: 'balanced', // balanced energy
+    squadPerk: '🎁 Squad Perk: Complimentary Olives & Sourdough for 4+',
+    circleCrossover: true,
     connectionType: 'Mixed Circle',
-    connectionBadge: 'Dinner Out • Wraps by 8:30 PM',
+    connectionBadge: '🔀 Double Squad • Early Dinner',
     iconName: 'restaurant',
     image: '/images/scrapbook_pizza_games.jpg',
     date: 'Fri, Aug 29 • 6:30 PM (Early Dinner)',
@@ -108,6 +116,10 @@ export const INITIAL_OUTINGS = [
       { time: '7:45 PM', detail: 'Dessert & espresso martini at South William St' },
       { time: '8:30 PM', detail: 'Home early feeling nourished & refreshed' }
     ],
+    souvenirPhotos: [
+      '/images/scrapbook_pizza_games.jpg',
+      '/images/scrapbook_afternoon_tea.jpg'
+    ],
     comments: [
       { id: 'c_l1', user: FRIENDS_DATA[2], text: 'Early dinner is so much better than late nights! Count me in 🍽️🍷', time: '40m ago' }
     ]
@@ -118,6 +130,8 @@ export const INITIAL_OUTINGS = [
     category: 'Concerts & Music',
     lifestyleTag: 'Live Concert (7:30 PM Doors)',
     accessibilityTag: '💳 Revolut / Split Bill Ready',
+    socialBattery: 'high', // high energy
+    squadPerk: '🎸 Reserved Front Balcony Table',
     connectionType: 'Mixed Circle',
     connectionBadge: 'Concert Crew • Live Music',
     iconName: 'music_note',
@@ -146,6 +160,9 @@ export const INITIAL_OUTINGS = [
       { time: '8:15 PM', detail: 'Acoustic gig upstairs' },
       { time: '9:45 PM', detail: 'Post-gig chat & night wrap-up' }
     ],
+    souvenirPhotos: [
+      '/images/scrapbook_sunset_hike.jpg'
+    ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[1], text: 'Whelan’s acoustic gigs are the best! Super excited 🎸🎶', time: '1h ago' }
     ]
@@ -156,8 +173,11 @@ export const INITIAL_OUTINGS = [
     category: 'Wellness & Retreats',
     lifestyleTag: 'Day Retreat (Sat 10:00 AM)',
     accessibilityTag: '🧘‍♀️ All Levels & Spa Included',
+    socialBattery: 'cozy', // cozy energy
+    squadPerk: '🌿 Complimentary Herbal Tea & Sauna Towels',
+    circleCrossover: true,
     connectionType: 'Core Squad',
-    connectionBadge: 'Wellness Retreat • Full Day',
+    connectionBadge: '🔀 Double Squad • Wellness Retreat',
     iconName: 'spa',
     image: '/images/scrapbook_spa_sauna.jpg',
     date: 'Sat, Sep 13 • 10:00 AM - 4:00 PM',
@@ -185,6 +205,9 @@ export const INITIAL_OUTINGS = [
       { time: '12:30 PM', detail: 'Nourishing farm-to-table lunch' },
       { time: '2:00 PM', detail: 'Thermal spa pools & relaxation room' }
     ],
+    souvenirPhotos: [
+      '/images/scrapbook_spa_sauna.jpg'
+    ],
     comments: [
       { id: 'c_r1', user: FRIENDS_DATA[0], text: 'Exactly what we need! My social battery will be 100% recharged 🧘‍♀️✨', time: '3h ago' }
     ]
@@ -195,6 +218,8 @@ export const INITIAL_OUTINGS = [
     category: 'Trips Abroad',
     lifestyleTag: '3-Day Weekend Trip Abroad',
     accessibilityTag: '✈️ Direct Flights & Central Airbnb',
+    socialBattery: 'high',
+    squadPerk: '✈️ Squad Flight Deal: Direct Aer Lingus Flights',
     connectionType: 'Core Squad',
     connectionBadge: 'Trip Abroad • Long Weekend',
     iconName: 'flight_takeoff',
@@ -225,6 +250,9 @@ export const INITIAL_OUTINGS = [
       { time: 'Sat Full Day', detail: 'Pastéis de Belém, tram rides & ceramic shopping' },
       { time: 'Sun Evening', detail: 'Fly back to Dublin feeling sun-kissed' }
     ],
+    souvenirPhotos: [
+      '/images/scrapbook_pottery.jpg'
+    ],
     comments: [
       { id: 'c_t1', user: FRIENDS_DATA[3], text: 'Flights booked! Need sunshine and portuguese tarts asap ✈️🇵🇹', time: '5h ago' }
     ]
@@ -235,6 +263,8 @@ export const INITIAL_OUTINGS = [
     category: 'Coffee & Strolls',
     lifestyleTag: 'Maternity Morning (10:30 AM)',
     accessibilityTag: '👶 Stroller & Buggy Accessible',
+    socialBattery: 'cozy',
+    squadPerk: '☕ Squad Perk: Free Extra Cinnamon Buns for 4+',
     connectionType: 'Core Squad',
     connectionBadge: 'Coffee & Strolls • Moms & Flex Hours',
     iconName: 'local_cafe',
@@ -263,6 +293,9 @@ export const INITIAL_OUTINGS = [
       { time: '11:15 AM', detail: 'Stroller walk through St Stephen’s Green gardens' },
       { time: '12:00 PM', detail: 'Park bench chat & relaxed morning wrap-up' }
     ],
+    souvenirPhotos: [
+      '/images/scrapbook_coffee_walk.jpg'
+    ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[4], text: 'So needed this! Monday mornings on maternity leave get lonely ☕👶', time: '2h ago' }
     ]
@@ -273,6 +306,8 @@ export const INITIAL_OUTINGS = [
     category: 'Afternoon Tea',
     lifestyleTag: 'Afternoon Tea (2:30 PM)',
     accessibilityTag: '💳 Revolut / Split Bill Ready',
+    socialBattery: 'balanced',
+    squadPerk: '🥂 Squad Perk: Complimentary Glass of Laurent-Perrier Champagne',
     connectionType: '1:1 Outing',
     connectionBadge: 'Afternoon Tea • Pamper Catchup',
     iconName: 'local_bar',
@@ -300,6 +335,9 @@ export const INITIAL_OUTINGS = [
       { time: '2:30 PM', detail: 'Seated at Lord Mayor’s Lounge overlooking St Stephen’s Green' },
       { time: '2:45 PM', detail: 'Champagne toast & finger sandwiches' },
       { time: '3:45 PM', detail: 'Warm scones, pastries & tea refill' }
+    ],
+    souvenirPhotos: [
+      '/images/scrapbook_afternoon_tea.jpg'
     ],
     comments: [
       { id: 'c_s1', user: FRIENDS_DATA[0], text: 'Can’t wait for warm scones! See you Sunday 💕☕', time: '30m ago' }

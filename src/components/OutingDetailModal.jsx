@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock, ShieldCheck, Download, Share2 } from 'lucide-react';
+import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock, ShieldCheck, Download, Share2, Camera, Gift } from 'lucide-react';
 
 export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggleRsvp, onAddComment }) {
   const [commentText, setCommentText] = useState('');
@@ -157,6 +157,19 @@ END:VCALENDAR`;
             </div>
           </div>
 
+          {/* Squad Perk Badge (UX Feature) */}
+          {outing.squadPerk && (
+            <div className="p-3.5 rounded-xl bg-[#F9E076]/40 border-2 border-[#E0C855] flex items-center justify-between gap-3 text-xs text-[#4A3E00] font-bold shadow-xs">
+              <div className="flex items-center gap-2">
+                <Gift className="w-4 h-4 text-[#C85A65]" />
+                <span>{outing.squadPerk}</span>
+              </div>
+              <span className="bg-[#C85A65] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full font-mono uppercase">
+                Perk Unlocked
+              </span>
+            </div>
+          )}
+
           {/* Share to WhatsApp & Calendar Integration Bar (UX Finding Applied) */}
           <div className="p-3.5 rounded-xl bg-white border-2 border-[#E0D4C5] space-y-3 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -222,6 +235,33 @@ END:VCALENDAR`;
             </div>
           </div>
 
+          {/* Digital Polaroid Souvenir Memory Wall (UX Feature) */}
+          <div className="p-4 rounded-xl bg-[#FAF6F0] border-2 border-[#E0D4C5] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#2C221E] flex items-center gap-1.5">
+                <Camera className="w-4 h-4 text-[#C85A65]" />
+                Post-Outing Polaroid Souvenir Reel
+              </span>
+              <button
+                onClick={() => alert("Upload photo feature unlocked for squad attendees!")}
+                className="text-[11px] font-bold text-[#C85A65] hover:underline"
+              >
+                + Add Photo
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {outing.souvenirPhotos && outing.souvenirPhotos.map((photo, i) => (
+                <div key={i} className="polaroid-frame p-2 shadow-xs">
+                  <img src={photo} alt="Souvenir Memory" className="w-full h-24 object-cover rounded-md" />
+                  <div className="text-[10px] font-handwriting text-center mt-1 text-[#2C221E]">
+                    memory #{i+1} 💕
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* About */}
           <div>
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-1.5">
@@ -231,26 +271,6 @@ END:VCALENDAR`;
               {outing.description}
             </p>
           </div>
-
-          {/* Social Battery & Familiarity Breakdown */}
-          {outing.familiarityBreakdown && (
-            <div className="bg-[#F3ECE0] p-4 rounded-xl border border-[#E0D4C5] space-y-2">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#4A3E00] flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#C85A65]" />
-                Cohort & Timing Compatibility Analysis
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#2C221E]">
-                <div className="bg-white p-2.5 rounded-lg border border-[#E0D4C5]">
-                  <span className="font-bold block text-[#6C5E58]">Schedule Fit:</span>
-                  <span className="font-semibold text-[#C85A65]">{outing.familiarityBreakdown.timingFit || outing.familiarityBreakdown.squadType}</span>
-                </div>
-                <div className="bg-white p-2.5 rounded-lg border border-[#E0D4C5]">
-                  <span className="font-bold block text-[#6C5E58]">Comfort Level:</span>
-                  <span className="font-semibold text-[#2C221E]">{outing.familiarityBreakdown.comfortLevel}</span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Attendees List */}
           <div>
@@ -275,26 +295,7 @@ END:VCALENDAR`;
             </div>
           </div>
 
-          {/* Itinerary */}
-          {outing.itinerary && outing.itinerary.length > 0 && (
-            <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-3 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#C85A65]" />
-                Outing Itinerary
-              </h4>
-              <div className="space-y-2 border-l-2 border-[#C85A65] pl-4 ml-2">
-                {outing.itinerary.map((item, idx) => (
-                  <div key={idx} className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#C85A65] border-2 border-white"></div>
-                    <span className="text-xs font-extrabold text-[#2C221E] font-mono">{item.time}: </span>
-                    <span className="text-xs text-[#6C5E58] font-medium">{item.detail}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Comments */}
+          {/* Comments Wall */}
           <div className="pt-4 border-t border-[#F3ECE0]">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-3 flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-[#C85A65]" />

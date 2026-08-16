@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock, ShieldCheck } from 'lucide-react';
+import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock, ShieldCheck, Download, Share2 } from 'lucide-react';
 
 export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggleRsvp, onAddComment }) {
   const [commentText, setCommentText] = useState('');
@@ -13,6 +13,37 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
     if (!commentText.trim()) return;
     onAddComment(outing.id, commentText.trim());
     setCommentText('');
+  };
+
+  // Generate Google Calendar Link
+  const getGoogleCalendarUrl = () => {
+    const title = encodeURIComponent(outing.title);
+    const location = encodeURIComponent(outing.location);
+    const details = encodeURIComponent(`${outing.description}\n\nMeetFriends Planner Dublin • ${outing.connectionBadge || 'Outing'}`);
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&location=${location}&details=${details}`;
+  };
+
+  // Download iCal (.ics) file
+  const handleDownloadIcs = () => {
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MeetFriends Planner//Dublin Edition//EN
+BEGIN:VEVENT
+SUMMARY:${outing.title}
+LOCATION:${outing.location}
+DESCRIPTION:${outing.description}
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${outing.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -105,7 +136,42 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
             </div>
           </div>
 
-          {/* Dublin Closing Hours & Timing Safety Banner (UX Finding Applied) */}
+          {/* 1-Click Calendar Integration Bar (Reduces Invisible Labor) */}
+          <div className="p-3.5 rounded-xl bg-white border-2 border-[#E0D4C5] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4.5 h-4.5 text-[#C85A65]" />
+              <div>
+                <span className="text-xs font-extrabold text-[#2C221E] block">
+                  Zero Invisible Labor: Sync to Calendar
+                </span>
+                <span className="text-[11px] text-[#6C5E58]">
+                  Auto-populates map venue, time & reminder alerts
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a
+                href={getGoogleCalendarUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1.5 px-3 text-xs font-bold shadow-xs"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Google Calendar
+              </a>
+
+              <button
+                onClick={handleDownloadIcs}
+                className="btn btn-secondary py-1.5 px-3 text-xs font-bold"
+              >
+                <Download className="w-3.5 h-3.5" />
+                iCal (.ics)
+              </button>
+            </div>
+          </div>
+
+          {/* Dublin Closing Hours Guarantee */}
           <div className="p-3.5 rounded-xl bg-[#F9E076]/30 border border-[#F9E076] flex items-center gap-2.5 text-xs text-[#4A3E00] font-medium">
             <ShieldCheck className="w-4.5 h-4.5 text-[#C85A65] shrink-0" />
             <div>

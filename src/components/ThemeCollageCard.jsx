@@ -3,16 +3,16 @@ import React from 'react';
 export default function ThemeCollageCard({ themeId = 'girl_club', className = '' }) {
   const themes = {
     girl_club: {
-      title: 'Diverse Girl Squad 💕',
-      subtitle: 'Dublin Outings & Friend Matches',
+      title: 'The Girl Club • Amiga Dublin 💕',
+      subtitle: 'Feminine Cutout Moodboard',
       badgeText: '🎀 Flawless Vibes',
       stickerText: '✨ Girls Don’t Cry',
-      imgSrc: '/images/pop_art_editorial_hero.jpg',
+      imgSrc: '/images/girl_club_moodboard.png',
       matchScore: '99%',
-      bgGradient: 'from-[#EFF6FF] via-[#FEF3C7] to-[#FFF1F2]',
+      bgGradient: 'from-[#FFF0F2] via-[#FCE4EC] to-[#FFF0F2]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#2563EB] text-white',
-      stickers: ['🎨 Graphic Doodles', '🔵 Cobalt Dots', '🟡 Mustard Rays', '🔴 Coral Accents']
+      stickers: ['☎️ Vintage Phone', '🧥 Red Fur Coat', '🎀 Velvet Bow', '👟 Pink Sneakers']
     },
     nature: {
       title: 'Wicklow Spa & Nature Retreat 🌿',
@@ -87,25 +87,20 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       {/* Pop-Art Halo Scrapbook Frame */}
       <div className={`p-4 bg-gradient-to-br ${theme.bgGradient} rounded-3xl border-3 ${theme.borderColor} shadow-[6px_6px_0px_#09090B] hover:shadow-[9px_9px_0px_#09090B] transform rotate-2 hover:rotate-0 transition-all duration-300 relative overflow-hidden`}>
         
-        {/* Radiating Graphic Tear-drop Halo Decorative Accents */}
+        {/* Radiating Graphic Accents */}
         <div className="absolute top-2 left-2 flex gap-1 z-10 opacity-90">
           <span className="w-2.5 h-4 bg-[#2563EB] rounded-full transform -rotate-12"></span>
           <span className="w-2.5 h-4 bg-[#E11D48] rounded-full transform rotate-12"></span>
           <span className="w-2.5 h-4 bg-[#F59E0B] rounded-full transform -rotate-6"></span>
         </div>
 
-        {/* Main Photo Image Layer with Pop-Art Graphic Border */}
+        {/* Main Original Photo Image Layer */}
         <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-sm bg-white aspect-[4/3]">
           <img
             src={theme.imgSrc}
             alt={theme.title}
             className="w-full h-full object-cover shadow-inner transition-opacity duration-300"
           />
-
-          {/* Pop-Art Eyebrow & Star Eye Graphic Overlay Badge */}
-          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-xs text-[#09090B] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#09090B]">
-            ⭐ Pop-Art Overlay
-          </div>
         </div>
         
         {/* Handwritten Cutout Sticker Caption */}

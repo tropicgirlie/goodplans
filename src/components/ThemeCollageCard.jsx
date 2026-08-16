@@ -10,11 +10,11 @@ export default function ThemeCollageCard({ className = '' }) {
       {/* Hero Card Frame */}
       <div className="p-4 bg-[#FFF0F2] rounded-3xl border-3 border-[#09090B] shadow-[6px_6px_0px_#09090B] transform hover:rotate-0 transition-all duration-300 relative overflow-hidden">
         
-        {/* Main Editorial Hero Photo */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-xs bg-white aspect-[4/3]">
+        {/* Main Original Girl Club Moodboard Collage */}
+        <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-sm bg-white aspect-[4/3]">
           <img
-            src="/images/pop_art_editorial_hero.jpg"
-            alt="Amiga Girl Squad"
+            src="/images/girl_club_moodboard.png"
+            alt="The Girl Club Moodboard"
             className="w-full h-full object-cover object-center shadow-inner"
           />
         </div>
@@ -23,7 +23,7 @@ export default function ThemeCollageCard({ className = '' }) {
         <div className="mt-3 px-1 space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-xl font-handwriting text-[#09090B] block font-bold">
-              The Girl Squad • Dublin 💕
+              The Girl Club • Dublin 💕
             </span>
             <span className="text-xs font-mono font-black bg-[#FEF3C7] text-[#09090B] px-2.5 py-0.5 rounded-full border-2 border-[#09090B] shadow-2xs">
               99% Match

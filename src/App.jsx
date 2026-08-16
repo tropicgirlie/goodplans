@@ -16,14 +16,15 @@ import { Sparkles, Calendar, Heart, Users, MapPin, Plus, Database, RotateCcw } f
 export default function App() {
   const [appMode, setAppMode] = useState('demo'); // 'demo' or 'empty'
   const [outings, setOutings] = useState(INITIAL_OUTINGS);
-  const [customFriends, setCustomFriends] = useState(FRIENDS_DATA);
+  const [demoFriends, setDemoFriends] = useState(FRIENDS_DATA);
+  const [userCreatedFriends, setUserCreatedFriends] = useState([]);
   const [selectedFriends, setSelectedFriends] = useState(['f1', 'f2', 'f3', 'f4', 'f5']);
   
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [batteryFilter, setBatteryFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('Dublin, Ireland');
-  const [activeView, setActiveView] = useState('explore'); // 'explore', 'affinity', 'outings', 'squad', 'settings'
+  const [activeView, setActiveView] = useState('explore');
   const [isMobileFrameView, setIsMobileFrameView] = useState(false);
 
   // Modals state
@@ -53,7 +54,7 @@ export default function App() {
             ...o.comments,
             {
               id: 'c_' + Date.now(),
-              user: customFriends[0] || FRIENDS_DATA[0],
+              user: activeFriendsList[0] || FRIENDS_DATA[0],
               text,
               time: 'Just now'
             }
@@ -66,17 +67,20 @@ export default function App() {
 
   const handleResetDemoData = () => {
     setOutings(INITIAL_OUTINGS);
-    setCustomFriends(FRIENDS_DATA);
+    setDemoFriends(FRIENDS_DATA);
+    setUserCreatedFriends([]);
     setAppMode('demo');
     setSelectedCategory('all');
     setBatteryFilter('all');
+    setSelectedFriends(['f1', 'f2', 'f3', 'f4', 'f5']);
   };
 
   const handleSelectVenueForPlan = (venueLoc) => {
     setIsPlanModalOpen(true);
   };
 
-  // Determine active outings based on appMode (Demo vs Empty State)
+  // Determine active lists based on appMode
+  const activeFriendsList = appMode === 'demo' ? demoFriends : userCreatedFriends;
   const activeOutingsList = appMode === 'demo' ? outings : outings.filter(o => o.id.startsWith('o_custom_'));
 
   // Lifestyle Routine, Social Battery & Category filter logic
@@ -130,7 +134,7 @@ export default function App() {
           {/* Mode Banner Indicator */}
           {appMode === 'empty' && (
             <div className="bg-[#E8F5E9] border-b border-[#A5D6A7] px-4 py-2 text-center text-xs font-bold text-[#2E7D32] flex items-center justify-center gap-2">
-              <span>🍃 Empty State Mode Active — You are viewing your custom clean state.</span>
+              <span>🍃 Empty State Mode Active — All demo data is hidden. Add your own friends & outings!</span>
               <button
                 onClick={() => setAppMode('demo')}
                 className="underline font-black hover:text-[#1B5E20] cursor-pointer"
@@ -151,6 +155,9 @@ export default function App() {
                 onSelectAffinityTab={() => setActiveView('affinity')}
                 batteryFilter={batteryFilter}
                 setBatteryFilter={setBatteryFilter}
+                friendsList={activeFriendsList}
+                appMode={appMode}
+                setAppMode={setAppMode}
               />
 
               {/* Outings Grid Section */}
@@ -159,7 +166,7 @@ export default function App() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
-                        {appMode === 'demo' ? 'Featured Outings in Dublin' : 'My Outings'}
+                        {appMode === 'demo' ? 'Featured Outings in Dublin' : 'My Custom Outings'}
                       </h2>
                       <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
                         {filteredOutings.length} Available
@@ -248,16 +255,18 @@ export default function App() {
               selectedFriends={selectedFriends}
               setSelectedFriends={setSelectedFriends}
               onOpenPlanModal={() => setIsPlanModalOpen(true)}
+              friendsList={activeFriendsList}
             />
           )}
 
-          {/* Settings View (Saved Friends, Data Mode, Preferences) */}
+          {/* Settings View */}
           {activeView === 'settings' && (
             <SettingsView
               appMode={appMode}
               setAppMode={setAppMode}
-              customFriends={customFriends}
-              setCustomFriends={setCustomFriends}
+              friendsList={activeFriendsList}
+              setUserCreatedFriends={setUserCreatedFriends}
+              userCreatedFriends={userCreatedFriends}
               onResetDemoData={handleResetDemoData}
               onOpenOnboarding={() => setIsOnboardingOpen(true)}
             />
@@ -271,7 +280,7 @@ export default function App() {
                 My Upcoming Dublin RSVPs
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {outings.filter(o => rsvpStatus[o.id]).map(outing => (
+                {activeOutingsList.filter(o => rsvpStatus[o.id]).map(outing => (
                   <OutingCard
                     key={outing.id}
                     outing={outing}
@@ -287,23 +296,34 @@ export default function App() {
           {/* Squad Friends List View */}
           {activeView === 'squad' && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Saved Squad & Friend Profiles</h2>
+              <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">
+                {appMode === 'demo' ? 'Demo Squad & Friend Profiles' : 'My Saved Friends'}
+              </h2>
               <p className="text-xs text-[#6C5E58] mb-6">Generational cohorts & preferred time windows (Dinner Out, Concerts, Retreats, Trips Abroad)</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {customFriends.map(friend => (
-                  <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
-                    <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-[#2C221E]">{friend.name}</h3>
-                        <span className="text-[10px] font-bold text-[#C85A65] bg-[#FFF0F2] px-1.5 py-0.5 rounded font-mono">{friend.mbti}</span>
+              
+              {activeFriendsList.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-white border-2 border-dashed border-[#E0D4C5] text-center space-y-3">
+                  <div className="text-3xl">👥</div>
+                  <h3 className="text-base font-bold text-[#2C221E]">No friends added yet</h3>
+                  <p className="text-xs text-[#6C5E58]">Go to Settings to add your friends to your squad roster, or load demo mode.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeFriendsList.map(friend => (
+                    <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
+                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-bold text-[#2C221E]">{friend.name}</h3>
+                          <span className="text-[10px] font-bold text-[#C85A65] bg-[#FFF0F2] px-1.5 py-0.5 rounded font-mono">{friend.mbti}</span>
+                        </div>
+                        <p className="text-xs font-semibold text-[#7B9E87]">{friend.lifestyle}</p>
+                        <p className="text-[11px] text-[#6C5E58] font-medium mt-0.5">⚡ Battery: {friend.socialBatteryLevel}</p>
                       </div>
-                      <p className="text-xs font-semibold text-[#7B9E87]">{friend.lifestyle}</p>
-                      <p className="text-[11px] text-[#6C5E58] font-medium mt-0.5">⚡ Battery: {friend.socialBatteryLevel}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -323,6 +343,7 @@ export default function App() {
           onClose={() => setIsPlanModalOpen(false)}
           onCreateOuting={handleCreateOuting}
           selectedFriends={selectedFriends}
+          friendsList={activeFriendsList}
         />
 
         <OutingDetailModal

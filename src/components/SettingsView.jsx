@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Settings, Users, Database, Sparkles, Plus, Trash2, Edit3, CheckCircle2, RotateCcw, HelpCircle, Heart } from 'lucide-react';
-import { FRIENDS_DATA } from '../data/mockData';
 
 export default function SettingsView({
   appMode,
   setAppMode,
-  customFriends,
-  setCustomFriends,
+  friendsList,
+  setUserCreatedFriends,
+  userCreatedFriends,
   onResetDemoData,
   onOpenOnboarding
 }) {
@@ -38,13 +38,17 @@ export default function SettingsView({
       color: '#C85A65'
     };
 
-    setCustomFriends([...customFriends, newFriendObj]);
+    if (appMode === 'empty') {
+      setUserCreatedFriends([...userCreatedFriends, newFriendObj]);
+    } else {
+      setUserCreatedFriends([...userCreatedFriends, newFriendObj]);
+    }
     setNewFriend({ name: '', mbti: 'ENFP', lifestyle: 'Corporate 9-5', preferredTime: 'Early Dinner (6:30 PM)', socialBatteryLevel: 'balanced' });
     setShowAddForm(false);
   };
 
   const handleDeleteFriend = (id) => {
-    setCustomFriends(customFriends.filter(f => f.id !== id));
+    setUserCreatedFriends(userCreatedFriends.filter(f => f.id !== id));
   };
 
   return (
@@ -149,10 +153,12 @@ export default function SettingsView({
             <Users className="w-5 h-5 text-[#7B9E87]" />
             <div>
               <h3 className="text-base font-bold text-[#2C221E] font-display">
-                Saved Squad & Friends Roster ({customFriends.length})
+                {appMode === 'demo' ? `Demo Squad Roster (${friendsList.length})` : `My Saved Friends (${friendsList.length})`}
               </h3>
               <p className="text-xs text-[#6C5E58]">
-                Add and manage saved friend profiles, MBTI types, and schedule preferences.
+                {appMode === 'demo'
+                  ? 'Showing pre-loaded demo friends. Switch to Empty State to manage your own friends.'
+                  : 'Add and manage your personal squad friend profiles, MBTI types, and schedule preferences.'}
               </p>
             </div>
           </div>
@@ -250,32 +256,41 @@ export default function SettingsView({
         )}
 
         {/* Saved Friends List */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {customFriends.map(friend => (
-            <div key={friend.id} className="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#E0D4C5] flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <img src={friend.avatar} alt={friend.name} className="w-10 h-10 rounded-full object-cover border border-white" />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="text-xs font-bold text-[#2C221E]">{friend.name}</h4>
-                    <span className="text-[10px] font-mono font-bold text-[#C85A65] bg-white px-1.5 py-0.5 rounded border border-[#E0D4C5]">
-                      {friend.mbti}
-                    </span>
+        {friendsList.length === 0 ? (
+          <div className="p-6 rounded-xl bg-[#FAF6F0] border border-dashed border-[#E0D4C5] text-center space-y-2">
+            <p className="text-xs font-bold text-[#2C221E]">No friends added to your personal roster yet.</p>
+            <p className="text-[11px] text-[#6C5E58]">Click "+ Add Friend" above to add your real-life friends to Amiga!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {friendsList.map(friend => (
+              <div key={friend.id} className="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#E0D4C5] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <img src={friend.avatar} alt={friend.name} className="w-10 h-10 rounded-full object-cover border border-white" />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-[#2C221E]">{friend.name}</h4>
+                      <span className="text-[10px] font-mono font-bold text-[#C85A65] bg-white px-1.5 py-0.5 rounded border border-[#E0D4C5]">
+                        {friend.mbti}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[#6C5E58] font-medium">{friend.lifestyle}</p>
                   </div>
-                  <p className="text-[10px] text-[#6C5E58] font-medium">{friend.lifestyle}</p>
                 </div>
-              </div>
 
-              <button
-                onClick={() => handleDeleteFriend(friend.id)}
-                className="p-1.5 text-[#9E8E87] hover:text-[#C85A65] transition-colors cursor-pointer"
-                title="Remove Friend"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
+                {appMode === 'empty' && (
+                  <button
+                    onClick={() => handleDeleteFriend(friend.id)}
+                    className="p-1.5 text-[#9E8E87] hover:text-[#C85A65] transition-colors cursor-pointer"
+                    title="Remove Friend"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>

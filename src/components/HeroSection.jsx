@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap } from 'lucide-react';
+import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap, Plus } from 'lucide-react';
 import { FRIENDS_DATA } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
@@ -9,7 +9,10 @@ export default function HeroSection({
   onOpenPlanModal,
   onSelectAffinityTab,
   batteryFilter,
-  setBatteryFilter
+  setBatteryFilter,
+  friendsList = FRIENDS_DATA,
+  appMode,
+  setAppMode
 }) {
   const [availabilityPolled, setAvailabilityPolled] = useState(false);
 
@@ -33,8 +36,8 @@ export default function HeroSection({
   };
 
   // Calculate live squad synergy score
-  const activeFriends = FRIENDS_DATA.filter(f => selectedFriends.includes(f.id));
-  const avgScore = Math.round(92 + (activeFriends.length * 1.5) % 8);
+  const activeFriends = friendsList.filter(f => selectedFriends.includes(f.id));
+  const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F2]/50 via-[#FAF6F0] to-[#FAF6F0] pt-8 pb-12">
@@ -115,58 +118,77 @@ export default function HeroSection({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-[#2C221E] font-display">
-                    Select Friends to Compute Squad Match
+                    {appMode === 'empty' && friendsList.length === 0 ? 'Squad Roster (Empty State)' : 'Select Friends to Compute Squad Match'}
                   </h3>
-                  <p className="text-xs text-[#6C5E58]">Routine compatibility & social battery alignment</p>
+                  <p className="text-xs text-[#6C5E58]">
+                    {appMode === 'empty' && friendsList.length === 0 ? 'No friends added yet to personal roster.' : 'Routine compatibility & social battery alignment'}
+                  </p>
                 </div>
-                <div className="bg-[#FFF0F2] text-[#C85A65] px-3 py-1 rounded-full text-xs font-extrabold border border-[#F7B7A3] font-mono">
-                  {avgScore}% Synergy Score
-                </div>
+                {friendsList.length > 0 && (
+                  <div className="bg-[#FFF0F2] text-[#C85A65] px-3 py-1 rounded-full text-xs font-extrabold border border-[#F7B7A3] font-mono">
+                    {avgScore}% Synergy Score
+                  </div>
+                )}
               </div>
 
-              {/* Friend Avatars Toggle List */}
-              <div className="flex flex-wrap items-center gap-3">
-                {FRIENDS_DATA.map((friend) => {
-                  const isSelected = selectedFriends.includes(friend.id);
-                  return (
-                    <button
-                      key={friend.id}
-                      onClick={() => toggleFriend(friend.id)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#FAF6F0] text-[#2C221E] border-[#C85A65] ring-2 ring-[#C85A65]/30 shadow-xs'
-                          : 'bg-white text-[#9E8E87] border-[#E0D4C5] opacity-60 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={friend.avatar} alt={friend.name} className="w-5 h-5 rounded-full object-cover" />
-                      <span>{friend.name}</span>
-                      <span className="text-[10px] font-mono font-bold text-[#C85A65]">({friend.mbti})</span>
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Friend Avatars Toggle List vs Empty State */}
+              {friendsList.length === 0 ? (
+                <div className="p-4 rounded-xl bg-[#FAF6F0] border border-dashed border-[#E0D4C5] text-center space-y-2">
+                  <p className="text-xs font-bold text-[#2C221E]">Your personal squad roster is clean.</p>
+                  <p className="text-[11px] text-[#6C5E58]">Tap "Load Demo Outings & Squad" below or go to Settings to add your friends!</p>
+                  <button
+                    onClick={() => setAppMode('demo')}
+                    className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] text-xs font-bold py-1 px-3 mt-1 shadow-xs"
+                  >
+                    🌟 Load Demo Squad (5 Friends)
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  {friendsList.map((friend) => {
+                    const isSelected = selectedFriends.includes(friend.id);
+                    return (
+                      <button
+                        key={friend.id}
+                        onClick={() => toggleFriend(friend.id)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#FAF6F0] text-[#2C221E] border-[#C85A65] ring-2 ring-[#C85A65]/30 shadow-xs'
+                            : 'bg-white text-[#9E8E87] border-[#E0D4C5] opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={friend.avatar} alt={friend.name} className="w-5 h-5 rounded-full object-cover" />
+                        <span>{friend.name}</span>
+                        <span className="text-[10px] font-mono font-bold text-[#C85A65]">({friend.mbti})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* 1-Tap Squad Availability Poller */}
-              <div className="pt-3 border-t border-[#F3ECE0] flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-[#6C5E58] font-medium">
-                  {availabilityPolled ? (
-                    <span className="text-[#2E7D32] font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" />
-                      #1 Overlapping Slot Found: Friday Early Dinner 6:30 PM!
-                    </span>
-                  ) : (
-                    <span>No-Chat Date Polling: Auto-find free time for selected friends</span>
-                  )}
-                </div>
+              {friendsList.length > 0 && (
+                <div className="pt-3 border-t border-[#F3ECE0] flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-xs text-[#6C5E58] font-medium">
+                    {availabilityPolled ? (
+                      <span className="text-[#2E7D32] font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" />
+                        #1 Overlapping Slot Found: Friday Early Dinner 6:30 PM!
+                      </span>
+                    ) : (
+                      <span>No-Chat Date Polling: Auto-find free time for selected friends</span>
+                    )}
+                  </div>
 
-                <button
-                  onClick={handlePollAvailability}
-                  className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1.5 px-3 text-xs font-extrabold shadow-xs"
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  Find Squad Availability
-                </button>
-              </div>
+                  <button
+                    onClick={handlePollAvailability}
+                    className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1.5 px-3 text-xs font-extrabold shadow-xs"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Find Squad Availability
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* CTAs */}

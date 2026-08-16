@@ -15,7 +15,6 @@ export default function HeroSection({
   setAppMode
 }) {
   const [availabilityPolled, setAvailabilityPolled] = useState(false);
-  const [activeCollageTab, setActiveCollageTab] = useState('girl_club'); // 'girl_club' or 'nature'
 
   const toggleFriend = (id) => {
     if (selectedFriends.includes(id)) {
@@ -213,45 +212,19 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Aesthetic Paper Cutout Scrapbook Moodboard */}
-          <div className="lg:col-span-5 relative flex flex-col items-center">
+          {/* Right Column: Girl Club Aesthetic Paper Cutout Scrapbook Moodboard (No Switcher) */}
+          <div className="lg:col-span-5 relative flex justify-center">
             
-            {/* Collage Selector Switcher */}
-            <div className="flex items-center gap-2 mb-3 bg-white p-1 rounded-full border border-[#E0D4C5] shadow-xs">
-              <button
-                onClick={() => setActiveCollageTab('girl_club')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  activeCollageTab === 'girl_club'
-                    ? 'bg-[#C85A65] text-white shadow-xs'
-                    : 'text-[#6C5E58] hover:text-[#2C221E]'
-                }`}
-              >
-                🎀 Girl Club Aesthetic
-              </button>
-
-              <button
-                onClick={() => setActiveCollageTab('nature')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  activeCollageTab === 'nature'
-                    ? 'bg-[#7B9E87] text-white shadow-xs'
-                    : 'text-[#6C5E58] hover:text-[#2C221E]'
-                }`}
-              >
-                🌿 Retreat & Nature
-              </button>
-            </div>
-
-            {/* Paper Cutout Collage Display Frame */}
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-sm">
               
               {/* Paper Washi Tape Strip */}
               <div className="tape-strip tape-top-center z-20"></div>
 
-              {/* Cutout Scrapbook Frame */}
-              <div className="p-3.5 bg-white rounded-3xl border-4 border-white shadow-2xl ring-1 ring-black/5 transform rotate-1 hover:rotate-0 transition-transform duration-300 relative overflow-hidden">
+              {/* Girl Club Cutout Scrapbook Frame */}
+              <div className="p-3.5 bg-white rounded-3xl border-4 border-white shadow-2xl ring-1 ring-black/5 transform rotate-2 hover:rotate-0 transition-transform duration-300 relative overflow-hidden">
                 <img
-                  src={activeCollageTab === 'girl_club' ? '/images/girl_club_moodboard.png' : '/images/nature_waterfall_moodboard.png'}
-                  alt="Amiga Aesthetic Cutout Collage"
+                  src="/images/girl_club_moodboard.png"
+                  alt="Amiga Girl Club Cutout Moodboard"
                   className="w-full rounded-2xl object-cover aspect-[4/3] shadow-inner"
                 />
                 
@@ -259,10 +232,10 @@ export default function HeroSection({
                 <div className="mt-3 px-1 flex items-center justify-between">
                   <div>
                     <span className="text-xl font-handwriting text-[#2C221E] block">
-                      {activeCollageTab === 'girl_club' ? 'The Girl Club • Amiga Dublin 💕' : 'You’re it, you’re my person 🌿'}
+                      The Girl Club • Amiga Dublin 💕
                     </span>
                     <span className="text-[10px] font-mono uppercase tracking-widest text-[#6C5E58]">
-                      Aesthetic Cutout Scrapbook
+                      Feminine Style & Routine Synergy
                     </span>
                   </div>
 
@@ -272,7 +245,7 @@ export default function HeroSection({
                 </div>
               </div>
 
-              {/* Floating Paper Cutout Stickers */}
+              {/* Floating Paper Cutout Badges */}
               <div className="absolute -top-3 -right-3 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-xl border-2 border-white transform rotate-12 font-handwriting text-base z-30">
                 🎀 Flawless Vibes
               </div>

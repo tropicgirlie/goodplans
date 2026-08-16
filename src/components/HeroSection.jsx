@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap } from 'lucide-react';
+import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap, Image as ImageIcon } from 'lucide-react';
 import { FRIENDS_DATA } from '../data/mockData';
+import ThemeCollageCard from './ThemeCollageCard';
 import confetti from 'canvas-confetti';
 
 export default function HeroSection({
@@ -15,6 +16,7 @@ export default function HeroSection({
   setAppMode
 }) {
   const [availabilityPolled, setAvailabilityPolled] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState('girl_club');
 
   const toggleFriend = (id) => {
     if (selectedFriends.includes(id)) {
@@ -212,49 +214,33 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Girl Club Aesthetic Paper Cutout Scrapbook Moodboard (No Switcher) */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          {/* Right Column: Aesthetic Theme Dropdown & Cutout Moodboard */}
+          <div className="lg:col-span-5 relative flex flex-col items-center">
             
-            <div className="relative w-full max-w-sm">
-              
-              {/* Paper Washi Tape Strip */}
-              <div className="tape-strip tape-top-center z-20"></div>
-
-              {/* Girl Club Cutout Scrapbook Frame */}
-              <div className="p-3.5 bg-white rounded-3xl border-4 border-white shadow-2xl ring-1 ring-black/5 transform rotate-2 hover:rotate-0 transition-transform duration-300 relative overflow-hidden">
-                <img
-                  src="/images/girl_club_moodboard.png"
-                  alt="Amiga Girl Club Cutout Moodboard"
-                  className="w-full rounded-2xl object-cover aspect-[4/3] shadow-inner"
-                />
-                
-                {/* Handwritten Cutout Sticker Caption */}
-                <div className="mt-3 px-1 flex items-center justify-between">
-                  <div>
-                    <span className="text-xl font-handwriting text-[#2C221E] block">
-                      The Girl Club • Amiga Dublin 💕
-                    </span>
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#6C5E58]">
-                      Feminine Style & Routine Synergy
-                    </span>
-                  </div>
-
-                  <span className="text-xs font-mono font-bold bg-[#FAF6F0] text-[#C85A65] px-2.5 py-1 rounded-full border border-[#E0D4C5]">
-                    99% Match
-                  </span>
-                </div>
+            {/* Aesthetic Theme Dropdown Select */}
+            <div className="w-full max-w-sm mb-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#E0D4C5] shadow-xs">
+                <ImageIcon className="w-4 h-4 text-[#C85A65]" />
+                <span className="text-xs font-bold text-[#9E8E87] uppercase tracking-wider whitespace-nowrap">
+                  Collage Theme:
+                </span>
+                <select
+                  value={selectedThemeId}
+                  onChange={(e) => setSelectedThemeId(e.target.value)}
+                  className="w-full bg-transparent text-xs font-bold text-[#2C221E] outline-none cursor-pointer"
+                >
+                  <option value="girl_club">🎀 Girl Club Classic (Red & Pink Cutouts)</option>
+                  <option value="nature">🌿 Wicklow Spa & Nature Retreat</option>
+                  <option value="afternoon_tea">🥂 Shelbourne Afternoon Tea</option>
+                  <option value="concert">🎸 Whelan’s Acoustic Live Gig</option>
+                  <option value="trip">✈️ Lisbon Long Weekend Getaway</option>
+                  <option value="coffee">☕ Ranelagh Maternity Coffee Walk</option>
+                </select>
               </div>
-
-              {/* Floating Paper Cutout Badges */}
-              <div className="absolute -top-3 -right-3 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-xl border-2 border-white transform rotate-12 font-handwriting text-base z-30">
-                🎀 Flawless Vibes
-              </div>
-
-              <div className="absolute -bottom-5 -left-3 bg-[#C85A65] text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-xl border-2 border-white transform -rotate-6 z-30">
-                ✨ Girls Don’t Cry
-              </div>
-
             </div>
+
+            {/* Theme Collage Card */}
+            <ThemeCollageCard themeId={selectedThemeId} />
 
           </div>
 

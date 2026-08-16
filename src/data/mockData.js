@@ -85,7 +85,7 @@ export const INITIAL_OUTINGS = [
     category: 'Dinner Out',
     lifestyleTag: 'Early Dinner (6:30 PM - Safe Dublin Hours)',
     accessibilityTag: '💳 Revolut / Split Bill Ready',
-    socialBattery: 'balanced', // balanced energy
+    socialBattery: 'balanced',
     squadPerk: '🎁 Squad Perk: Complimentary Olives & Sourdough for 4+',
     circleCrossover: true,
     connectionType: 'Mixed Circle',
@@ -130,7 +130,7 @@ export const INITIAL_OUTINGS = [
     category: 'Concerts & Music',
     lifestyleTag: 'Live Concert (7:30 PM Doors)',
     accessibilityTag: '💳 Revolut / Split Bill Ready',
-    socialBattery: 'high', // high energy
+    socialBattery: 'high',
     squadPerk: '🎸 Reserved Front Balcony Table',
     connectionType: 'Mixed Circle',
     connectionBadge: 'Concert Crew • Live Music',
@@ -173,7 +173,7 @@ export const INITIAL_OUTINGS = [
     category: 'Wellness & Retreats',
     lifestyleTag: 'Day Retreat (Sat 10:00 AM)',
     accessibilityTag: '🧘‍♀️ All Levels & Spa Included',
-    socialBattery: 'cozy', // cozy energy
+    socialBattery: 'cozy',
     squadPerk: '🌿 Complimentary Herbal Tea & Sauna Towels',
     circleCrossover: true,
     connectionType: 'Core Squad',
@@ -346,12 +346,13 @@ export const INITIAL_OUTINGS = [
 ];
 
 export const CATEGORY_PILLS = [
-  { id: 'all', label: 'All Outings', icon: 'auto_awesome' },
-  { id: 'Dinner Out', label: 'Dinner Out', icon: 'restaurant' },
-  { id: 'Concerts & Music', label: 'Concerts & Music', icon: 'music_note' },
-  { id: 'Wellness & Retreats', label: 'Wellness & Retreats', icon: 'spa' },
-  { id: 'Trips Abroad', label: 'Trips Abroad', icon: 'flight_takeoff' },
-  { id: 'Coffee & Strolls', label: 'Coffee & Strolls', icon: 'local_cafe' },
-  { id: 'Workshops & Pottery', label: 'Workshops & Pottery', icon: 'brush' },
-  { id: 'Afternoon Tea', label: 'Afternoon Tea', icon: 'local_bar' }
+  { id: 'all', label: 'All Outings', icon: 'auto_awesome', type: 'category' },
+  { id: 'cozy', label: 'Cozy Low-Key', icon: 'energy_savings_leaf', type: 'battery' },
+  { id: 'high', label: 'High Energy', icon: 'bolt', type: 'battery' },
+  { id: 'Dinner Out', label: 'Dinner Out', icon: 'restaurant', type: 'category' },
+  { id: 'Concerts & Music', label: 'Concerts & Music', icon: 'music_note', type: 'category' },
+  { id: 'Wellness & Retreats', label: 'Wellness & Retreats', icon: 'spa', type: 'category' },
+  { id: 'Trips Abroad', label: 'Trips Abroad', icon: 'flight_takeoff', type: 'category' },
+  { id: 'Coffee & Strolls', label: 'Coffee & Strolls', icon: 'local_cafe', type: 'category' },
+  { id: 'Afternoon Tea', label: 'Afternoon Tea', icon: 'local_bar', type: 'category' }
 ];

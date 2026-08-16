@@ -7,6 +7,8 @@ export default function Navbar({
   setSearchQuery,
   selectedCategory,
   setSelectedCategory,
+  batteryFilter,
+  setBatteryFilter,
   onOpenPlanModal,
   activeView,
   setActiveView,
@@ -15,15 +17,42 @@ export default function Navbar({
   location,
   setLocation
 }) {
+  const handlePillClick = (pill) => {
+    if (activeView !== 'explore') setActiveView('explore');
+
+    if (pill.id === 'all') {
+      setSelectedCategory('all');
+      setBatteryFilter('all');
+    } else if (pill.type === 'battery') {
+      if (batteryFilter === pill.id) {
+        setBatteryFilter('all');
+      } else {
+        setBatteryFilter(pill.id);
+        setSelectedCategory('all');
+      }
+    } else {
+      if (selectedCategory === pill.id) {
+        setSelectedCategory('all');
+      } else {
+        setSelectedCategory(pill.id);
+        setBatteryFilter('all');
+      }
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
       {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         
-        {/* Affinita Clean Text Wordmark (No Graphic Box Logo) */}
+        {/* Affinita Clean Text Wordmark */}
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setActiveView('explore')}
+            onClick={() => {
+              setActiveView('explore');
+              setSelectedCategory('all');
+              setBatteryFilter('all');
+            }}
             className="flex items-center gap-2.5 text-left bg-transparent border-none cursor-pointer group"
           >
             <div>
@@ -106,28 +135,32 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Category Pills Bar with Google Material Symbols */}
+      {/* Category & Battery Pills Bar */}
       <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
-          {CATEGORY_PILLS.map((pill) => (
-            <button
-              key={pill.id}
-              onClick={() => {
-                if (activeView !== 'explore') setActiveView('explore');
-                setSelectedCategory(pill.id);
-              }}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === pill.id && activeView === 'explore'
-                  ? 'bg-[#C85A65] text-white shadow-sm scale-105'
-                  : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-base leading-none">
-                {pill.icon}
-              </span>
-              <span>{pill.label}</span>
-            </button>
-          ))}
+          {CATEGORY_PILLS.map((pill) => {
+            const isSelected = 
+              (pill.id === 'all' && selectedCategory === 'all' && batteryFilter === 'all') ||
+              (pill.type === 'category' && selectedCategory === pill.id && activeView === 'explore') ||
+              (pill.type === 'battery' && batteryFilter === pill.id && activeView === 'explore');
+
+            return (
+              <button
+                key={pill.id}
+                onClick={() => handlePillClick(pill)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#C85A65] text-white shadow-sm scale-105'
+                    : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base leading-none">
+                  {pill.icon}
+                </span>
+                <span>{pill.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </header>

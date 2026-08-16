@@ -98,6 +98,8 @@ export default function App() {
             setSearchQuery={setSearchQuery}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            batteryFilter={batteryFilter}
+            setBatteryFilter={setBatteryFilter}
             onOpenPlanModal={() => setIsPlanModalOpen(true)}
             activeView={activeView}
             setActiveView={setActiveView}
@@ -237,7 +239,7 @@ export default function App() {
           )}
         </div>
 
-        {/* Footer with Made with heart by luana.systems */}
+        {/* Footer */}
         <Footer />
 
         {/* Modals */}

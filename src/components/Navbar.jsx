@@ -18,23 +18,20 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
       {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
         
-        {/* Affinita Modern Brand Logo */}
+        {/* Affinita Clean Text Wordmark (No Graphic Box Logo) */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setActiveView('explore')}
             className="flex items-center gap-2.5 text-left bg-transparent border-none cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform border border-[#E0D4C5]">
-              <img src="/images/affinita_app_logo.jpg" alt="Affinita Logo" className="w-full h-full object-cover" />
-            </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-2xl font-display tracking-tight text-[#2C221E] uppercase">
+                <span className="font-extrabold text-2xl font-display tracking-wider text-[#2C221E] uppercase group-hover:text-[#C85A65] transition-colors">
                   Affinita
                 </span>
-                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
+                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
                 </span>
               </div>

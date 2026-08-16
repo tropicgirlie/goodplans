@@ -190,10 +190,10 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Editorial Lifestyle Moodboard */}
+          {/* Right Column: Clean Editorial Lifestyle Moodboard */}
           <div className="lg:col-span-5 relative flex justify-center">
             
-            {/* Main Editorial Image Card */}
+            {/* Clean Editorial Photo Frame */}
             <div className="relative w-full max-w-md">
               <div className="p-3 bg-white rounded-2xl border border-[#E0D4C5] shadow-xl space-y-3">
                 <img
@@ -212,9 +212,9 @@ export default function HeroSection({
                     </span>
                   </div>
 
-                  <div className="w-10 h-10 rounded-full border border-[#E0D4C5] p-0.5 shadow-xs">
-                    <img src="/images/affinita_app_logo.jpg" alt="Affinita Logo" className="w-full h-full rounded-full object-cover" />
-                  </div>
+                  <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
+                    EST. DUBLIN
+                  </span>
                 </div>
               </div>
 

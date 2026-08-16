@@ -10,15 +10,12 @@ export default function Footer() {
           
           {/* Brand */}
           <div className="flex items-center gap-3 text-center md:text-left">
-            <div className="w-10 h-10 rounded-xl bg-[#C85A65] text-white flex items-center justify-center font-serif text-2xl font-bold shadow-xs">
-              A
-            </div>
             <div>
               <div className="flex items-center justify-center md:justify-start gap-2">
-                <span className="font-extrabold text-xl font-display uppercase tracking-tight text-[#2C221E]">
+                <span className="font-extrabold text-2xl font-display uppercase tracking-wider text-[#2C221E]">
                   Affinita
                 </span>
-                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
+                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
                 </span>
               </div>

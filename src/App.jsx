@@ -7,7 +7,6 @@ import PlanOutingModal from './components/PlanOutingModal';
 import OutingDetailModal from './components/OutingDetailModal';
 import MobileAppFrame from './components/MobileAppFrame';
 import GoogleMapsExplorer from './components/GoogleMapsExplorer';
-import UXResearchDashboard from './components/UXResearchDashboard';
 import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
 import { Sparkles, Calendar, Heart, Users, MapPin, Plus } from 'lucide-react';
 
@@ -180,11 +179,6 @@ export default function App() {
               <GoogleMapsExplorer onSelectVenueForPlan={handleSelectVenueForPlan} />
             </section>
           </main>
-        )}
-
-        {/* UX Research Dashboard View */}
-        {activeView === 'research' && (
-          <UXResearchDashboard />
         )}
 
         {/* Squad Vibe Matrix View */}

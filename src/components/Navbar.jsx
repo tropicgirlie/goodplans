@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, MapPin, Plus, Users, Smartphone, Sparkles, PieChart } from 'lucide-react';
+import { Search, MapPin, Plus, Users, Smartphone } from 'lucide-react';
 import { CATEGORY_PILLS } from '../data/mockData';
 
 export default function Navbar({
@@ -71,24 +71,10 @@ export default function Navbar({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* UX Research View Toggle */}
-          <button
-            onClick={() => setActiveView(activeView === 'research' ? 'explore' : 'research')}
-            className={`btn sm:px-3 text-xs font-semibold ${
-              activeView === 'research' 
-                ? 'bg-[#2C221E] text-white' 
-                : 'btn-secondary'
-            }`}
-            title="UX Research & Cohort Insights"
-          >
-            <PieChart className="w-4 h-4 text-[#F9E076]" />
-            <span className="hidden sm:inline">UX Research</span>
-          </button>
-
           {/* Squad Vibe Matrix */}
           <button
             onClick={() => setActiveView(activeView === 'affinity' ? 'explore' : 'affinity')}
-            className={`btn sm:px-3 text-xs font-semibold ${
+            className={`btn sm:px-4 text-xs sm:text-sm font-semibold ${
               activeView === 'affinity' 
                 ? 'bg-[#2C221E] text-white' 
                 : 'btn-secondary'
@@ -126,19 +112,15 @@ export default function Navbar({
       {/* Category Pills Bar */}
       <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
-          {CATEGORY_PILLS.map((pill) => (
+          {CATEGORY_PILLS.filter(p => p.id !== 'ux_research').map((pill) => (
             <button
               key={pill.id}
               onClick={() => {
-                if (pill.id === 'ux_research') {
-                  setActiveView('research');
-                } else {
-                  if (activeView !== 'explore') setActiveView('explore');
-                  setSelectedCategory(pill.id);
-                }
+                if (activeView !== 'explore') setActiveView('explore');
+                setSelectedCategory(pill.id);
               }}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                (selectedCategory === pill.id && activeView === 'explore') || (pill.id === 'ux_research' && activeView === 'research')
+                selectedCategory === pill.id && activeView === 'explore'
                   ? 'bg-[#C85A65] text-white shadow-sm scale-105'
                   : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
               }`}

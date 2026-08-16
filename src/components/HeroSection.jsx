@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Heart, Users, Calendar, ArrowRight, CheckCircle2, BatteryCharging, Zap } from 'lucide-react';
 import { FRIENDS_DATA } from '../data/mockData';
 import ThemeCollageCard from './ThemeCollageCard';
 import confetti from 'canvas-confetti';
@@ -16,7 +16,6 @@ export default function HeroSection({
   setAppMode
 }) {
   const [availabilityPolled, setAvailabilityPolled] = useState(false);
-  const [selectedThemeId, setSelectedThemeId] = useState('girl_club');
 
   const toggleFriend = (id) => {
     if (selectedFriends.includes(id)) {
@@ -40,15 +39,6 @@ export default function HeroSection({
   // Calculate live squad synergy score
   const activeFriends = friendsList.filter(f => selectedFriends.includes(f.id));
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
-
-  const themeOptions = [
-    { id: 'girl_club', label: '🎀 Girl Club Collage' },
-    { id: 'nature', label: '🌿 Wicklow Spa Retreat' },
-    { id: 'afternoon_tea', label: '🥂 Shelbourne Tea' },
-    { id: 'concert', label: '🎸 Whelan’s Gig' },
-    { id: 'trip', label: '✈️ Lisbon Weekend' },
-    { id: 'coffee', label: '☕ Ranelagh Coffee' }
-  ];
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#EFF6F0]/60 via-[#FAFAFA] to-[#FAFAFA] pt-8 pb-12">
@@ -223,79 +213,9 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Multi-Photo Stacked Polaroid Scrapbook Collage */}
-          <div className="lg:col-span-5 relative flex flex-col items-center pt-4">
-            
-            {/* Theme Control Box */}
-            <div className="w-full max-w-sm mb-4 space-y-2 z-20">
-              <div className="flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border-2 border-[#09090B] shadow-xs">
-                <ImageIcon className="w-4.5 h-4.5 text-[#2563EB]" />
-                <span className="text-xs font-black text-[#09090B] uppercase tracking-wider whitespace-nowrap font-display">
-                  Hero Collage:
-                </span>
-                <select
-                  value={selectedThemeId}
-                  onChange={(e) => setSelectedThemeId(e.target.value)}
-                  className="w-full bg-transparent text-xs font-bold text-[#09090B] outline-none cursor-pointer"
-                >
-                  {themeOptions.map(t => (
-                    <option key={t.id} value={t.id}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Quick Visual Theme Switcher Pills */}
-              <div className="flex flex-wrap gap-1.5 justify-center">
-                {themeOptions.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedThemeId(t.id)}
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all border-2 border-[#09090B] cursor-pointer ${
-                      selectedThemeId === t.id
-                        ? 'bg-[#2563EB] text-white shadow-2xs scale-105'
-                        : 'bg-white text-[#09090B] hover:bg-[#EFF6FF]'
-                    }`}
-                  >
-                    {t.label.split(' ')[0]} {t.label.split(' ')[1]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Stacked Polaroid Scrapbook Collage */}
-            <div className="relative w-full max-w-sm flex justify-center py-4">
-              
-              {/* Back Polaroid Card 1: Original Pop-Art Editorial Portrait (Tilted Left) */}
-              <div className="absolute top-2 -left-4 w-[280px] p-3 bg-white rounded-2xl border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] transform -rotate-8 z-0 opacity-90 hover:opacity-100 hover:rotate-0 transition-all duration-300">
-                <img
-                  src="/images/pop_art_editorial_hero.jpg"
-                  alt="Pop-Art Editorial Hero"
-                  className="w-full aspect-[4/3] object-cover rounded-xl border-2 border-[#09090B]"
-                />
-                <span className="text-[11px] font-handwriting font-bold text-[#09090B] mt-1.5 block text-center">
-                  ✨ Pop-Art Editorial Vibe
-                </span>
-              </div>
-
-              {/* Back Polaroid Card 2: Afternoon Tea Collage (Tilted Right) */}
-              <div className="absolute -top-2 -right-4 w-[270px] p-3 bg-[#FEF3C7] rounded-2xl border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] transform rotate-6 z-0 opacity-90 hover:opacity-100 hover:rotate-0 transition-all duration-300">
-                <img
-                  src="/images/scrapbook_afternoon_tea.jpg"
-                  alt="Afternoon Tea Outing"
-                  className="w-full aspect-[4/3] object-cover rounded-xl border-2 border-[#09090B]"
-                />
-                <span className="text-[11px] font-handwriting font-bold text-[#09090B] mt-1.5 block text-center">
-                  🫖 Shelbourne Tea &amp; Pamper
-                </span>
-              </div>
-
-              {/* Front Main Polaroid Theme Collage Card (Center Stage) */}
-              <div className="relative z-10 transform hover:scale-102 transition-transform">
-                <ThemeCollageCard themeId={selectedThemeId} />
-              </div>
-
-            </div>
-
+          {/* Right Column: Clean Premium Hero Card */}
+          <div className="lg:col-span-5 relative flex justify-center items-center">
+            <ThemeCollageCard />
           </div>
 
         </div>

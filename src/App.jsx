@@ -110,7 +110,7 @@ export default function App() {
       setActiveTab={setActiveView}
       onOpenPlanModal={() => setIsPlanModalOpen(true)}
     >
-      <div className="min-h-screen bg-[#FAF6F0] text-[#2C221E] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#FAFAFA] text-[#09090B] flex flex-col justify-between">
         
         <div>
           {/* Navigation Bar */}
@@ -133,11 +133,11 @@ export default function App() {
 
           {/* Mode Banner Indicator */}
           {appMode === 'empty' && (
-            <div className="bg-[#E8F5E9] border-b border-[#A5D6A7] px-4 py-2 text-center text-xs font-bold text-[#2E7D32] flex items-center justify-center gap-2">
-              <span>🍃 Empty State Mode Active — All demo data is hidden. Add your own friends & outings!</span>
+            <div className="bg-[#FEF3C7] border-b-2 border-[#09090B] px-4 py-2 text-center text-xs font-black text-[#09090B] flex items-center justify-center gap-2 font-display">
+              <span>🍃 Empty State Mode Active: All demo data is hidden. Add your own friends &amp; outings!</span>
               <button
                 onClick={() => setAppMode('demo')}
-                className="underline font-black hover:text-[#1B5E20] cursor-pointer"
+                className="underline font-black hover:text-[#2563EB] cursor-pointer"
               >
                 Switch to Demo Mode 🌟
               </button>
@@ -162,25 +162,25 @@ export default function App() {
 
               {/* Outings Grid Section */}
               <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-[#F3ECE0]">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-[#09090B]/10">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
+                      <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#09090B]">
                         {appMode === 'demo' ? 'Featured Outings in Dublin' : 'My Custom Outings'}
                       </h2>
-                      <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
+                      <span className="bg-[#FEF3C7] text-[#09090B] text-xs font-black px-2.5 py-0.5 rounded-full border-2 border-[#09090B] font-mono">
                         {filteredOutings.length} Available
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-[#6C5E58] font-medium mt-1">
-                      Matched for <strong className="text-[#2C221E]">Early Dinner (6:30 PM)</strong>, <strong className="text-[#2C221E]">Concerts</strong>, <strong className="text-[#2C221E]">Retreats</strong> & <strong className="text-[#2C221E]">Trips Abroad</strong>
+                    <p className="text-xs sm:text-sm text-[#52525B] font-semibold mt-1">
+                      Matched for <strong className="text-[#09090B]">Early Dinner (6:30 PM)</strong>, <strong className="text-[#09090B]">Concerts</strong>, <strong className="text-[#09090B]">Retreats</strong> &amp; <strong className="text-[#09090B]">Trips Abroad</strong>
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsPlanModalOpen(true)}
-                      className="btn btn-primary text-xs font-bold shadow-md hover:scale-105 transition-transform"
+                      className="btn-pop-primary text-xs"
                     >
                       <Plus className="w-4 h-4" />
                       Create Custom Outing
@@ -190,12 +190,12 @@ export default function App() {
 
                 {/* Grid vs Empty State */}
                 {filteredOutings.length === 0 ? (
-                  <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5] p-8 space-y-4">
+                  <div className="text-center py-16 bg-white rounded-3xl border-3 border-[#09090B] shadow-[6px_6px_0px_#09090B] p-8 space-y-4">
                     <div className="text-4xl">🍃</div>
-                    <h3 className="text-lg sm:text-xl font-bold font-display text-[#2C221E]">
+                    <h3 className="text-lg sm:text-xl font-bold font-display text-[#09090B]">
                       {appMode === 'empty' ? 'Your Social Circle is Ready for Its First Outing!' : 'No outings match this filter'}
                     </h3>
-                    <p className="text-xs sm:text-sm text-[#6C5E58] max-w-md mx-auto">
+                    <p className="text-xs sm:text-sm text-[#52525B] max-w-md mx-auto font-medium">
                       {appMode === 'empty'
                         ? 'You are in clean empty state mode. Tap "Plan Outing" to create your first custom outing, or load pre-built demo outings.'
                         : 'Try selecting another category or resetting social battery filters!'}
@@ -204,7 +204,7 @@ export default function App() {
                     <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                       <button
                         onClick={() => setIsPlanModalOpen(true)}
-                        className="btn btn-primary text-xs font-bold shadow-md"
+                        className="btn-pop-primary text-xs"
                       >
                         <Plus className="w-4 h-4" />
                         Plan First Outing
@@ -213,14 +213,14 @@ export default function App() {
                       {appMode === 'empty' ? (
                         <button
                           onClick={() => setAppMode('demo')}
-                          className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] text-xs font-bold shadow-xs"
+                          className="btn-pop-secondary text-xs bg-[#FEF3C7]"
                         >
                           🌟 Load Demo Outings
                         </button>
                       ) : (
                         <button
                           onClick={() => { setSelectedCategory('all'); setBatteryFilter('all'); setSearchQuery(''); }}
-                          className="btn btn-secondary text-xs font-bold"
+                          className="btn-pop-secondary text-xs"
                         >
                           Reset Filters
                         </button>
@@ -275,8 +275,8 @@ export default function App() {
           {/* My Outings View */}
           {activeView === 'outings' && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-6 text-[#2C221E] flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-[#C85A65]" />
+              <h2 className="text-2xl font-black font-display mb-6 text-[#09090B] flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-[#2563EB]" />
                 My Upcoming Dublin RSVPs
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -296,29 +296,29 @@ export default function App() {
           {/* Squad Friends List View */}
           {activeView === 'squad' && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">
+              <h2 className="text-2xl font-black font-display mb-2 text-[#09090B]">
                 {appMode === 'demo' ? 'Demo Squad & Friend Profiles' : 'My Saved Friends'}
               </h2>
-              <p className="text-xs text-[#6C5E58] mb-6">Generational cohorts & preferred time windows (Dinner Out, Concerts, Retreats, Trips Abroad)</p>
+              <p className="text-xs text-[#52525B] mb-6 font-semibold">Generational cohorts &amp; preferred time windows (Dinner Out, Concerts, Retreats, Trips Abroad)</p>
               
               {activeFriendsList.length === 0 ? (
-                <div className="p-8 rounded-2xl bg-white border-2 border-dashed border-[#E0D4C5] text-center space-y-3">
+                <div className="p-8 rounded-3xl bg-white border-3 border-dashed border-[#09090B] text-center space-y-3">
                   <div className="text-3xl">👥</div>
-                  <h3 className="text-base font-bold text-[#2C221E]">No friends added yet</h3>
-                  <p className="text-xs text-[#6C5E58]">Go to Settings to add your friends to your squad roster, or load demo mode.</p>
+                  <h3 className="text-base font-bold text-[#09090B]">No friends added yet</h3>
+                  <p className="text-xs text-[#52525B]">Go to Settings to add your friends to your squad roster, or load demo mode.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activeFriendsList.map(friend => (
-                    <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
-                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
+                    <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#09090B] shadow-2xs flex items-center gap-3">
+                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-[#09090B]" />
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-[#2C221E]">{friend.name}</h3>
-                          <span className="text-[10px] font-bold text-[#C85A65] bg-[#FFF0F2] px-1.5 py-0.5 rounded font-mono">{friend.mbti}</span>
+                          <h3 className="text-base font-bold text-[#09090B]">{friend.name}</h3>
+                          <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#09090B] font-mono">{friend.mbti}</span>
                         </div>
-                        <p className="text-xs font-semibold text-[#7B9E87]">{friend.lifestyle}</p>
-                        <p className="text-[11px] text-[#6C5E58] font-medium mt-0.5">⚡ Battery: {friend.socialBatteryLevel}</p>
+                        <p className="text-xs font-semibold text-[#059669]">{friend.lifestyle}</p>
+                        <p className="text-[11px] text-[#52525B] font-medium mt-0.5">⚡ Battery: {friend.socialBatteryLevel}</p>
                       </div>
                     </div>
                   ))}

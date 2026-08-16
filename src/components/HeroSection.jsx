@@ -42,8 +42,8 @@ export default function HeroSection({
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
   const themeOptions = [
-    { id: 'girl_club', label: '🎨 Pop-Art Editorial (Anne Hathaway Style)' },
-    { id: 'nature', label: '🌿 Wicklow Spa & Nature Retreat' },
+    { id: 'girl_club', label: '🎨 Pop-Art Diverse Squad' },
+    { id: 'nature', label: '🌿 Wicklow Spa & Retreat' },
     { id: 'afternoon_tea', label: '🥂 Shelbourne Afternoon Tea' },
     { id: 'concert', label: '🎸 Whelan’s Acoustic Gig' },
     { id: 'trip', label: '✈️ Lisbon Weekend Trip' },
@@ -60,10 +60,10 @@ export default function HeroSection({
           {/* Left Column: Headlines & Personality Engine */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Pop-Art Editorial Brand Tag */}
+            {/* Brand Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#09090B] text-xs font-black shadow-2xs border-2 border-[#09090B]">
               <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB] animate-pulse"></span>
-              <span className="font-mono tracking-widest uppercase text-[11px]">AMIGA • POP-ART EDITORIAL EDITION</span>
+              <span className="font-mono tracking-widest uppercase text-[11px]">AMIGA DUBLIN</span>
             </div>
 
             {/* Title with Syne Trendy Font */}
@@ -231,7 +231,7 @@ export default function HeroSection({
               <div className="flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border-2 border-[#09090B] shadow-xs">
                 <ImageIcon className="w-4.5 h-4.5 text-[#2563EB]" />
                 <span className="text-xs font-black text-[#09090B] uppercase tracking-wider whitespace-nowrap font-display">
-                  Pop-Art Theme:
+                  Outing Moodboard:
                 </span>
                 <select
                   value={selectedThemeId}

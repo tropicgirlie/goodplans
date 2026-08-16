@@ -66,7 +66,7 @@ export default function Navbar({
                 </span>
               </div>
               <p className="text-[10px] text-[#52525B] font-bold tracking-wider uppercase hidden sm:block">
-                Pop-Art Editorial Outings &amp; Routine Synergy
+                Curated Outings for Connected Women
               </p>
             </div>
           </button>
@@ -159,7 +159,7 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Category Pills Bar (Pop-Art Graphic Outlines) */}
+      {/* Category Pills Bar */}
       <div className="bg-[#F4F4F5] border-t-2 border-b-2 border-[#09090B] px-4 sm:px-8 py-2">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 justify-start">
           {CATEGORY_PILLS.map((pill) => {

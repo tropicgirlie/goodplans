@@ -3,29 +3,27 @@ import React from 'react';
 export default function ThemeCollageCard({ themeId = 'girl_club', className = '' }) {
   const themes = {
     girl_club: {
-      title: 'Diverse Squad • Amiga Dublin 🎨',
-      subtitle: 'Black & White Photography + Pop-Art Rays',
-      badgeText: '✨ Diverse Friends',
-      stickerText: '💖 Girls Don’t Cry',
-      imgSrc: '/images/pop_art_squad_hero.svg',
+      title: 'Diverse Girl Squad 💕',
+      subtitle: 'Dublin Outings & Friend Matches',
+      badgeText: '🎀 Flawless Vibes',
+      stickerText: '✨ Girls Don’t Cry',
+      imgSrc: '/images/pop_art_editorial_hero.jpg',
       matchScore: '99%',
       bgGradient: 'from-[#EFF6FF] via-[#FEF3C7] to-[#FFF1F2]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#2563EB] text-white',
-      tagline: 'Straight hair • Curly afro coils • Chic braids • Polka dots & star eyes',
-      stickers: ['🎨 Teardrop Rays', '🔵 Cobalt Dots', '🟡 Mustard Aura', '🔴 Polka Dots']
+      stickers: ['🎨 Graphic Doodles', '🔵 Cobalt Dots', '🟡 Mustard Rays', '🔴 Coral Accents']
     },
     nature: {
       title: 'Wicklow Spa & Nature Retreat 🌿',
       subtitle: 'Thermal Baths & Mountain Flow',
       badgeText: '🧘‍♀️ Deep Relaxation',
       stickerText: '✨ You’re It, My Person',
-      imgSrc: '/images/pop_art_retreat.svg',
+      imgSrc: '/images/nature_waterfall_moodboard.png',
       matchScore: '99%',
       bgGradient: 'from-[#E8F5E9] via-[#C8E6C9] to-[#E8F5E9]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#059669] text-white',
-      tagline: 'Paintbrushes • Waterfall dip • Mountain art • Wildflowers',
       stickers: ['🎨 Paintbrushes', '🦋 Monarch Butterfly', '📚 Stacked Books', '🌊 Thermal Dip']
     },
     afternoon_tea: {
@@ -33,12 +31,11 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Lord Mayor’s Lounge Champagne',
       badgeText: '🥂 Champagne Toast',
       stickerText: '✨ Warm Scones & Cream',
-      imgSrc: '/images/pop_art_dinner.svg',
+      imgSrc: '/images/scrapbook_afternoon_tea.jpg',
       matchScore: '98%',
       bgGradient: 'from-[#FFFDE7] via-[#FEF3C7] to-[#FFFDE7]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#D97706] text-white',
-      tagline: 'Stacked teacups • Laurent-Perrier • Clotted cream • Finger sandwiches',
       stickers: ['🫖 Fine Teapot', '🥂 Champagne Glass', '🧁 Fresh Scones', '🎀 Pink Silk Ribbon']
     },
     concert: {
@@ -46,12 +43,11 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Candlelit Indie Music Night',
       badgeText: '🎟️ Ticket to Club',
       stickerText: '✨ Front Balcony Vibe',
-      imgSrc: '/images/pop_art_concert.svg',
+      imgSrc: '/images/scrapbook_sunset_hike.jpg',
       matchScore: '98%',
       bgGradient: 'from-[#FFF3E0] via-[#FFE0B2] to-[#FFF3E0]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#E11D48] text-white',
-      tagline: 'Live indie acoustic • Craft cider • Balcony seats • Post-show chat',
       stickers: ['🎟️ Ticket Stub', '🎸 Acoustic Guitar', '📷 Digital Camera', '🎧 Headphones']
     },
     trip: {
@@ -59,12 +55,11 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Pastéis de Belém & Sunset Drinks',
       badgeText: '✈️ The Next Big Thing',
       stickerText: '✨ Lisbon Sun & Tarts',
-      imgSrc: '/images/pop_art_trip.svg',
+      imgSrc: '/images/scrapbook_pottery.jpg',
       matchScore: '97%',
       bgGradient: 'from-[#FFF3E0] via-[#FFCC80] to-[#FFF3E0]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#2563EB] text-white',
-      tagline: 'Direct Aer Lingus • Rooftop sunset wine • Alfama tiles • Pastéis de Belém',
       stickers: ['✈️ Boarding Pass', '🕶️ Sunglasses', '🇵🇹 Lisbon Tile', '🍷 Rooftop Wine']
     },
     coffee: {
@@ -72,12 +67,11 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Clement & Pekoe Lattes & Buns',
       badgeText: '👶 Stroller Friendly',
       stickerText: '✨ Cardamom Buns',
-      imgSrc: '/images/pop_art_coffee.svg',
+      imgSrc: '/images/scrapbook_coffee_walk.jpg',
       matchScore: '98%',
       bgGradient: 'from-[#FAF6F0] via-[#F3ECE0] to-[#FAF6F0]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#52525B] text-white',
-      tagline: 'Pour-over coffee • Cardamom buns • Stroller walk • Bench chat',
       stickers: ['☕ Pour-over Latte', '🥐 Cardamom Bun', '👶 Stroller Badge', '🌳 Park Green']
     }
   };
@@ -100,13 +94,18 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
           <span className="w-2.5 h-4 bg-[#F59E0B] rounded-full transform -rotate-6"></span>
         </div>
 
-        {/* Main Pop-Art Illustration SVG */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-sm bg-white">
+        {/* Main Photo Image Layer with Pop-Art Graphic Border */}
+        <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-sm bg-white aspect-[4/3]">
           <img
             src={theme.imgSrc}
             alt={theme.title}
-            className="w-full object-cover aspect-[4/3] shadow-inner transition-opacity duration-300"
+            className="w-full h-full object-cover shadow-inner transition-opacity duration-300"
           />
+
+          {/* Pop-Art Eyebrow & Star Eye Graphic Overlay Badge */}
+          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-xs text-[#09090B] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#09090B]">
+            ⭐ Pop-Art Overlay
+          </div>
         </div>
         
         {/* Handwritten Cutout Sticker Caption */}
@@ -122,10 +121,6 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
 
           <p className="text-[10px] font-mono uppercase tracking-widest text-[#52525B] font-bold">
             {theme.subtitle}
-          </p>
-
-          <p className="text-[11px] text-[#09090B] font-semibold italic pt-1">
-            "{theme.tagline}"
           </p>
         </div>
 

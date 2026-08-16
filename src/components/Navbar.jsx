@@ -20,14 +20,14 @@ export default function Navbar({
       {/* Top Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         
-        {/* Affinita Editorial Brand Logo */}
+        {/* Affinita Modern Brand Logo */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setActiveView('explore')}
-            className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer group"
+            className="flex items-center gap-2.5 text-left bg-transparent border-none cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#C85A65] text-white flex items-center justify-center font-serif text-2xl font-bold shadow-xs group-hover:scale-105 transition-transform tracking-tighter">
-              A
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform border border-[#E0D4C5]">
+              <img src="/images/affinita_app_logo.jpg" alt="Affinita Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2">

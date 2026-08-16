@@ -1,158 +1,165 @@
-import React from 'react';
-import { Calendar, MapPin, Heart, Users, CheckCircle2, Sparkles, Share2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, MapPin, Sparkles, Heart, CheckCircle2, UserCheck, Share2, ShieldCheck, Zap } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggleRsvp }) {
-  const isRsvped = rsvpStatus[outing.id];
+  const isAttending = rsvpStatus[outing.id];
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  const handleWhatsAppShareCard = (e) => {
+  const handleRsvpClick = (e) => {
     e.stopPropagation();
-    const text = encodeURIComponent(`Hey girls! Check out this outing: "${outing.title}" on ${outing.date} at ${outing.location}.\n\nRSVP & view details here: ${window.location.href}`);
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    if (!isAttending) {
+      confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.7 }
+      });
+    }
+    onToggleRsvp(outing.id);
+  };
+
+  const handleShareWhatsApp = (e) => {
+    e.stopPropagation();
+    const shareText = `Hey girls! Check out this Dublin outing: ${outing.title} at ${outing.location} on ${outing.date}. Details on Amiga!`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
     <div 
       onClick={() => onSelectOuting(outing)}
-      className="scrapbook-card group cursor-pointer flex flex-col justify-between"
+      className="group relative bg-white rounded-3xl border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] hover:shadow-[8px_8px_0px_#09090B] hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between"
     >
-      <div>
-        {/* Scrapbook Tape Strip */}
+      
+      {/* Top Media & Badge Container */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#F4F4F5] border-b-3 border-[#09090B]">
+        <img
+          src={outing.image}
+          alt={outing.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+
+        {/* Washi Tape Strip */}
         <div className="tape-strip tape-top-center"></div>
 
-        {/* Polaroid Image Container */}
-        <div className="polaroid-frame relative mb-4">
-          <img 
-            src={outing.image} 
-            alt={outing.title} 
-            className="polaroid-img group-hover:scale-105 transition-transform duration-500"
-          />
-
-          {/* Connection Type Badge */}
-          <div className="absolute top-2 left-2 z-10">
-            <span className="bg-[#2C221E]/80 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 shadow-xs flex items-center gap-1 font-display">
-              <Users className="w-3 h-3 text-[#F9E076]" />
-              {outing.connectionType || 'Group Outing'}
-            </span>
-          </div>
-
-          {/* Affinity Score Badge */}
-          <div className="absolute top-2 right-2 z-10">
-            <span className="bg-[#C85A65] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-md border-2 border-white flex items-center gap-1 font-display">
-              <Heart className="w-3 h-3 fill-white" />
-              {outing.affinityScore}% Match
-            </span>
-          </div>
-
-          {/* Handwritten Polaroid Caption */}
-          {outing.handwrittenTag && (
-            <div className="handwritten-caption flex items-center justify-between">
-              <span>#{outing.handwrittenTag}</span>
-              <span className="text-[10px] text-[#6C5E58] font-mono font-bold">{outing.price}</span>
-            </div>
-          )}
+        {/* Category Pill with Google Material Symbols */}
+        <div className="absolute top-3 left-3 bg-[#09090B] text-white px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center gap-1.5 font-display border border-white">
+          <span className="material-symbols-outlined text-sm leading-none text-[#F59E0B]">
+            {outing.iconName || 'auto_awesome'}
+          </span>
+          <span>{outing.category}</span>
         </div>
 
-        {/* Category & Routine Badges */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-2">
-          {outing.category && (
-            <span className="bg-[#FFF0F2] text-[#C85A65] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-[#F7B7A3] font-mono flex items-center gap-1">
-              <span className="material-symbols-outlined text-xs leading-none">
-                {outing.iconName || 'auto_awesome'}
-              </span>
-              {outing.category}
-            </span>
-          )}
-
-          {outing.accessibilityTag && (
-            <span className="bg-[#E8F5E9] text-[#2E7D32] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#A5D6A7]">
-              {outing.accessibilityTag}
-            </span>
-          )}
+        {/* Connection Type Badge (Core Squad / Mixed Circle / 1:1) */}
+        <div className="absolute top-3 right-3 bg-[#2563EB] text-white px-2.5 py-1 rounded-full text-[10px] font-mono font-black shadow-md border border-white">
+          {outing.connectionBadge || '👯 Outing'}
         </div>
 
-        {/* Outing Title */}
-        <h3 className="text-lg font-bold font-display text-[#2C221E] group-hover:text-[#C85A65] transition-colors leading-snug mb-2">
-          {outing.title}
-        </h3>
+        {/* Social Battery & Routine Tag */}
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+          <span className="bg-white/95 backdrop-blur-md text-[#09090B] text-[11px] font-bold px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs truncate max-w-[70%]">
+            {outing.lifestyleTag}
+          </span>
 
-        {/* Event Meta Details */}
-        <div className="space-y-1 text-xs text-[#6C5E58] font-medium mb-3">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-[#C85A65] shrink-0" />
-            <span>{outing.date}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-[#7B9E87] shrink-0" />
-            <span className="truncate">{outing.location}</span>
-          </div>
+          <span className="bg-[#FEF3C7] text-[#09090B] text-xs font-mono font-black px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs">
+            {outing.affinityScore}% Match
+          </span>
         </div>
-
-        {/* Met Before / Familiarity Summary */}
-        {outing.familiarityBreakdown && (
-          <div className="p-2.5 rounded-xl bg-[#FAF6F0] border border-[#E0D4C5] text-[11px] space-y-1 mb-4">
-            <div className="flex items-center justify-between text-[#2C221E] font-bold">
-              <span className="text-[#6C5E58]">Schedule Fit:</span>
-              <span className="text-[#C85A65] truncate max-w-[170px]">{outing.familiarityBreakdown.timingFit || outing.familiarityBreakdown.squadType}</span>
-            </div>
-            <div className="text-[10px] text-[#6C5E58] font-medium truncate">
-              {outing.familiarityBreakdown.metBeforeCount}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Attendees Avatars & RSVP Action */}
-      <div className="pt-3 border-t border-[#F3ECE0] flex items-center justify-between gap-2">
-        <div className="flex items-center -space-x-2">
-          {outing.attendees.map((attendee, idx) => (
-            <div key={attendee.id || idx} className="relative group/avatar" title={`${attendee.name} (${attendee.relationNote || 'Attending'})`}>
-              <img
-                src={attendee.avatar}
-                alt={attendee.name}
-                className="w-7 h-7 rounded-full object-cover border-2 border-white shadow-xs"
-              />
+      {/* Card Content Body */}
+      <div className="p-5 space-y-3.5 flex-1 flex flex-col justify-between">
+        
+        <div className="space-y-2">
+          {/* Title with Syne Display Font */}
+          <h3 className="text-lg font-extrabold font-display text-[#09090B] leading-snug group-hover:text-[#2563EB] transition-colors line-clamp-2">
+            {outing.title}
+          </h3>
+
+          {/* Date & Location */}
+          <div className="space-y-1 text-xs text-[#52525B] font-semibold">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
+              <span className="truncate">{outing.date}</span>
             </div>
-          ))}
-          {outing.attendees.length > 3 && (
-            <div className="w-7 h-7 rounded-full bg-[#F3ECE0] border-2 border-white text-[10px] font-bold flex items-center justify-center text-[#6C5E58]">
-              +{outing.attendees.length - 3}
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#E11D48] shrink-0" />
+              <span className="truncate">{outing.location}</span>
+            </div>
+          </div>
+
+          {/* Squad Perk Badge */}
+          {outing.squadPerk && (
+            <div className="p-2 rounded-xl bg-[#EFF6FF] border border-[#2563EB] text-[11px] font-bold text-[#1D4ED8]">
+              {outing.squadPerk}
             </div>
           )}
+
+          {/* Accessibility & Split Bill Tags */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <span className="text-[10px] font-bold bg-[#FAFAFA] text-[#09090B] px-2 py-0.5 rounded-md border border-[#09090B]">
+              {outing.accessibilityTag || '👶 Buggy Accessible'}
+            </span>
+            <span className="text-[10px] font-bold bg-[#FEF3C7] text-[#09090B] px-2 py-0.5 rounded-md border border-[#09090B]">
+              💳 Revolut Ready
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleWhatsAppShareCard}
-            className="p-1.5 rounded-full bg-[#E8F5E9] text-[#25D366] hover:bg-[#C8E6C9] transition-colors border border-[#A5D6A7]"
-            title="Share to WhatsApp"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-          </button>
+        {/* Card Footer: Host Avatars, RSVP & 1-Click WhatsApp Share */}
+        <div className="pt-3 border-t-2 border-[#09090B]/10 flex items-center justify-between gap-2">
+          
+          {/* Attendees / Host Avatars */}
+          <div className="flex items-center gap-1.5">
+            <div className="flex -space-x-2">
+              {outing.attendees.map((a, i) => (
+                <img
+                  key={i}
+                  src={a.avatar}
+                  alt={a.name}
+                  className="w-7 h-7 rounded-full object-cover border-2 border-white ring-1 ring-[#09090B]"
+                  title={`${a.name} (${a.metBefore ? 'Met Before ✓' : 'First Time Intro'})`}
+                />
+              ))}
+            </div>
+            <span className="text-[11px] font-bold text-[#52525B]">
+              {outing.attendees.length}/{outing.maxAttendees} Going
+            </span>
+          </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleRsvp(outing.id);
-            }}
-            className={`btn py-1 px-3 text-xs font-bold transition-all ${
-              isRsvped
-                ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7]'
-                : 'btn-primary'
-            }`}
-          >
-            {isRsvped ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Going ✓</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>RSVP</span>
-              </>
-            )}
-          </button>
+          {/* Action CTAs */}
+          <div className="flex items-center gap-1.5">
+            {/* 1-Click WhatsApp Share */}
+            <button
+              onClick={handleShareWhatsApp}
+              className="p-2 rounded-full bg-[#FAFAFA] hover:bg-[#2563EB] hover:text-white text-[#09090B] border-2 border-[#09090B] transition-colors shadow-2xs"
+              title="Share via WhatsApp Group"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
+
+            {/* RSVP Button */}
+            <button
+              onClick={handleRsvpClick}
+              className={`px-3 py-1.5 rounded-full text-xs font-black transition-all border-2 border-[#09090B] flex items-center gap-1 cursor-pointer font-display ${
+                isAttending
+                  ? 'bg-[#2563EB] text-white shadow-2xs'
+                  : 'bg-[#FAFAFA] text-[#09090B] hover:bg-[#FEF3C7]'
+              }`}
+            >
+              {isAttending ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>RSVP'd</span>
+                </>
+              ) : (
+                <span>Join Outing</span>
+              )}
+            </button>
+          </div>
+
         </div>
+
       </div>
 
     </div>

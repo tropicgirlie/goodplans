@@ -42,11 +42,11 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-3 border-[#09090B] shadow-sm">
       {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         
-        {/* Amiga Brand Name Wordmark */}
+        {/* Amiga Brand Name Wordmark in Syne Trendy Display Font */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => {
@@ -58,40 +58,40 @@ export default function Navbar({
           >
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-2xl font-display tracking-wider text-[#2C221E] uppercase group-hover:text-[#C85A65] transition-colors">
+                <span className="font-extrabold text-2xl sm:text-3xl font-display tracking-tight text-[#09090B] uppercase group-hover:text-[#2563EB] transition-colors">
                   Amiga
                 </span>
-                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
+                <span className="bg-[#FEF3C7] text-[#D97706] text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border-2 border-[#09090B] tracking-widest uppercase shadow-2xs">
                   Dublin
                 </span>
               </div>
-              <p className="text-[10px] text-[#6C5E58] font-medium tracking-wider uppercase hidden sm:block">
-                Female Friendship Circles & Routine Outings
+              <p className="text-[10px] text-[#52525B] font-bold tracking-wider uppercase hidden sm:block">
+                Pop-Art Editorial Outings &amp; Routine Synergy
               </p>
             </div>
           </button>
         </div>
 
         {/* Location & Search Bar */}
-        <div className="hidden md:flex items-center flex-1 max-w-xl bg-[#FAF6F0] border border-[#E0D4C5] rounded-full p-1.5 shadow-inner">
-          <div className="flex items-center gap-2 px-3 flex-1 border-r border-[#E0D4C5]">
-            <Search className="w-4 h-4 text-[#C85A65]" />
+        <div className="hidden md:flex items-center flex-1 max-w-xl bg-[#FAFAFA] border-2 border-[#09090B] rounded-full p-1.5 shadow-xs">
+          <div className="flex items-center gap-2 px-3 flex-1 border-r-2 border-[#09090B]">
+            <Search className="w-4 h-4 text-[#2563EB]" />
             <input
               type="text"
               placeholder="Search early dinner, concerts, retreats, trips abroad..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] placeholder:text-[#9E8E87] font-medium"
+              className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-[#09090B] placeholder:text-[#A1A1AA] font-semibold"
             />
           </div>
-          <div className="flex items-center gap-2 px-3 w-52">
-            <MapPin className="w-4 h-4 text-[#7B9E87]" />
+          <div className="flex items-center gap-2 px-3 w-48">
+            <MapPin className="w-4 h-4 text-[#E11D48]" />
             <input
               type="text"
               placeholder="Dublin, Ireland"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] font-medium placeholder:text-[#9E8E87]"
+              className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-[#09090B] font-semibold placeholder:text-[#A1A1AA]"
             />
           </div>
         </div>
@@ -101,44 +101,44 @@ export default function Navbar({
           {/* How It Works Explainer */}
           <button
             onClick={onOpenOnboarding}
-            className="p-2.5 rounded-full bg-[#FAF6F0] text-[#6C5E58] border border-[#E0D4C5] hover:text-[#2C221E] transition-colors"
+            className="p-2.5 rounded-full bg-[#FAFAFA] text-[#09090B] border-2 border-[#09090B] hover:bg-[#EFF6FF] transition-colors shadow-2xs cursor-pointer"
             title="How Amiga Works (Onboarding Guide)"
           >
-            <HelpCircle className="w-4 h-4 text-[#C85A65]" />
+            <HelpCircle className="w-4 h-4 text-[#2563EB]" />
           </button>
 
           {/* Squad Vibe Matrix */}
           <button
             onClick={() => setActiveView(activeView === 'affinity' ? 'explore' : 'affinity')}
-            className={`btn sm:px-3.5 text-xs sm:text-sm font-semibold ${
+            className={`btn-pop-secondary text-xs sm:text-sm ${
               activeView === 'affinity' 
-                ? 'bg-[#2C221E] text-white' 
-                : 'btn-secondary'
+                ? 'bg-[#09090B] text-white' 
+                : ''
             }`}
             title="Friend Circle Synergy Matrix"
           >
-            <Users className="w-4 h-4 text-[#F9E076]" />
+            <Users className="w-4 h-4 text-[#F59E0B]" />
             <span className="hidden sm:inline">Vibe Matrix</span>
           </button>
 
           {/* Settings View Button */}
           <button
             onClick={() => setActiveView(activeView === 'settings' ? 'explore' : 'settings')}
-            className={`btn sm:px-3 text-xs sm:text-sm font-semibold ${
+            className={`btn-pop-secondary text-xs sm:text-sm ${
               activeView === 'settings' 
-                ? 'bg-[#2C221E] text-white' 
-                : 'btn-secondary'
+                ? 'bg-[#09090B] text-white' 
+                : ''
             }`}
             title="Settings & Saved Squad Center"
           >
-            <Settings className="w-4 h-4 text-[#7B9E87]" />
+            <Settings className="w-4 h-4 text-[#E11D48]" />
             <span className="hidden sm:inline">Settings</span>
           </button>
 
           {/* Create Outing CTA */}
           <button
             onClick={onOpenPlanModal}
-            className="btn btn-primary text-xs sm:text-sm shadow-md hover:scale-105 transition-transform"
+            className="btn-pop-primary text-xs sm:text-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Plan Outing</span>
@@ -147,20 +147,20 @@ export default function Navbar({
           {/* Mobile Simulator Toggle */}
           <button
             onClick={() => setIsMobileFrameView(!isMobileFrameView)}
-            className={`p-2.5 rounded-full border transition-all ${
+            className={`p-2.5 rounded-full border-2 border-[#09090B] transition-all cursor-pointer ${
               isMobileFrameView
-                ? 'bg-[#C85A65] text-white border-[#C85A65] shadow-sm'
-                : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:text-[#2C221E]'
+                ? 'bg-[#2563EB] text-white shadow-xs'
+                : 'bg-[#FAFAFA] text-[#09090B] hover:bg-[#EFF6FF]'
             }`}
             title={isMobileFrameView ? "Switch to Full Desktop View" : "Preview Mobile App Experience"}
           >
-            <Smartphone className="w-4.5 h-4.5" />
+            <Smartphone className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Category Pills Bar (Non-Scrolling Flex-Wrap Layout) */}
-      <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2">
+      {/* Category Pills Bar (Pop-Art Graphic Outlines) */}
+      <div className="bg-[#F4F4F5] border-t-2 border-b-2 border-[#09090B] px-4 sm:px-8 py-2">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 justify-start">
           {CATEGORY_PILLS.map((pill) => {
             const isSelected = 
@@ -172,10 +172,10 @@ export default function Navbar({
               <button
                 key={pill.id}
                 onClick={() => handlePillClick(pill)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border-2 border-[#09090B] ${
                   isSelected
-                    ? 'bg-[#C85A65] text-white shadow-sm scale-105'
-                    : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
+                    ? 'bg-[#2563EB] text-white shadow-xs scale-105'
+                    : 'bg-white text-[#09090B] hover:bg-[#FEF3C7] shadow-2xs'
                 }`}
               >
                 <span className="material-symbols-outlined text-base leading-none">

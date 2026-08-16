@@ -42,8 +42,8 @@ export default function HeroSection({
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
   const themeOptions = [
-    { id: 'girl_club', label: '🎀 Girl Club (Classic Cutouts)' },
-    { id: 'nature', label: '🌿 Wicklow Spa & Retreat' },
+    { id: 'girl_club', label: '🎨 Pop-Art Editorial (Anne Hathaway Style)' },
+    { id: 'nature', label: '🌿 Wicklow Spa & Nature Retreat' },
     { id: 'afternoon_tea', label: '🥂 Shelbourne Afternoon Tea' },
     { id: 'concert', label: '🎸 Whelan’s Acoustic Gig' },
     { id: 'trip', label: '✈️ Lisbon Weekend Trip' },
@@ -51,7 +51,7 @@ export default function HeroSection({
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F2]/50 via-[#FAF6F0] to-[#FAF6F0] pt-8 pb-12">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#EFF6F0]/60 via-[#FAFAFA] to-[#FAFAFA] pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Hero Grid */}
@@ -60,30 +60,30 @@ export default function HeroSection({
           {/* Left Column: Headlines & Personality Engine */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Brand Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#2C221E] text-xs font-bold shadow-xs border border-[#E0D4C5]">
-              <span className="w-2 h-2 rounded-full bg-[#C85A65] animate-pulse"></span>
-              <span className="font-mono tracking-widest uppercase text-[11px]">AMIGA • DUBLIN EDITION</span>
+            {/* Pop-Art Editorial Brand Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#09090B] text-xs font-black shadow-2xs border-2 border-[#09090B]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB] animate-pulse"></span>
+              <span className="font-mono tracking-widest uppercase text-[11px]">AMIGA • POP-ART EDITORIAL EDITION</span>
             </div>
 
-            {/* Title */}
-            <h1 className="text-4xl sm:text-6xl font-black font-display tracking-tight text-[#2C221E] leading-[1.1]">
+            {/* Title with Syne Trendy Font */}
+            <h1 className="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-[#09090B] leading-[1.08]">
               A Life Curated. <br />
-              <span className="font-serif italic font-normal text-[#C85A65]">Elevating Every Outing</span>
+              <span className="font-serif-editorial italic font-normal text-[#2563EB]">Elevating Every Outing</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-[#6C5E58] font-medium leading-relaxed max-w-2xl">
-              From <strong className="text-[#2C221E]">Early Dinner at Coppinger Row</strong> to <strong className="text-[#2C221E]">Wicklow Mountain Spa Retreats</strong> and <strong className="text-[#2C221E]">Girls Long Weekends in Lisbon</strong>. Curated for connected women with zero planning friction.
+            <p className="text-sm sm:text-base text-[#52525B] font-semibold leading-relaxed max-w-2xl">
+              From <strong className="text-[#09090B]">Early Dinner at Coppinger Row</strong> to <strong className="text-[#09090B]">Wicklow Mountain Spa Retreats</strong> and <strong className="text-[#09090B]">Girls Long Weekends in Lisbon</strong>. Curated for connected women with zero planning friction.
             </p>
 
             {/* Interactive Social Battery Level Filter */}
-            <div className="p-4 rounded-2xl bg-white border border-[#E0D4C5] shadow-xs space-y-3">
+            <div className="p-4 rounded-2xl bg-white border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] flex items-center gap-1.5">
-                  <BatteryCharging className="w-4 h-4 text-[#C85A65]" />
+                <span className="text-xs font-black uppercase tracking-wider text-[#09090B] flex items-center gap-1.5 font-display">
+                  <BatteryCharging className="w-4 h-4 text-[#2563EB]" />
                   Filter Outings by Social Energy Status
                 </span>
-                <span className="text-[11px] font-bold text-[#7B9E87] font-mono">
+                <span className="text-[11px] font-bold text-[#2563EB] font-mono bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#09090B]">
                   LIVE SYNC
                 </span>
               </div>
@@ -91,10 +91,10 @@ export default function HeroSection({
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setBatteryFilter('all')}
-                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border-2 border-[#09090B] text-center cursor-pointer ${
                     batteryFilter === 'all'
-                      ? 'bg-[#C85A65] text-white border-[#C85A65] shadow-xs'
-                      : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:bg-[#F3ECE0]'
+                      ? 'bg-[#2563EB] text-white shadow-2xs'
+                      : 'bg-[#FAFAFA] text-[#09090B] hover:bg-[#EFF6FF]'
                   }`}
                 >
                   ⚡ All Energy
@@ -102,10 +102,10 @@ export default function HeroSection({
 
                 <button
                   onClick={() => setBatteryFilter('high')}
-                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border-2 border-[#09090B] text-center cursor-pointer ${
                     batteryFilter === 'high'
-                      ? 'bg-[#C85A65] text-white border-[#C85A65] shadow-xs'
-                      : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:bg-[#F3ECE0]'
+                      ? 'bg-[#2563EB] text-white shadow-2xs'
+                      : 'bg-[#FAFAFA] text-[#09090B] hover:bg-[#EFF6FF]'
                   }`}
                 >
                   🔋 High Energy (100%)
@@ -113,10 +113,10 @@ export default function HeroSection({
 
                 <button
                   onClick={() => setBatteryFilter('cozy')}
-                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                  className={`p-2.5 rounded-xl text-xs font-bold transition-all border-2 border-[#09090B] text-center cursor-pointer ${
                     batteryFilter === 'cozy'
-                      ? 'bg-[#C85A65] text-white border-[#C85A65] shadow-xs'
-                      : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:bg-[#F3ECE0]'
+                      ? 'bg-[#2563EB] text-white shadow-2xs'
+                      : 'bg-[#FAFAFA] text-[#09090B] hover:bg-[#EFF6FF]'
                   }`}
                 >
                   🪫 Cozy Low-Key (30%)
@@ -125,18 +125,18 @@ export default function HeroSection({
             </div>
 
             {/* Friend Selector & Synergy Calculator */}
-            <div className="p-5 rounded-2xl bg-white border border-[#E0D4C5] shadow-sm space-y-4">
+            <div className="p-5 rounded-2xl bg-white border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#2C221E] font-display">
+                  <h3 className="text-sm font-extrabold text-[#09090B] font-display">
                     {appMode === 'empty' && friendsList.length === 0 ? 'Squad Roster (Empty State)' : 'Select Friends to Compute Squad Match'}
                   </h3>
-                  <p className="text-xs text-[#6C5E58]">
+                  <p className="text-xs text-[#52525B] font-medium">
                     {appMode === 'empty' && friendsList.length === 0 ? 'No friends added yet to personal roster.' : 'Routine compatibility & social battery alignment'}
                   </p>
                 </div>
                 {friendsList.length > 0 && (
-                  <div className="bg-[#FFF0F2] text-[#C85A65] px-3 py-1 rounded-full text-xs font-extrabold border border-[#F7B7A3] font-mono">
+                  <div className="bg-[#FEF3C7] text-[#09090B] px-3 py-1 rounded-full text-xs font-black border-2 border-[#09090B] font-mono">
                     {avgScore}% Synergy Score
                   </div>
                 )}
@@ -144,12 +144,12 @@ export default function HeroSection({
 
               {/* Friend Avatars Toggle List */}
               {friendsList.length === 0 ? (
-                <div className="p-4 rounded-xl bg-[#FAF6F0] border border-dashed border-[#E0D4C5] text-center space-y-2">
-                  <p className="text-xs font-bold text-[#2C221E]">Your personal squad roster is clean.</p>
-                  <p className="text-[11px] text-[#6C5E58]">Tap "Load Demo Outings & Squad" below or go to Settings to add your friends!</p>
+                <div className="p-4 rounded-xl bg-[#FAFAFA] border-2 border-dashed border-[#09090B] text-center space-y-2">
+                  <p className="text-xs font-bold text-[#09090B]">Your personal squad roster is clean.</p>
+                  <p className="text-[11px] text-[#52525B]">Tap "Load Demo Outings & Squad" below or go to Settings to add your friends!</p>
                   <button
                     onClick={() => setAppMode('demo')}
-                    className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] text-xs font-bold py-1 px-3 mt-1 shadow-xs"
+                    className="btn-pop-primary text-xs py-1 px-3 mt-1"
                   >
                     🌟 Load Demo Squad (5 Friends)
                   </button>
@@ -162,15 +162,15 @@ export default function HeroSection({
                       <button
                         key={friend.id}
                         onClick={() => toggleFriend(friend.id)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all cursor-pointer ${
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-[#09090B] text-xs font-bold transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-[#FAF6F0] text-[#2C221E] border-[#C85A65] ring-2 ring-[#C85A65]/30 shadow-xs'
-                            : 'bg-white text-[#9E8E87] border-[#E0D4C5] opacity-60 hover:opacity-100'
+                            ? 'bg-[#2563EB] text-white shadow-2xs'
+                            : 'bg-white text-[#52525B] opacity-70 hover:opacity-100'
                         }`}
                       >
-                        <img src={friend.avatar} alt={friend.name} className="w-5 h-5 rounded-full object-cover" />
+                        <img src={friend.avatar} alt={friend.name} className="w-5 h-5 rounded-full object-cover border border-white" />
                         <span>{friend.name}</span>
-                        <span className="text-[10px] font-mono font-bold text-[#C85A65]">({friend.mbti})</span>
+                        <span className="text-[10px] font-mono font-bold text-[#F59E0B]">({friend.mbti})</span>
                       </button>
                     );
                   })}
@@ -179,10 +179,10 @@ export default function HeroSection({
 
               {/* 1-Tap Squad Availability Poller */}
               {friendsList.length > 0 && (
-                <div className="pt-3 border-t border-[#F3ECE0] flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-xs text-[#6C5E58] font-medium">
+                <div className="pt-3 border-t-2 border-[#09090B]/10 flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-xs text-[#52525B] font-semibold">
                     {availabilityPolled ? (
-                      <span className="text-[#2E7D32] font-bold flex items-center gap-1">
+                      <span className="text-[#059669] font-bold flex items-center gap-1">
                         <CheckCircle2 className="w-4 h-4" />
                         #1 Overlapping Slot Found: Friday Early Dinner 6:30 PM!
                       </span>
@@ -193,7 +193,7 @@ export default function HeroSection({
 
                   <button
                     onClick={handlePollAvailability}
-                    className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1.5 px-3 text-xs font-extrabold shadow-xs"
+                    className="btn-pop-primary py-1.5 px-3 text-xs bg-[#F59E0B] text-[#09090B]"
                   >
                     <Zap className="w-3.5 h-3.5" />
                     Find Squad Availability
@@ -206,37 +206,37 @@ export default function HeroSection({
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={onOpenPlanModal}
-                className="btn btn-primary text-sm font-bold shadow-lg hover:scale-105 transition-transform"
+                className="btn-pop-primary text-sm shadow-md"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-[#FEF3C7]" />
                 Plan Outing Now
               </button>
 
               <button
                 onClick={onSelectAffinityTab}
-                className="btn btn-secondary text-sm font-bold"
+                className="btn-pop-secondary text-sm font-bold"
               >
-                <Users className="w-4 h-4 text-[#7B9E87]" />
+                <Users className="w-4 h-4 text-[#2563EB]" />
                 View Vibe Matrix
               </button>
             </div>
 
           </div>
 
-          {/* Right Column: Aesthetic Theme Dropdown & Dynamic Cutout Moodboard */}
+          {/* Right Column: Aesthetic Pop-Art Moodboard & Dropdown */}
           <div className="lg:col-span-5 relative flex flex-col items-center">
             
             {/* Theme Control Box */}
             <div className="w-full max-w-sm mb-4 space-y-2">
-              <div className="flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border border-[#E0D4C5] shadow-xs">
-                <ImageIcon className="w-4.5 h-4.5 text-[#C85A65]" />
-                <span className="text-xs font-extrabold text-[#9E8E87] uppercase tracking-wider whitespace-nowrap">
-                  Moodboard Theme:
+              <div className="flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border-2 border-[#09090B] shadow-xs">
+                <ImageIcon className="w-4.5 h-4.5 text-[#2563EB]" />
+                <span className="text-xs font-black text-[#09090B] uppercase tracking-wider whitespace-nowrap font-display">
+                  Pop-Art Theme:
                 </span>
                 <select
                   value={selectedThemeId}
                   onChange={(e) => setSelectedThemeId(e.target.value)}
-                  className="w-full bg-transparent text-xs font-extrabold text-[#2C221E] outline-none cursor-pointer"
+                  className="w-full bg-transparent text-xs font-bold text-[#09090B] outline-none cursor-pointer"
                 >
                   {themeOptions.map(t => (
                     <option key={t.id} value={t.id}>{t.label}</option>
@@ -250,10 +250,10 @@ export default function HeroSection({
                   <button
                     key={t.id}
                     onClick={() => setSelectedThemeId(t.id)}
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all border-2 border-[#09090B] cursor-pointer ${
                       selectedThemeId === t.id
-                        ? 'bg-[#2C221E] text-white border-[#2C221E] shadow-2xs scale-105'
-                        : 'bg-white text-[#6C5E58] border-[#E0D4C5] hover:bg-[#FAF6F0]'
+                        ? 'bg-[#2563EB] text-white shadow-2xs scale-105'
+                        : 'bg-white text-[#09090B] hover:bg-[#EFF6FF]'
                     }`}
                   >
                     {t.label.split(' ')[0]} {t.label.split(' ')[1]}

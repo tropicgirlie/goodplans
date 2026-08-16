@@ -7,6 +7,7 @@ import PlanOutingModal from './components/PlanOutingModal';
 import OutingDetailModal from './components/OutingDetailModal';
 import MobileAppFrame from './components/MobileAppFrame';
 import GoogleMapsExplorer from './components/GoogleMapsExplorer';
+import UXResearchDashboard from './components/UXResearchDashboard';
 import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
 import { Sparkles, Calendar, Heart, Users, MapPin, Plus } from 'lucide-react';
 
@@ -22,7 +23,7 @@ export default function App() {
   // Modals state
   const [selectedOutingModal, setSelectedOutingModal] = useState(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [rsvpStatus, setRsvpStatus] = useState({ o_dance_wednesday: true, o_sunday_salon: true, o_maternity_coffee: true, o_sauna: true });
+  const [rsvpStatus, setRsvpStatus] = useState({ o_early_lunch: true, o_dance_wednesday: true, o_sunday_salon: true, o_maternity_coffee: true });
 
   const handleToggleRsvp = (outingId) => {
     setRsvpStatus(prev => ({
@@ -60,11 +61,13 @@ export default function App() {
     setIsPlanModalOpen(true);
   };
 
-  // Lifestyle Routine & Category filter logic
+  // Lifestyle Routine & Early Lunch Category filter logic
   const filteredOutings = outings.filter(outing => {
     let matchesCategory = true;
-    if (selectedCategory === 'wed_dance') {
-      matchesCategory = outing.lifestyleTag?.includes('Wed Office');
+    if (selectedCategory === 'early_lunch') {
+      matchesCategory = outing.category === 'Early Lunch & Brunch' || outing.lifestyleTag?.includes('Early Lunch');
+    } else if (selectedCategory === 'wed_dance') {
+      matchesCategory = outing.lifestyleTag?.includes('Wed Post-Work');
     } else if (selectedCategory === 'sun_salon') {
       matchesCategory = outing.lifestyleTag?.includes('Sun Salon');
     } else if (selectedCategory === 'maternity') {
@@ -122,14 +125,14 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
-                      Routine-Matched Outings in Dublin
+                      Early Lunch & Dublin Hours Matched Outings
                     </h2>
                     <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
                       {filteredOutings.length} Featured
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-[#6C5E58] font-medium mt-1">
-                    Matched for <strong className="text-[#2C221E]">Wed Night Dance Classes (Post-Office)</strong> & <strong className="text-[#2C221E]">Sunday Post-Salon Town Meetups</strong>
+                    Matched for <strong className="text-[#2C221E]">Early Lunch (12:00 PM)</strong> & <strong className="text-[#2C221E]">Post-Office (Wrapping by 8:30 PM before closing)</strong>
                   </p>
                 </div>
 
@@ -147,9 +150,9 @@ export default function App() {
               {/* Grid */}
               {filteredOutings.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5]">
-                  <div className="text-4xl mb-2">💃</div>
-                  <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this routine filter</h3>
-                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another routine filter!</p>
+                  <div className="text-4xl mb-2">☀️</div>
+                  <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this filter</h3>
+                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting Early Lunch or resetting filters!</p>
                   <button
                     onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
                     className="btn btn-secondary text-xs font-bold"
@@ -177,6 +180,11 @@ export default function App() {
               <GoogleMapsExplorer onSelectVenueForPlan={handleSelectVenueForPlan} />
             </section>
           </main>
+        )}
+
+        {/* UX Research Dashboard View */}
+        {activeView === 'research' && (
+          <UXResearchDashboard />
         )}
 
         {/* Squad Vibe Matrix View */}
@@ -212,8 +220,8 @@ export default function App() {
         {/* Squad Friends List View */}
         {activeView === 'squad' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Profiles & Weekly Routines</h2>
-            <p className="text-xs text-[#6C5E58] mb-6">Real schedules (Wednesday Office & Dance Night, Sunday Salon Catchups)</p>
+            <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Profiles & Timing Preferences</h2>
+            <p className="text-xs text-[#6C5E58] mb-6">Generational cohorts & preferred time windows (Early Lunch vs Post-Work vs Mat Leave)</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {FRIENDS_DATA.map(friend => (
                 <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
@@ -224,7 +232,7 @@ export default function App() {
                       <span className="text-[10px] font-bold text-[#C85A65] bg-[#FFF0F2] px-1.5 py-0.5 rounded font-mono">{friend.mbti}</span>
                     </div>
                     <p className="text-xs font-semibold text-[#7B9E87]">{friend.lifestyle}</p>
-                    <p className="text-[11px] text-[#6C5E58] font-medium mt-0.5">🗓️ {friend.scheduleType}</p>
+                    <p className="text-[11px] text-[#6C5E58] font-medium mt-0.5">⏱️ {friend.preferredTime}</p>
                   </div>
                 </div>
               ))}

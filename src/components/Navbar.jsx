@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, MapPin, Plus, Users, Smartphone, Sparkles } from 'lucide-react';
+import { Search, MapPin, Plus, Users, Smartphone, Sparkles, PieChart } from 'lucide-react';
 import { CATEGORY_PILLS } from '../data/mockData';
 
 export default function Navbar({
@@ -45,13 +45,13 @@ export default function Navbar({
           </button>
         </div>
 
-        {/* Location & Search Bar (Dublin Default) */}
+        {/* Location & Search Bar */}
         <div className="hidden md:flex items-center flex-1 max-w-xl bg-[#FAF6F0] border border-[#E0D4C5] rounded-full p-1.5 shadow-inner">
           <div className="flex items-center gap-2 px-3 flex-1 border-r border-[#E0D4C5]">
             <Search className="w-4 h-4 text-[#C85A65]" />
             <input
               type="text"
-              placeholder="Search cafe walks, pottery, cliff hikes..."
+              placeholder="Search early lunch, dance, pottery, afternoon tea..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] placeholder:text-[#9E8E87] font-medium"
@@ -71,10 +71,24 @@ export default function Navbar({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Squad Affinity View Toggle */}
+          {/* UX Research View Toggle */}
+          <button
+            onClick={() => setActiveView(activeView === 'research' ? 'explore' : 'research')}
+            className={`btn sm:px-3 text-xs font-semibold ${
+              activeView === 'research' 
+                ? 'bg-[#2C221E] text-white' 
+                : 'btn-secondary'
+            }`}
+            title="UX Research & Cohort Insights"
+          >
+            <PieChart className="w-4 h-4 text-[#F9E076]" />
+            <span className="hidden sm:inline">UX Research</span>
+          </button>
+
+          {/* Squad Vibe Matrix */}
           <button
             onClick={() => setActiveView(activeView === 'affinity' ? 'explore' : 'affinity')}
-            className={`btn sm:px-4 text-xs sm:text-sm font-semibold ${
+            className={`btn sm:px-3 text-xs font-semibold ${
               activeView === 'affinity' 
                 ? 'bg-[#2C221E] text-white' 
                 : 'btn-secondary'
@@ -109,15 +123,22 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Category Pills Bar (Dublin & Relationship Tier Filtering) */}
+      {/* Category Pills Bar */}
       <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
           {CATEGORY_PILLS.map((pill) => (
             <button
               key={pill.id}
-              onClick={() => setSelectedCategory(pill.id)}
+              onClick={() => {
+                if (pill.id === 'ux_research') {
+                  setActiveView('research');
+                } else {
+                  if (activeView !== 'explore') setActiveView('explore');
+                  setSelectedCategory(pill.id);
+                }
+              }}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === pill.id
+                (selectedCategory === pill.id && activeView === 'explore') || (pill.id === 'ux_research' && activeView === 'research')
                   ? 'bg-[#C85A65] text-white shadow-sm scale-105'
                   : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
               }`}

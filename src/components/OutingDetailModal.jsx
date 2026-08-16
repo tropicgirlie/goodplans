@@ -3,6 +3,7 @@ import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, S
 
 export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggleRsvp, onAddComment }) {
   const [commentText, setCommentText] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
 
   if (!outing) return null;
 
@@ -46,6 +47,19 @@ END:VCALENDAR`;
     document.body.removeChild(link);
   };
 
+  // 1-Click WhatsApp Share
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent(`Hey girls! 💖 Check out this outing: "${outing.title}" on ${outing.date} at ${outing.location}.\n\nRSVP & view details here: ${window.location.href}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
+  // Copy Link
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content max-w-2xl p-0 overflow-hidden">
@@ -71,7 +85,7 @@ END:VCALENDAR`;
             <div>
               {outing.handwrittenTag && (
                 <div className="inline-block bg-[#F9E076] text-[#4A3E00] text-sm font-bold px-3 py-1 rounded-full shadow-md font-handwriting text-lg border border-white mb-2 transform -rotate-1">
-                  {outing.handwrittenTag}
+                  #{outing.handwrittenTag}
                 </div>
               )}
               <h2 className="text-2xl sm:text-3xl font-black font-display text-white drop-shadow-md leading-tight">
@@ -92,11 +106,18 @@ END:VCALENDAR`;
           {/* Connection Tier & Meta Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#FAF6F0] border border-[#E0D4C5]">
             <div className="space-y-1">
-              {outing.connectionBadge && (
-                <div className="inline-block bg-[#F3ECE0] text-[#2C221E] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] mb-1">
-                  {outing.connectionBadge}
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                {outing.connectionBadge && (
+                  <span className="bg-[#F3ECE0] text-[#2C221E] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5]">
+                    {outing.connectionBadge}
+                  </span>
+                )}
+                {outing.accessibilityTag && (
+                  <span className="bg-[#E8F5E9] text-[#2E7D32] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#A5D6A7]">
+                    {outing.accessibilityTag}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2 text-sm font-bold text-[#2C221E]">
                 <Calendar className="w-4 h-4 text-[#C85A65]" />
                 <span>{outing.date}</span>
@@ -136,38 +157,59 @@ END:VCALENDAR`;
             </div>
           </div>
 
-          {/* 1-Click Calendar Integration Bar (Reduces Invisible Labor) */}
-          <div className="p-3.5 rounded-xl bg-white border-2 border-[#E0D4C5] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4.5 h-4.5 text-[#C85A65]" />
-              <div>
-                <span className="text-xs font-extrabold text-[#2C221E] block">
-                  Zero Invisible Labor: Sync to Calendar
+          {/* Share to WhatsApp & Calendar Integration Bar (UX Finding Applied) */}
+          <div className="p-3.5 rounded-xl bg-white border-2 border-[#E0D4C5] space-y-3 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Share2 className="w-4 h-4 text-[#C85A65]" />
+                <span className="text-xs font-extrabold text-[#2C221E]">
+                  Share Outing Card with Squad
                 </span>
-                <span className="text-[11px] text-[#6C5E58]">
-                  Auto-populates map venue, time & reminder alerts
-                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="btn bg-[#25D366] text-white hover:bg-[#20bd5a] py-1.5 px-3 text-xs font-bold shadow-xs border-none"
+                >
+                  💬 Share on WhatsApp
+                </button>
+
+                <button
+                  onClick={handleCopyLink}
+                  className="btn btn-secondary py-1.5 px-3 text-xs font-bold"
+                >
+                  {copiedLink ? 'Copied ✓' : 'Copy Link'}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <a
-                href={getGoogleCalendarUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1.5 px-3 text-xs font-bold shadow-xs"
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Google Calendar
-              </a>
+            <div className="pt-2 border-t border-[#F3ECE0] flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#7B9E87]" />
+                <span className="text-xs font-bold text-[#6C5E58]">
+                  Zero Invisible Labor: Sync to Calendar
+                </span>
+              </div>
 
-              <button
-                onClick={handleDownloadIcs}
-                className="btn btn-secondary py-1.5 px-3 text-xs font-bold"
-              >
-                <Download className="w-3.5 h-3.5" />
-                iCal (.ics)
-              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href={getGoogleCalendarUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] py-1 px-2.5 text-[11px] font-bold shadow-xs"
+                >
+                  Google Calendar
+                </a>
+
+                <button
+                  onClick={handleDownloadIcs}
+                  className="btn btn-secondary py-1 px-2.5 text-[11px] font-bold"
+                >
+                  <Download className="w-3 h-3" />
+                  iCal (.ics)
+                </button>
+              </div>
             </div>
           </div>
 

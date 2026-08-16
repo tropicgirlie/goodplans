@@ -1,8 +1,14 @@
 import React from 'react';
-import { Calendar, MapPin, Heart, Users, CheckCircle2, Sparkles, Clock } from 'lucide-react';
+import { Calendar, MapPin, Heart, Users, CheckCircle2, Sparkles, Share2 } from 'lucide-react';
 
 export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggleRsvp }) {
   const isRsvped = rsvpStatus[outing.id];
+
+  const handleWhatsAppShareCard = (e) => {
+    e.stopPropagation();
+    const text = encodeURIComponent(`Hey girls! Check out this outing: "${outing.title}" on ${outing.date} at ${outing.location}.\n\nRSVP & view details here: ${window.location.href}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
 
   return (
     <div 
@@ -57,9 +63,9 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
             </span>
           )}
 
-          {outing.lifestyleTag && (
-            <span className="bg-[#F9E076]/40 text-[#4A3E00] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#E0C855]">
-              {outing.lifestyleTag}
+          {outing.accessibilityTag && (
+            <span className="bg-[#E8F5E9] text-[#2E7D32] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#A5D6A7]">
+              {outing.accessibilityTag}
             </span>
           )}
         </div>
@@ -114,29 +120,39 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
           )}
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleRsvp(outing.id);
-          }}
-          className={`btn py-1 px-3 text-xs font-bold transition-all ${
-            isRsvped
-              ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7]'
-              : 'btn-primary'
-          }`}
-        >
-          {isRsvped ? (
-            <>
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Going ✓</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>RSVP</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleWhatsAppShareCard}
+            className="p-1.5 rounded-full bg-[#E8F5E9] text-[#25D366] hover:bg-[#C8E6C9] transition-colors border border-[#A5D6A7]"
+            title="Share to WhatsApp"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleRsvp(outing.id);
+            }}
+            className={`btn py-1 px-3 text-xs font-bold transition-all ${
+              isRsvped
+                ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7]'
+                : 'btn-primary'
+            }`}
+          >
+            {isRsvped ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Going ✓</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>RSVP</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
     </div>

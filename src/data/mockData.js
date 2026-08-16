@@ -1,4 +1,4 @@
-// Mock data for MeetFriends Planner - Dublin Edition with Google Material Symbols
+// Mock data for MeetFriends Planner - Dublin Edition with Google Material Symbols & UX Validation
 
 export const FRIENDS_DATA = [
   {
@@ -79,6 +79,7 @@ export const INITIAL_OUTINGS = [
     title: 'Early Dinner & Natural Wine at Coppinger Row',
     category: 'Dinner Out',
     lifestyleTag: 'Early Dinner (6:30 PM - Safe Dublin Hours)',
+    accessibilityTag: '💳 Revolut / Split Bill Ready',
     connectionType: 'Mixed Circle',
     connectionBadge: 'Dinner Out • Wraps by 8:30 PM',
     iconName: 'restaurant',
@@ -116,6 +117,7 @@ export const INITIAL_OUTINGS = [
     title: 'Acoustic Live Concert & Drinks at Whelan’s',
     category: 'Concerts & Music',
     lifestyleTag: 'Live Concert (7:30 PM Doors)',
+    accessibilityTag: '💳 Revolut / Split Bill Ready',
     connectionType: 'Mixed Circle',
     connectionBadge: 'Concert Crew • Live Music',
     iconName: 'music_note',
@@ -153,6 +155,7 @@ export const INITIAL_OUTINGS = [
     title: 'Wicklow Mountain Spa & Yoga Day Retreat',
     category: 'Wellness & Retreats',
     lifestyleTag: 'Day Retreat (Sat 10:00 AM)',
+    accessibilityTag: '🧘‍♀️ All Levels & Spa Included',
     connectionType: 'Core Squad',
     connectionBadge: 'Wellness Retreat • Full Day',
     iconName: 'spa',
@@ -191,6 +194,7 @@ export const INITIAL_OUTINGS = [
     title: 'Girls Long Weekend Getaway: Lisbon Sun & Pastéis',
     category: 'Trips Abroad',
     lifestyleTag: '3-Day Weekend Trip Abroad',
+    accessibilityTag: '✈️ Direct Flights & Central Airbnb',
     connectionType: 'Core Squad',
     connectionBadge: 'Trip Abroad • Long Weekend',
     iconName: 'flight_takeoff',
@@ -214,7 +218,7 @@ export const INITIAL_OUTINGS = [
       { ...FRIENDS_DATA[3], metBefore: true, relationNote: 'Saoirse (Travel Duo)' }
     ],
     maxAttendees: 5,
-    description: 'Fly out Friday morning for a sun-drenched 3-day girlfriends getaway to Lisbon! Stay in an old-town boutique Airbnb, explore Alfama cobbled streets, eat warm Pastéis de Ném, and enjoy rooftop cocktails.',
+    description: 'Fly out Friday morning for a sun-drenched 3-day girlfriends getaway to Lisbon! Stay in an old-town boutique Airbnb, explore Alfama cobbled streets, eat warm Pastéis de Belém, and enjoy rooftop cocktails.',
     itinerary: [
       { time: 'Fri Morning', detail: 'Fly out from Dublin Airport to Lisbon' },
       { time: 'Fri Afternoon', detail: 'Check into Airbnb & sunset rooftop wine' },
@@ -230,6 +234,7 @@ export const INITIAL_OUTINGS = [
     title: 'Monday Morning Coffee & Stroller Walk in Ranelagh',
     category: 'Coffee & Strolls',
     lifestyleTag: 'Maternity Morning (10:30 AM)',
+    accessibilityTag: '👶 Stroller & Buggy Accessible',
     connectionType: 'Core Squad',
     connectionBadge: 'Coffee & Strolls • Moms & Flex Hours',
     iconName: 'local_cafe',
@@ -267,6 +272,7 @@ export const INITIAL_OUTINGS = [
     title: 'Classic Afternoon Tea at The Shelbourne Hotel',
     category: 'Afternoon Tea',
     lifestyleTag: 'Afternoon Tea (2:30 PM)',
+    accessibilityTag: '💳 Revolut / Split Bill Ready',
     connectionType: '1:1 Outing',
     connectionBadge: 'Afternoon Tea • Pamper Catchup',
     iconName: 'local_bar',

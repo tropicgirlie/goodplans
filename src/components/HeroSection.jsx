@@ -42,7 +42,7 @@ export default function HeroSection({
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
   const themeOptions = [
-    { id: 'girl_club', label: '🎨 Pop-Art Diverse Squad' },
+    { id: 'girl_club', label: '🎀 Girl Club Moodboard' },
     { id: 'nature', label: '🌿 Wicklow Spa & Retreat' },
     { id: 'afternoon_tea', label: '🥂 Shelbourne Afternoon Tea' },
     { id: 'concert', label: '🎸 Whelan’s Acoustic Gig' },
@@ -223,7 +223,7 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Aesthetic Pop-Art Moodboard & Dropdown */}
+          {/* Right Column: Original Girl Club Collage Moodboard */}
           <div className="lg:col-span-5 relative flex flex-col items-center">
             
             {/* Theme Control Box */}

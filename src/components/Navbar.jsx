@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, MapPin, Plus, Users, Smartphone, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Search, MapPin, Plus, Users, Smartphone, Sparkles } from 'lucide-react';
 import { CATEGORY_PILLS } from '../data/mockData';
 
 export default function Navbar({
@@ -16,55 +16,55 @@ export default function Navbar({
   setLocation
 }) {
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#EFE9DF] shadow-sm">
-      {/* Top Main Navigation Bar */}
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
+      {/* Top Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
         
-        {/* Brand Logo & Scrapbook Badge */}
+        {/* Brand Logo with Feminine Rose Accent */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setActiveView('explore')}
             className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#F64060] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-2xl bg-[#C85A65] text-white flex items-center justify-center font-black text-xl shadow-sm group-hover:scale-105 transition-transform">
               MF
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl font-display tracking-tight text-[#1E2022]">
+                <span className="font-extrabold text-xl font-display tracking-tight text-[#2C221E]">
                   MeetFriends
                 </span>
-                <span className="bg-[#FFE66D] text-[#4A3E00] text-xs font-bold px-2 py-0.5 rounded-full border border-white shadow-xs font-handwriting">
-                  Planner
+                <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-bold px-2 py-0.5 rounded-full border border-white shadow-xs font-handwriting">
+                  Dublin
                 </span>
               </div>
-              <p className="text-[11px] text-[#5F646D] font-medium hidden sm:block">
-                Personality & Affinity Outings
+              <p className="text-[11px] text-[#6C5E58] font-medium hidden sm:block">
+                Friendship Circles & Personality Outings
               </p>
             </div>
           </button>
         </div>
 
-        {/* Meetup-Style Search & Location Inputs */}
-        <div className="hidden md:flex items-center flex-1 max-w-xl bg-[#FAF7F2] border border-[#E2DACB] rounded-full p-1.5 shadow-inner">
-          <div className="flex items-center gap-2 px-3 flex-1 border-r border-[#D8D0C0]">
-            <Search className="w-4 h-4 text-[#F64060]" />
+        {/* Location & Search Bar (Dublin Default) */}
+        <div className="hidden md:flex items-center flex-1 max-w-xl bg-[#FAF6F0] border border-[#E0D4C5] rounded-full p-1.5 shadow-inner">
+          <div className="flex items-center gap-2 px-3 flex-1 border-r border-[#E0D4C5]">
+            <Search className="w-4 h-4 text-[#C85A65]" />
             <input
               type="text"
-              placeholder="Search coffee walks, hikes, game nights..."
+              placeholder="Search cafe walks, pottery, cliff hikes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm text-[#1E2022] placeholder:text-[#8E939D] font-medium"
+              className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] placeholder:text-[#9E8E87] font-medium"
             />
           </div>
-          <div className="flex items-center gap-2 px-3 w-48">
-            <MapPin className="w-4 h-4 text-[#4ECDC4]" />
+          <div className="flex items-center gap-2 px-3 w-52">
+            <MapPin className="w-4 h-4 text-[#7B9E87]" />
             <input
               type="text"
-              placeholder="City or neighborhood..."
+              placeholder="Dublin, Ireland"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm text-[#1E2022] font-medium placeholder:text-[#8E939D]"
+              className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] font-medium placeholder:text-[#9E8E87]"
             />
           </div>
         </div>
@@ -76,13 +76,13 @@ export default function Navbar({
             onClick={() => setActiveView(activeView === 'affinity' ? 'explore' : 'affinity')}
             className={`btn sm:px-4 text-xs sm:text-sm font-semibold ${
               activeView === 'affinity' 
-                ? 'bg-[#1E2022] text-white' 
+                ? 'bg-[#2C221E] text-white' 
                 : 'btn-secondary'
             }`}
-            title="Squad Affinity Matrix"
+            title="Friend Circle Synergy Matrix"
           >
-            <Users className="w-4 h-4 text-[#FFE66D]" />
-            <span className="hidden sm:inline">Squad Affinity</span>
+            <Users className="w-4 h-4 text-[#F9E076]" />
+            <span className="hidden sm:inline">Vibe Matrix</span>
           </button>
 
           {/* Create Outing CTA */}
@@ -99,32 +99,18 @@ export default function Navbar({
             onClick={() => setIsMobileFrameView(!isMobileFrameView)}
             className={`p-2.5 rounded-full border transition-all ${
               isMobileFrameView
-                ? 'bg-[#F64060] text-white border-[#F64060] shadow-sm'
-                : 'bg-[#FAF7F2] text-[#5F646D] border-[#E2DACB] hover:text-[#1E2022]'
+                ? 'bg-[#C85A65] text-white border-[#C85A65] shadow-sm'
+                : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:text-[#2C221E]'
             }`}
-            title={isMobileFrameView ? "Switch to Full Desktop View" : "Preview Mobile App Shell"}
+            title={isMobileFrameView ? "Switch to Full Desktop View" : "Preview Mobile App Experience"}
           >
             <Smartphone className="w-4.5 h-4.5" />
           </button>
         </div>
       </div>
 
-      {/* Mobile Search Bar (Visible on mobile screens) */}
-      <div className="md:hidden px-4 pb-3">
-        <div className="flex items-center gap-2 bg-[#FAF7F2] border border-[#E2DACB] rounded-full p-2 shadow-inner">
-          <Search className="w-4 h-4 text-[#F64060] ml-1" />
-          <input
-            type="text"
-            placeholder="Search outings or events..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none outline-none text-sm text-[#1E2022] font-medium"
-          />
-        </div>
-      </div>
-
-      {/* Category Pills Bar (Meetup Style) */}
-      <div className="bg-[#FAF7F2] border-t border-b border-[#EFE9DF] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
+      {/* Category Pills Bar (Dublin & Relationship Tier Filtering) */}
+      <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
           {CATEGORY_PILLS.map((pill) => (
             <button
@@ -132,8 +118,8 @@ export default function Navbar({
               onClick={() => setSelectedCategory(pill.id)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 selectedCategory === pill.id
-                  ? 'bg-[#F64060] text-white shadow-sm scale-105'
-                  : 'bg-white text-[#5F646D] hover:bg-[#EFE9DF] hover:text-[#1E2022] border border-[#E2DACB]'
+                  ? 'bg-[#C85A65] text-white shadow-sm scale-105'
+                  : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'
               }`}
             >
               <span>{pill.label}</span>

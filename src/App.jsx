@@ -7,14 +7,14 @@ import PlanOutingModal from './components/PlanOutingModal';
 import OutingDetailModal from './components/OutingDetailModal';
 import MobileAppFrame from './components/MobileAppFrame';
 import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
-import { Sparkles, Calendar, Heart, Users, MapPin, Plus, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Calendar, Heart, Users, MapPin, Plus } from 'lucide-react';
 
 export default function App() {
   const [outings, setOutings] = useState(INITIAL_OUTINGS);
   const [selectedFriends, setSelectedFriends] = useState(['f1', 'f2', 'f3', 'f4', 'f5']);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('San Francisco, CA');
+  const [location, setLocation] = useState('Dublin, Ireland');
   const [activeView, setActiveView] = useState('explore');
   const [isMobileFrameView, setIsMobileFrameView] = useState(false);
 
@@ -55,12 +55,18 @@ export default function App() {
     }));
   };
 
-  // Filter logic
+  // Relationship & Category filter logic
   const filteredOutings = outings.filter(outing => {
-    const matchesCategory = 
-      selectedCategory === 'all' ? true :
-      selectedCategory === 'match' ? outing.affinityScore >= 90 :
-      outing.category === selectedCategory;
+    let matchesCategory = true;
+    if (selectedCategory === 'squad_core') {
+      matchesCategory = outing.connectionType === 'Core Squad';
+    } else if (selectedCategory === 'squad_mixed') {
+      matchesCategory = outing.connectionType === 'Mixed Circle';
+    } else if (selectedCategory === 'squad_duo') {
+      matchesCategory = outing.connectionType === '1:1 Outing';
+    } else if (selectedCategory !== 'all') {
+      matchesCategory = outing.category === selectedCategory;
+    }
 
     const matchesSearch = searchQuery === '' || 
       outing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +83,7 @@ export default function App() {
       setActiveTab={setActiveView}
       onOpenPlanModal={() => setIsPlanModalOpen(true)}
     >
-      <div className="min-h-screen bg-[#FAF7F2] text-[#1E2022]">
+      <div className="min-h-screen bg-[#FAF6F0] text-[#2C221E]">
         
         {/* Navigation Bar */}
         <Navbar
@@ -94,7 +100,7 @@ export default function App() {
           setLocation={setLocation}
         />
 
-        {/* View Switcher */}
+        {/* Main View Switcher */}
         {activeView === 'explore' && (
           <main>
             {/* Hero Section */}
@@ -107,18 +113,18 @@ export default function App() {
 
             {/* Outings Grid Section */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-[#EFE9DF]">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-[#F3ECE0]">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#1E2022]">
-                      Matched Outings for Your Squad
+                    <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
+                      Dublin Circle & Squad Outings
                     </h2>
-                    <span className="bg-[#FFE66D] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
+                    <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
                       {filteredOutings.length} Ideas
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-[#5F646D] font-medium mt-1">
-                    Showing outings near <strong className="text-[#1E2022]">{location}</strong> • Ranked by squad affinity
+                  <p className="text-xs sm:text-sm text-[#6C5E58] font-medium mt-1">
+                    Showing outings near <strong className="text-[#2C221E]">{location}</strong> • Matched for social comfort & Vibe Sync
                   </p>
                 </div>
 
@@ -128,17 +134,17 @@ export default function App() {
                     className="btn btn-primary text-xs font-bold shadow-md hover:scale-105 transition-transform"
                   >
                     <Plus className="w-4 h-4" />
-                    Create Custom Outing Card
+                    Create Custom Outing
                   </button>
                 </div>
               </div>
 
               {/* Grid */}
               {filteredOutings.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E2DACB]">
+                <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5]">
                   <div className="text-4xl mb-2">☕</div>
-                  <h3 className="text-lg font-bold font-display text-[#1E2022]">No matching outings found</h3>
-                  <p className="text-xs text-[#5F646D] mt-1 mb-4">Try searching for a different activity or category!</p>
+                  <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this filter</h3>
+                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another circle tier or clearing your search term!</p>
                   <button
                     onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
                     className="btn btn-secondary text-xs font-bold"
@@ -163,7 +169,7 @@ export default function App() {
           </main>
         )}
 
-        {/* Squad Affinity View */}
+        {/* Squad Vibe Matrix View */}
         {activeView === 'affinity' && (
           <AffinityMatchMatrix
             selectedFriends={selectedFriends}
@@ -175,9 +181,9 @@ export default function App() {
         {/* My Outings View */}
         {activeView === 'outings' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h2 className="text-2xl font-black font-display mb-6 text-[#1E2022] flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-[#F64060]" />
-              My Upcoming RSVPs & Outings
+            <h2 className="text-2xl font-black font-display mb-6 text-[#2C221E] flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-[#C85A65]" />
+              My Upcoming Dublin RSVPs
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {outings.filter(o => rsvpStatus[o.id]).map(outing => (
@@ -196,16 +202,19 @@ export default function App() {
         {/* Squad Friends List View */}
         {activeView === 'squad' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h2 className="text-2xl font-black font-display mb-2 text-[#1E2022]">Your Outing Squad</h2>
-            <p className="text-xs text-[#5F646D] mb-6">Friends synced with your personality affinity engine</p>
+            <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Circles & Profiles</h2>
+            <p className="text-xs text-[#6C5E58] mb-6">Dublin friend profiles, age cohorts, and social energy styles</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {FRIENDS_DATA.map(friend => (
-                <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#EFE9DF] shadow-xs flex items-center gap-3">
+                <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
                   <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
                   <div>
-                    <h3 className="text-base font-bold text-[#1E2022]">{friend.name}</h3>
-                    <span className="text-xs font-mono font-bold text-[#F64060] bg-[#FFF0F3] px-2 py-0.5 rounded">{friend.mbti} • {friend.archetype}</span>
-                    <p className="text-xs text-[#8E939D] mt-1">Interests: {friend.interests.join(', ')}</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-bold text-[#2C221E]">{friend.name}</h3>
+                      <span className="text-[10px] font-bold text-[#C85A65] bg-[#FFF0F2] px-1.5 py-0.5 rounded font-mono">{friend.mbti}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#7B9E87]">{friend.archetype} • {friend.ageGroup}</p>
+                    <p className="text-xs text-[#9E8E87] mt-1">Interests: {friend.interests.join(', ')}</p>
                   </div>
                 </div>
               ))}

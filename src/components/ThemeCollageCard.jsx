@@ -7,7 +7,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Feminine Style & Routine Synergy',
       badgeText: '🎀 Flawless Vibes',
       stickerText: '✨ Girls Don’t Cry',
-      imgSrc: '/images/girl_club_moodboard.png',
+      imgSrc: '/images/girl_club_classic.svg',
       matchScore: '99%',
       bgGradient: 'from-[#FFF0F2] via-[#FCE4EC] to-[#FFF0F2]',
       borderColor: 'border-[#C85A65]',
@@ -20,7 +20,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Thermal Baths & Mountain Flow',
       badgeText: '🧘‍♀️ Deep Relaxation',
       stickerText: '✨ You’re It, My Person',
-      imgSrc: '/images/nature_waterfall_moodboard.png',
+      imgSrc: '/images/nature_retreat.svg',
       matchScore: '99%',
       bgGradient: 'from-[#E8F5E9] via-[#C8E6C9] to-[#E8F5E9]',
       borderColor: 'border-[#7B9E87]',
@@ -33,7 +33,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Lord Mayor’s Lounge Champagne',
       badgeText: '🥂 Champagne Toast',
       stickerText: '✨ Warm Scones & Cream',
-      imgSrc: '/images/scrapbook_afternoon_tea.jpg',
+      imgSrc: '/images/afternoon_tea.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FFFDE7] via-[#FFF9C4] to-[#FFFDE7]',
       borderColor: 'border-[#F9E076]',
@@ -46,7 +46,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Candlelit Indie Music Night',
       badgeText: '🎟️ Ticket to Club',
       stickerText: '✨ Front Balcony Vibe',
-      imgSrc: '/images/scrapbook_sunset_hike.jpg',
+      imgSrc: '/images/live_concert.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FFF3E0] via-[#FFE0B2] to-[#FFF3E0]',
       borderColor: 'border-[#E65100]',
@@ -59,7 +59,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Pastéis de Belém & Sunset Drinks',
       badgeText: '✈️ The Next Big Thing',
       stickerText: '✨ Lisbon Sun & Tarts',
-      imgSrc: '/images/scrapbook_pottery.jpg',
+      imgSrc: '/images/lisbon_trip.svg',
       matchScore: '97%',
       bgGradient: 'from-[#FFF3E0] via-[#FFCC80] to-[#FFF3E0]',
       borderColor: 'border-[#FB8C00]',
@@ -72,7 +72,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Clement & Pekoe Lattes & Buns',
       badgeText: '👶 Stroller Friendly',
       stickerText: '✨ Cardamom Buns',
-      imgSrc: '/images/scrapbook_coffee_walk.jpg',
+      imgSrc: '/images/morning_coffee.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FAF6F0] via-[#F3ECE0] to-[#FAF6F0]',
       borderColor: 'border-[#9E8E87]',
@@ -93,8 +93,8 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       {/* Girl Club Cutout Scrapbook Frame with Dynamic Theme Background */}
       <div className={`p-4 bg-gradient-to-br ${theme.bgGradient} rounded-3xl border-4 ${theme.borderColor} shadow-2xl ring-1 ring-black/5 transform rotate-2 hover:rotate-0 transition-all duration-300 relative overflow-hidden`}>
         
-        {/* Main Theme Image */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-white shadow-md">
+        {/* Main Theme Image SVG */}
+        <div className="relative overflow-hidden rounded-2xl border-2 border-white shadow-md bg-white">
           <img
             src={theme.imgSrc}
             alt={theme.title}

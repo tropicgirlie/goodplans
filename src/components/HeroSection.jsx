@@ -41,6 +41,15 @@ export default function HeroSection({
   const activeFriends = friendsList.filter(f => selectedFriends.includes(f.id));
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
+  const themeOptions = [
+    { id: 'girl_club', label: '🎀 Girl Club (Classic Cutouts)' },
+    { id: 'nature', label: '🌿 Wicklow Spa & Retreat' },
+    { id: 'afternoon_tea', label: '🥂 Shelbourne Afternoon Tea' },
+    { id: 'concert', label: '🎸 Whelan’s Acoustic Gig' },
+    { id: 'trip', label: '✈️ Lisbon Weekend Trip' },
+    { id: 'coffee', label: '☕ Ranelagh Morning Coffee' }
+  ];
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F2]/50 via-[#FAF6F0] to-[#FAF6F0] pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,32 +223,46 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Aesthetic Theme Dropdown & Cutout Moodboard */}
+          {/* Right Column: Aesthetic Theme Dropdown & Dynamic Cutout Moodboard */}
           <div className="lg:col-span-5 relative flex flex-col items-center">
             
-            {/* Aesthetic Theme Dropdown Select */}
-            <div className="w-full max-w-sm mb-3">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#E0D4C5] shadow-xs">
-                <ImageIcon className="w-4 h-4 text-[#C85A65]" />
-                <span className="text-xs font-bold text-[#9E8E87] uppercase tracking-wider whitespace-nowrap">
-                  Collage Theme:
+            {/* Theme Control Box */}
+            <div className="w-full max-w-sm mb-4 space-y-2">
+              <div className="flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border border-[#E0D4C5] shadow-xs">
+                <ImageIcon className="w-4.5 h-4.5 text-[#C85A65]" />
+                <span className="text-xs font-extrabold text-[#9E8E87] uppercase tracking-wider whitespace-nowrap">
+                  Moodboard Theme:
                 </span>
                 <select
                   value={selectedThemeId}
                   onChange={(e) => setSelectedThemeId(e.target.value)}
-                  className="w-full bg-transparent text-xs font-bold text-[#2C221E] outline-none cursor-pointer"
+                  className="w-full bg-transparent text-xs font-extrabold text-[#2C221E] outline-none cursor-pointer"
                 >
-                  <option value="girl_club">🎀 Girl Club Classic (Red & Pink Cutouts)</option>
-                  <option value="nature">🌿 Wicklow Spa & Nature Retreat</option>
-                  <option value="afternoon_tea">🥂 Shelbourne Afternoon Tea</option>
-                  <option value="concert">🎸 Whelan’s Acoustic Live Gig</option>
-                  <option value="trip">✈️ Lisbon Long Weekend Getaway</option>
-                  <option value="coffee">☕ Ranelagh Maternity Coffee Walk</option>
+                  {themeOptions.map(t => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
                 </select>
+              </div>
+
+              {/* Quick Visual Theme Switcher Pills */}
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {themeOptions.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedThemeId(t.id)}
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+                      selectedThemeId === t.id
+                        ? 'bg-[#2C221E] text-white border-[#2C221E] shadow-2xs scale-105'
+                        : 'bg-white text-[#6C5E58] border-[#E0D4C5] hover:bg-[#FAF6F0]'
+                    }`}
+                  >
+                    {t.label.split(' ')[0]} {t.label.split(' ')[1]}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Theme Collage Card */}
+            {/* Theme Cutout Collage Card */}
             <ThemeCollageCard themeId={selectedThemeId} />
 
           </div>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <filter id="bwFilter">
+      <feColorMatrix type="matrix" values="
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0    0    0    1 0"/>
+    </filter>
+
+    <pattern id="polkaBlue" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#2563EB"/>
+      <circle cx="10" cy="10" r="5" fill="#F43F5E"/>
+    </pattern>
+
+    <g id="teardropRay">
+      <path d="M 0 -180 Q -12 -140 0 -100 Q 12 -140 0 -180 Z" />
+    </g>
+  </defs>
+
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- Radiating Teardrops -->
+  <g transform="translate(400, 300)">
+    <use href="#teardropRay" fill="#2563EB" transform="rotate(-60)"/>
+    <use href="#teardropRay" fill="#F59E0B" transform="rotate(-30)"/>
+    <use href="#teardropRay" fill="#F43F5E" transform="rotate(0)"/>
+    <use href="#teardropRay" fill="#2563EB" transform="rotate(30)"/>
+    <use href="#teardropRay" fill="#F59E0B" transform="rotate(60)"/>
+  </g>
+
+  <!-- Mustard Aura -->
+  <path d="M 140 540 Q 160 200 400 130 Q 640 200 660 540 Z" fill="none" stroke="#F59E0B" stroke-width="18"/>
+
+  <!-- B&W Travel Photo -->
+  <g filter="url(#bwFilter)">
+    <image href="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80" 
+           x="200" y="170" width="400" height="330" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <!-- Pop-Art Cat-Eye Sunglasses & Boarding Pass Cutout -->
+  <g transform="translate(320, 230)">
+    <rect x="0" y="0" width="60" height="38" rx="8" fill="#09090B"/>
+    <rect x="75" y="0" width="60" height="38" rx="8" fill="#09090B"/>
+    <line x1="60" y1="15" x2="75" y2="15" stroke="#09090B" stroke-width="4"/>
+  </g>
+
+  <!-- Boarding Pass Sticker Cutout -->
+  <g transform="translate(440, 70) rotate(-8)">
+    <rect x="0" y="0" width="220" height="80" rx="12" fill="#2563EB" stroke="#FFFFFF" stroke-width="4"/>
+    <text x="25" y="38" font-family="Syne, sans-serif" font-size="20" font-weight="900" fill="#FFFFFF">DUB ✈️ LIS</text>
+    <text x="25" y="62" font-family="Caveat, cursive" font-size="22" font-weight="bold" fill="#FEF3C7">Lisbon Girls Weekend</text>
+  </g>
+
+  <!-- Caption -->
+  <g transform="translate(240, 510)">
+    <rect x="0" y="0" width="320" height="55" rx="28" fill="#FFFFFF" stroke="#09090B" stroke-width="3"/>
+    <text x="30" y="35" font-family="Syne, sans-serif" font-size="18" font-weight="800" fill="#09090B">LISBON SUN &amp; PASTÉIS ✈️🇵🇹</text>
+  </g>
+</svg>

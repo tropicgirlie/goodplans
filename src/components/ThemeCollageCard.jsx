@@ -3,24 +3,24 @@ import React from 'react';
 export default function ThemeCollageCard({ themeId = 'girl_club', className = '' }) {
   const themes = {
     girl_club: {
-      title: 'Editorial Pop-Art • Amiga Dublin 🎨',
-      subtitle: 'Black & White Portrait + Graphic Halos',
-      badgeText: '✨ Flawless Pop-Art',
+      title: 'Diverse Squad • Amiga Dublin 🎨',
+      subtitle: 'Black & White Photography + Pop-Art Rays',
+      badgeText: '✨ Diverse Friends',
       stickerText: '💖 Girls Don’t Cry',
-      imgSrc: '/images/pop_art_editorial_hero.jpg',
+      imgSrc: '/images/pop_art_squad_hero.svg',
       matchScore: '99%',
       bgGradient: 'from-[#EFF6FF] via-[#FEF3C7] to-[#FFF1F2]',
       borderColor: 'border-[#09090B]',
       accentBadgeBg: 'bg-[#2563EB] text-white',
-      tagline: 'Radiating teardrops • Polka-dot hoodie • Striped blazer • Mustard halos',
-      stickers: ['🎨 Graphic Doodles', '🔵 Cobalt Dots', '🟡 Mustard Rays', '🔴 Coral Accents']
+      tagline: 'Straight hair • Curly afro coils • Chic braids • Polka dots & star eyes',
+      stickers: ['🎨 Teardrop Rays', '🔵 Cobalt Dots', '🟡 Mustard Aura', '🔴 Polka Dots']
     },
     nature: {
       title: 'Wicklow Spa & Nature Retreat 🌿',
       subtitle: 'Thermal Baths & Mountain Flow',
       badgeText: '🧘‍♀️ Deep Relaxation',
       stickerText: '✨ You’re It, My Person',
-      imgSrc: '/images/nature_waterfall_moodboard.png',
+      imgSrc: '/images/pop_art_retreat.svg',
       matchScore: '99%',
       bgGradient: 'from-[#E8F5E9] via-[#C8E6C9] to-[#E8F5E9]',
       borderColor: 'border-[#09090B]',
@@ -33,7 +33,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Lord Mayor’s Lounge Champagne',
       badgeText: '🥂 Champagne Toast',
       stickerText: '✨ Warm Scones & Cream',
-      imgSrc: '/images/scrapbook_afternoon_tea.jpg',
+      imgSrc: '/images/pop_art_dinner.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FFFDE7] via-[#FEF3C7] to-[#FFFDE7]',
       borderColor: 'border-[#09090B]',
@@ -46,7 +46,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Candlelit Indie Music Night',
       badgeText: '🎟️ Ticket to Club',
       stickerText: '✨ Front Balcony Vibe',
-      imgSrc: '/images/scrapbook_sunset_hike.jpg',
+      imgSrc: '/images/pop_art_concert.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FFF3E0] via-[#FFE0B2] to-[#FFF3E0]',
       borderColor: 'border-[#09090B]',
@@ -59,7 +59,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Pastéis de Belém & Sunset Drinks',
       badgeText: '✈️ The Next Big Thing',
       stickerText: '✨ Lisbon Sun & Tarts',
-      imgSrc: '/images/scrapbook_pottery.jpg',
+      imgSrc: '/images/pop_art_trip.svg',
       matchScore: '97%',
       bgGradient: 'from-[#FFF3E0] via-[#FFCC80] to-[#FFF3E0]',
       borderColor: 'border-[#09090B]',
@@ -72,7 +72,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
       subtitle: 'Clement & Pekoe Lattes & Buns',
       badgeText: '👶 Stroller Friendly',
       stickerText: '✨ Cardamom Buns',
-      imgSrc: '/images/scrapbook_coffee_walk.jpg',
+      imgSrc: '/images/pop_art_coffee.svg',
       matchScore: '98%',
       bgGradient: 'from-[#FAF6F0] via-[#F3ECE0] to-[#FAF6F0]',
       borderColor: 'border-[#09090B]',
@@ -100,7 +100,7 @@ export default function ThemeCollageCard({ themeId = 'girl_club', className = ''
           <span className="w-2.5 h-4 bg-[#F59E0B] rounded-full transform -rotate-6"></span>
         </div>
 
-        {/* Main Theme Image */}
+        {/* Main Pop-Art Illustration SVG */}
         <div className="relative overflow-hidden rounded-2xl border-2 border-[#09090B] shadow-sm bg-white">
           <img
             src={theme.imgSrc}

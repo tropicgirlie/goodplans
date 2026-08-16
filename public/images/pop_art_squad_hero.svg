@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 800" width="100%" height="100%">
+  <defs>
+    <!-- Desaturation Filter for B&W Editorial Photo Vibe -->
+    <filter id="bwFilter">
+      <feColorMatrix type="matrix" values="
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0    0    0    1 0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.1" intercept="-0.05"/>
+        <feFuncG type="linear" slope="1.1" intercept="-0.05"/>
+        <feFuncB type="linear" slope="1.1" intercept="-0.05"/>
+      </feComponentTransfer>
+    </filter>
+
+    <!-- Polka Dot Pattern for Clothing Overlay -->
+    <pattern id="polkaBluePink" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#2563EB"/>
+      <circle cx="12" cy="12" r="6" fill="#F43F5E"/>
+    </pattern>
+
+    <pattern id="polkaYellowBlue" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#F59E0B"/>
+      <circle cx="10" cy="10" r="4" fill="#2563EB"/>
+    </pattern>
+
+    <!-- Stripe Pattern for Aura -->
+    <pattern id="coralStripes" width="16" height="16" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="#FFFFFF"/>
+      <line x1="0" y1="0" x2="0" y2="16" stroke="#F43F5E" stroke-width="6"/>
+    </pattern>
+
+    <!-- Dot Pattern for Aura -->
+    <pattern id="auraDots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="#FFFFFF"/>
+      <circle cx="8" cy="8" r="4.5" fill="#1D4ED8"/>
+    </pattern>
+
+    <!-- Teardrop Ray Definition -->
+    <g id="teardropRay">
+      <path d="M 0 -220 Q -14 -170 0 -130 Q 14 -170 0 -220 Z" />
+    </g>
+  </defs>
+
+  <!-- Background Base Canvas -->
+  <rect width="1000" height="800" fill="#FAFAFA"/>
+
+  <!-- LAYER 5: Radiating Teardrop Halos (Exact Anne Hathaway Pop-Art Style) -->
+  <g transform="translate(500, 420)">
+    <!-- Deep Blue Teardrops -->
+    <use href="#teardropRay" fill="#1D4ED8" transform="rotate(-85)"/>
+    <use href="#teardropRay" fill="#38BDF8" transform="rotate(-75)"/>
+    <use href="#teardropRay" fill="#F43F5E" transform="rotate(-65)"/>
+    <use href="#teardropRay" fill="#FB923C" transform="rotate(-55)"/>
+    <use href="#teardropRay" fill="#FBCFE8" transform="rotate(-45)"/>
+    <use href="#teardropRay" fill="#1D4ED8" transform="rotate(-35)"/>
+    <use href="#teardropRay" fill="#F59E0B" transform="rotate(-25)"/>
+    <use href="#teardropRay" fill="#F43F5E" transform="rotate(-15)"/>
+    <use href="#teardropRay" fill="#38BDF8" transform="rotate(-5)"/>
+    <use href="#teardropRay" fill="#1D4ED8" transform="rotate(5)"/>
+    <use href="#teardropRay" fill="#FB923C" transform="rotate(15)"/>
+    <use href="#teardropRay" fill="#F59E0B" transform="rotate(25)"/>
+    <use href="#teardropRay" fill="#F43F5E" transform="rotate(35)"/>
+    <use href="#teardropRay" fill="#1D4ED8" transform="rotate(45)"/>
+    <use href="#teardropRay" fill="#38BDF8" transform="rotate(55)"/>
+    <use href="#teardropRay" fill="#FBCFE8" transform="rotate(65)"/>
+    <use href="#teardropRay" fill="#FB923C" transform="rotate(75)"/>
+    <use href="#teardropRay" fill="#1D4ED8" transform="rotate(85)"/>
+  </g>
+
+  <!-- LAYER 4: Mustard Yellow Organic Contour Line Aura -->
+  <path d="M 120 720 Q 140 320 280 200 Q 500 120 720 200 Q 860 320 880 720 Z" 
+        fill="none" stroke="#F59E0B" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- LAYER 3: Blue Polka Dot Aura Contour -->
+  <path d="M 150 720 Q 170 340 300 230 Q 500 150 700 230 Q 830 340 850 720 Z" 
+        fill="url(#auraDots)" stroke="#1D4ED8" stroke-width="4"/>
+
+  <!-- LAYER 2: Coral Striped Inner Aura -->
+  <path d="M 180 720 Q 200 370 320 270 Q 500 200 680 270 Q 800 370 820 720 Z" 
+        fill="url(#coralStripes)" stroke="#FFFFFF" stroke-width="8"/>
+
+  <!-- LAYER 1: Base Photography (Diverse Squad of Female Friends) -->
+  <g filter="url(#bwFilter)">
+    <!-- Friend 1 (Left - Straight Hair) -->
+    <image href="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" 
+           x="220" y="240" width="220" height="320" preserveAspectRatio="xMidYMid slice" clip-path="url(#friend1Clip)"/>
+    
+    <!-- Friend 2 (Center - Voluminous Curly Hair) -->
+    <image href="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80" 
+           x="390" y="180" width="240" height="360" preserveAspectRatio="xMidYMid slice"/>
+
+    <!-- Friend 3 (Right - Chic Braids / Bob) -->
+    <image href="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80" 
+           x="580" y="240" width="220" height="320" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <!-- OVERLAY GRAPHICS (Hand-Drawn Pop-Art Clothes, Eyebrows & Star Eyes) -->
+
+  <!-- Friend 1 Pop-Art Overlays (Straight Hair) -->
+  <path d="M 230 400 Q 300 380 370 410 L 390 620 L 210 620 Z" fill="url(#polkaBluePink)" opacity="0.9"/>
+  <!-- Doodle Eyebrows & Stars -->
+  <path d="M 285 300 Q 300 290 315 300" stroke="#1D4ED8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M 335 300 Q 350 290 365 300" stroke="#1D4ED8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <polygon points="300,325 303,332 310,333 305,338 307,345 300,341 293,345 295,338 290,333 297,332" fill="#F43F5E"/>
+  <polygon points="350,325 353,332 360,333 355,338 357,345 350,341 343,345 345,338 340,333 347,332" fill="#F43F5E"/>
+
+  <!-- Friend 2 Pop-Art Overlays (Curly Hair Center) -->
+  <path d="M 410 360 Q 510 330 610 360 L 630 660 L 390 660 Z" fill="url(#polkaYellowBlue)" opacity="0.95"/>
+  <!-- Bold Blazer Line Outlines -->
+  <path d="M 430 380 L 460 520 L 510 660" stroke="#F43F5E" stroke-width="6" fill="none"/>
+  <path d="M 590 380 L 560 520 L 510 660" stroke="#F43F5E" stroke-width="6" fill="none"/>
+  <!-- Doodle Eyebrows & Cheek Sunburst Stripes -->
+  <path d="M 460 250 Q 480 235 500 250" stroke="#1D4ED8" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M 525 250 Q 545 235 565 250" stroke="#1D4ED8" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- Cheek Sunburst Stripes -->
+  <line x1="450" y1="285" x2="450" y2="305" stroke="#F43F5E" stroke-width="4"/>
+  <line x1="458" y1="285" x2="458" y2="308" stroke="#F43F5E" stroke-width="4"/>
+  <line x1="466" y1="285" x2="466" y2="305" stroke="#F43F5E" stroke-width="4"/>
+  <line x1="560" y1="285" x2="560" y2="305" stroke="#F43F5E" stroke-width="4"/>
+  <line x1="568" y1="285" x2="568" y2="308" stroke="#F43F5E" stroke-width="4"/>
+  <line x1="576" y1="285" x2="576" y2="305" stroke="#F43F5E" stroke-width="4"/>
+
+  <!-- Friend 3 Pop-Art Overlays (Braids / Bob Right) -->
+  <path d="M 610 400 Q 680 380 750 410 L 770 620 L 590 620 Z" fill="url(#polkaBluePink)" opacity="0.9"/>
+  <!-- Star Eyes -->
+  <polygon points="650,325 653,332 660,333 655,338 657,345 650,341 643,345 645,338 640,333 647,332" fill="#F59E0B"/>
+  <polygon points="700,325 703,332 710,333 705,338 707,345 700,341 693,345 695,338 690,333 697,332" fill="#F59E0B"/>
+
+  <!-- Foreground Title Badge: Amiga Pop-Art Squad -->
+  <g transform="translate(320, 680)">
+    <rect x="0" y="0" width="360" height="70" rx="35" fill="#FFFFFF" stroke="#09090B" stroke-width="4"/>
+    <text x="35" y="44" font-family="Syne, sans-serif" font-size="24" font-weight="800" fill="#09090B">AMIGA DIVERSE SQUAD 💕</text>
+  </g>
+</svg>

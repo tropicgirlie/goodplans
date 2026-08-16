@@ -1,4 +1,4 @@
-// Mock data for Amiga Planner - Dublin Edition with Girl Club Paper Cutout Aesthetic & luana.systems Architecture
+// Mock data for Amiga Planner - Dublin Edition with Pop-Art Mixed-Media Editorial Artwork & luana.systems Architecture
 
 export const FRIENDS_DATA = [
   {
@@ -12,7 +12,7 @@ export const FRIENDS_DATA = [
     ageGroup: '28 (Millennial)',
     socialBatteryLevel: 'balanced',
     interests: ['Afternoon Tea', 'Trips Abroad', 'Concerts', 'Coffee Walks'],
-    color: '#C85A65'
+    color: '#2563EB'
   },
   {
     id: 'f2',
@@ -25,7 +25,7 @@ export const FRIENDS_DATA = [
     ageGroup: '29 (Millennial)',
     socialBatteryLevel: 'balanced',
     interests: ['Dinner Out', 'Workshops', 'Trips Abroad', 'Wellness Retreats'],
-    color: '#7B9E87'
+    color: '#059669'
   },
   {
     id: 'f3',
@@ -38,7 +38,7 @@ export const FRIENDS_DATA = [
     ageGroup: '32 (Millennial)',
     socialBatteryLevel: 'cozy',
     interests: ['Concerts', 'Retreats', 'Trips Abroad', 'Dinner Out'],
-    color: '#9B870C'
+    color: '#F59E0B'
   },
   {
     id: 'f4',
@@ -51,7 +51,7 @@ export const FRIENDS_DATA = [
     ageGroup: '24 (Gen Z)',
     socialBatteryLevel: 'high',
     interests: ['Concerts', 'Trips Abroad', 'Wellness Retreats', 'Dinner Out'],
-    color: '#F9E076'
+    color: '#E11D48'
   },
   {
     id: 'f5',
@@ -64,7 +64,7 @@ export const FRIENDS_DATA = [
     ageGroup: '29 (Millennial)',
     socialBatteryLevel: 'cozy',
     interests: ['Afternoon Tea', 'Retreats', 'Trips Abroad', 'Workshops'],
-    color: '#B388EB'
+    color: '#8B5CF6'
   }
 ];
 
@@ -91,7 +91,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Mixed Circle',
     connectionBadge: '🔀 Double Squad • Early Dinner',
     iconName: 'restaurant',
-    image: '/images/girl_club_moodboard.png',
+    image: '/images/pop_art_dinner.svg',
     date: 'Fri, Aug 29 • 6:30 PM (Early Dinner)',
     location: 'Coppinger Row & South William St, Dublin 2',
     host: FRIENDS_DATA[1],
@@ -102,7 +102,7 @@ export const INITIAL_OUTINGS = [
       comfortLevel: 'Lively Dublin Atmosphere • Relaxed Dining',
       vibeSync: 'Seasonal tapas, fresh pasta & organic wine'
     },
-    handwrittenTag: 'girl club early dinner 🍷',
+    handwrittenTag: 'early dinner & wine 🍷',
     stickerType: 'dinner',
     price: '€32 / person',
     attendees: [
@@ -117,8 +117,8 @@ export const INITIAL_OUTINGS = [
       { time: '8:30 PM', detail: 'Home early feeling nourished & refreshed' }
     ],
     souvenirPhotos: [
-      '/images/girl_club_moodboard.png',
-      '/images/nature_waterfall_moodboard.png'
+      '/images/pop_art_dinner.svg',
+      '/images/pop_art_squad_hero.svg'
     ],
     comments: [
       { id: 'c_l1', user: FRIENDS_DATA[2], text: 'Early dinner is so much better than late nights! Count me in 🍽️🍷', time: '40m ago' }
@@ -135,7 +135,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Mixed Circle',
     connectionBadge: 'Concert Crew • Live Music',
     iconName: 'music_note',
-    image: '/images/girl_club_moodboard.png',
+    image: '/images/pop_art_concert.svg',
     date: 'Thu, Sep 4 • 7:30 PM',
     location: 'Whelan’s, Camden St, Dublin 2',
     host: FRIENDS_DATA[3],
@@ -146,7 +146,7 @@ export const INITIAL_OUTINGS = [
       comfortLevel: 'Intimate Candlelit Acoustic Gig',
       vibeSync: 'Indie acoustic vibes & post-show chat'
     },
-    handwrittenTag: 'ticket to club 🎟️',
+    handwrittenTag: 'whelan’s live gig 🎤',
     stickerType: 'music',
     price: '€22 / ticket',
     attendees: [
@@ -161,7 +161,7 @@ export const INITIAL_OUTINGS = [
       { time: '9:45 PM', detail: 'Post-gig chat & night wrap-up' }
     ],
     souvenirPhotos: [
-      '/images/girl_club_moodboard.png'
+      '/images/pop_art_concert.svg'
     ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[1], text: 'Whelan’s acoustic gigs are the best! Super excited 🎸🎶', time: '1h ago' }
@@ -179,7 +179,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: '🔀 Double Squad • Wellness Retreat',
     iconName: 'spa',
-    image: '/images/nature_waterfall_moodboard.png',
+    image: '/images/pop_art_retreat.svg',
     date: 'Sat, Sep 13 • 10:00 AM - 4:00 PM',
     location: 'Powerscourt Estate & Thermal Spa, Enniskerry, Co. Wicklow',
     host: FRIENDS_DATA[4],
@@ -206,7 +206,7 @@ export const INITIAL_OUTINGS = [
       { time: '2:00 PM', detail: 'Thermal spa pools & relaxation room' }
     ],
     souvenirPhotos: [
-      '/images/nature_waterfall_moodboard.png'
+      '/images/pop_art_retreat.svg'
     ],
     comments: [
       { id: 'c_r1', user: FRIENDS_DATA[0], text: 'Exactly what we need! My social battery will be 100% recharged 🧘‍♀️✨', time: '3h ago' }
@@ -223,7 +223,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: 'Trip Abroad • Long Weekend',
     iconName: 'flight_takeoff',
-    image: '/images/girl_club_moodboard.png',
+    image: '/images/pop_art_trip.svg',
     date: 'Fri, Oct 10 - Sun, Oct 12',
     location: 'Lisbon, Portugal (Direct Flights from Dublin)',
     host: FRIENDS_DATA[2],
@@ -234,7 +234,7 @@ export const INITIAL_OUTINGS = [
       comfortLevel: 'Sunny Vibe & High Energy Discovery',
       vibeSync: 'Rooftop sunset drinks, ceramic tiles & Lisbon pastries'
     },
-    handwrittenTag: 'the next big thing ✈️',
+    handwrittenTag: 'dub ✈️ lisbon getaway',
     stickerType: 'trip',
     price: '€180 / person (Flight + Airbnb)',
     attendees: [
@@ -251,7 +251,7 @@ export const INITIAL_OUTINGS = [
       { time: 'Sun Evening', detail: 'Fly back to Dublin feeling sun-kissed' }
     ],
     souvenirPhotos: [
-      '/images/girl_club_moodboard.png'
+      '/images/pop_art_trip.svg'
     ],
     comments: [
       { id: 'c_t1', user: FRIENDS_DATA[3], text: 'Flights booked! Need sunshine and portuguese tarts asap ✈️🇵🇹', time: '5h ago' }
@@ -268,7 +268,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: 'Coffee & Strolls • Moms & Flex Hours',
     iconName: 'local_cafe',
-    image: '/images/girl_club_moodboard.png',
+    image: '/images/pop_art_coffee.svg',
     date: 'Mon, Aug 25 • 10:30 AM (Weekday Morning)',
     location: 'Clement & Pekoe, South William St & Stephen’s Green, Dublin 2',
     host: FRIENDS_DATA[0],
@@ -279,7 +279,7 @@ export const INITIAL_OUTINGS = [
       comfortLevel: 'Stroller Friendly • Low Pressure',
       vibeSync: 'Warm oat milk lattes, park stroll & baby catchup'
     },
-    handwrittenTag: 'flawless morning ☕',
+    handwrittenTag: 'morning coffee & stroll ☕',
     stickerType: 'coffee',
     price: 'Free',
     attendees: [
@@ -294,7 +294,7 @@ export const INITIAL_OUTINGS = [
       { time: '12:00 PM', detail: 'Park bench chat & relaxed morning wrap-up' }
     ],
     souvenirPhotos: [
-      '/images/girl_club_moodboard.png'
+      '/images/pop_art_coffee.svg'
     ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[4], text: 'So needed this! Monday mornings on maternity leave get lonely ☕👶', time: '2h ago' }
@@ -311,7 +311,7 @@ export const INITIAL_OUTINGS = [
     connectionType: '1:1 Outing',
     connectionBadge: 'Afternoon Tea • Pamper Catchup',
     iconName: 'local_bar',
-    image: '/images/girl_club_moodboard.png',
+    image: '/images/pop_art_squad_hero.svg',
     date: 'Sun, Aug 31 • 2:30 PM',
     location: 'Lord Mayor’s Lounge, The Shelbourne Hotel, Dublin 2',
     host: FRIENDS_DATA[1],
@@ -337,7 +337,7 @@ export const INITIAL_OUTINGS = [
       { time: '3:45 PM', detail: 'Warm scones, pastries & tea refill' }
     ],
     souvenirPhotos: [
-      '/images/girl_club_moodboard.png'
+      '/images/pop_art_squad_hero.svg'
     ],
     comments: [
       { id: 'c_s1', user: FRIENDS_DATA[0], text: 'Can’t wait for warm scones! See you Sunday 💕☕', time: '30m ago' }

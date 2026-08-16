@@ -20,7 +20,7 @@ export default function Footer() {
                 </span>
               </div>
               <p className="text-xs text-[#52525B] font-semibold mt-0.5">
-                Pop-Art Editorial Outings, MBTI Matching &amp; Routine Synergy
+                Curated Outings, Friend Matching &amp; Routine Alignment
               </p>
             </div>
           </div>

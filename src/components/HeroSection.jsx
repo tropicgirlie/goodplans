@@ -36,7 +36,7 @@ export default function HeroSection({
     setAvailabilityPolled(true);
   };
 
-  // Calculate live squad synergy score
+  // Calculate live squad match score
   const activeFriends = friendsList.filter(f => selectedFriends.includes(f.id));
   const avgScore = activeFriends.length > 0 ? Math.round(92 + (activeFriends.length * 1.5) % 8) : 0;
 
@@ -114,7 +114,7 @@ export default function HeroSection({
               </div>
             </div>
 
-            {/* Friend Selector & Synergy Calculator */}
+            {/* Friend Selector & Match Calculator */}
             <div className="p-5 rounded-2xl bg-white border-3 border-[#09090B] shadow-[5px_5px_0px_#09090B] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -127,7 +127,7 @@ export default function HeroSection({
                 </div>
                 {friendsList.length > 0 && (
                   <div className="bg-[#FEF3C7] text-[#09090B] px-3 py-1 rounded-full text-xs font-black border-2 border-[#09090B] font-mono">
-                    {avgScore}% Synergy Score
+                    {avgScore}% Squad Match
                   </div>
                 )}
               </div>

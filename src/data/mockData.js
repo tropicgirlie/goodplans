@@ -1,4 +1,4 @@
-// Mock data for Amiga Planner - Dublin Edition with Real Pop-Art Editorial PNG Images & luana.systems Architecture
+// Mock data for Amiga Planner - Dublin Edition with Gorgeous Original Polaroid Collages & luana.systems Architecture
 
 export const FRIENDS_DATA = [
   {
@@ -91,7 +91,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Mixed Circle',
     connectionBadge: '🔀 Double Squad • Early Dinner',
     iconName: 'restaurant',
-    image: '/images/popart_early_dinner.png',
+    image: '/images/scrapbook_pizza_games.jpg',
     date: 'Fri, Aug 29 • 6:30 PM (Early Dinner)',
     location: 'Coppinger Row & South William St, Dublin 2',
     host: FRIENDS_DATA[1],
@@ -117,8 +117,8 @@ export const INITIAL_OUTINGS = [
       { time: '8:30 PM', detail: 'Home early feeling nourished & refreshed' }
     ],
     souvenirPhotos: [
-      '/images/popart_early_dinner.png',
-      '/images/popart_hero_squad.png'
+      '/images/scrapbook_pizza_games.jpg',
+      '/images/scrapbook_afternoon_tea.jpg'
     ],
     comments: [
       { id: 'c_l1', user: FRIENDS_DATA[2], text: 'Early dinner is so much better than late nights! Count me in 🍽️🍷', time: '40m ago' }
@@ -135,7 +135,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Mixed Circle',
     connectionBadge: 'Concert Crew • Live Music',
     iconName: 'music_note',
-    image: '/images/popart_whelans_gig.png',
+    image: '/images/scrapbook_sunset_hike.jpg',
     date: 'Thu, Sep 4 • 7:30 PM',
     location: 'Whelan’s, Camden St, Dublin 2',
     host: FRIENDS_DATA[3],
@@ -161,7 +161,7 @@ export const INITIAL_OUTINGS = [
       { time: '9:45 PM', detail: 'Post-gig chat & night wrap-up' }
     ],
     souvenirPhotos: [
-      '/images/popart_whelans_gig.png'
+      '/images/scrapbook_sunset_hike.jpg'
     ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[1], text: 'Whelan’s acoustic gigs are the best! Super excited 🎸🎶', time: '1h ago' }
@@ -179,7 +179,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: '🔀 Double Squad • Wellness Retreat',
     iconName: 'spa',
-    image: '/images/popart_wicklow_spa.png',
+    image: '/images/scrapbook_spa_sauna.jpg',
     date: 'Sat, Sep 13 • 10:00 AM - 4:00 PM',
     location: 'Powerscourt Estate & Thermal Spa, Enniskerry, Co. Wicklow',
     host: FRIENDS_DATA[4],
@@ -206,7 +206,7 @@ export const INITIAL_OUTINGS = [
       { time: '2:00 PM', detail: 'Thermal spa pools & relaxation room' }
     ],
     souvenirPhotos: [
-      '/images/popart_wicklow_spa.png'
+      '/images/scrapbook_spa_sauna.jpg'
     ],
     comments: [
       { id: 'c_r1', user: FRIENDS_DATA[0], text: 'Exactly what we need! My social battery will be 100% recharged 🧘‍♀️✨', time: '3h ago' }
@@ -223,7 +223,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: 'Trip Abroad • Long Weekend',
     iconName: 'flight_takeoff',
-    image: '/images/popart_lisbon_trip.png',
+    image: '/images/scrapbook_pottery.jpg',
     date: 'Fri, Oct 10 - Sun, Oct 12',
     location: 'Lisbon, Portugal (Direct Flights from Dublin)',
     host: FRIENDS_DATA[2],
@@ -251,7 +251,7 @@ export const INITIAL_OUTINGS = [
       { time: 'Sun Evening', detail: 'Fly back to Dublin feeling sun-kissed' }
     ],
     souvenirPhotos: [
-      '/images/popart_lisbon_trip.png'
+      '/images/scrapbook_pottery.jpg'
     ],
     comments: [
       { id: 'c_t1', user: FRIENDS_DATA[3], text: 'Flights booked! Need sunshine and portuguese tarts asap ✈️🇵🇹', time: '5h ago' }
@@ -268,7 +268,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Core Squad',
     connectionBadge: 'Coffee & Strolls • Moms & Flex Hours',
     iconName: 'local_cafe',
-    image: '/images/popart_coffee_walk.png',
+    image: '/images/scrapbook_coffee_walk.jpg',
     date: 'Mon, Aug 25 • 10:30 AM (Weekday Morning)',
     location: 'Clement & Pekoe, South William St & Stephen’s Green, Dublin 2',
     host: FRIENDS_DATA[0],
@@ -294,7 +294,7 @@ export const INITIAL_OUTINGS = [
       { time: '12:00 PM', detail: 'Park bench chat & relaxed morning wrap-up' }
     ],
     souvenirPhotos: [
-      '/images/popart_coffee_walk.png'
+      '/images/scrapbook_coffee_walk.jpg'
     ],
     comments: [
       { id: 'c_m1', user: FRIENDS_DATA[4], text: 'So needed this! Monday mornings on maternity leave get lonely ☕👶', time: '2h ago' }
@@ -311,7 +311,7 @@ export const INITIAL_OUTINGS = [
     connectionType: '1:1 Outing',
     connectionBadge: 'Afternoon Tea • Pamper Catchup',
     iconName: 'local_bar',
-    image: '/images/popart_hero_squad.png',
+    image: '/images/scrapbook_afternoon_tea.jpg',
     date: 'Sun, Aug 31 • 2:30 PM',
     location: 'Lord Mayor’s Lounge, The Shelbourne Hotel, Dublin 2',
     host: FRIENDS_DATA[1],
@@ -337,7 +337,7 @@ export const INITIAL_OUTINGS = [
       { time: '3:45 PM', detail: 'Warm scones, pastries & tea refill' }
     ],
     souvenirPhotos: [
-      '/images/popart_hero_squad.png'
+      '/images/scrapbook_afternoon_tea.jpg'
     ],
     comments: [
       { id: 'c_s1', user: FRIENDS_DATA[0], text: 'Can’t wait for warm scones! See you Sunday 💕☕', time: '30m ago' }

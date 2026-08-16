@@ -49,7 +49,7 @@ export default function HeroSection({
             {/* Brand Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#2C221E] text-xs font-bold shadow-xs border border-[#E0D4C5]">
               <span className="w-2 h-2 rounded-full bg-[#C85A65] animate-pulse"></span>
-              <span className="font-mono tracking-widest uppercase text-[11px]">AFFINITA • DUBLIN EDITION</span>
+              <span className="font-mono tracking-widest uppercase text-[11px]">AMIGA • DUBLIN EDITION</span>
             </div>
 
             {/* Title */}

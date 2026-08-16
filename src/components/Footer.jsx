@@ -13,7 +13,7 @@ export default function Footer() {
             <div>
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <span className="font-extrabold text-2xl font-display uppercase tracking-wider text-[#2C221E]">
-                  Affinita
+                  Amiga
                 </span>
                 <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
@@ -45,7 +45,7 @@ export default function Footer() {
 
         {/* Bottom Attribution */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[#6C5E58]">
-          <p>© {new Date().getFullYear()} Affinita Europe. Designed for connected women in Dublin, Ireland.</p>
+          <p>© {new Date().getFullYear()} Amiga Europe. Designed for connected women in Dublin, Ireland.</p>
           
           <div className="flex items-center gap-1.5 text-sm font-extrabold text-[#2C221E]">
             <span>Made with</span>

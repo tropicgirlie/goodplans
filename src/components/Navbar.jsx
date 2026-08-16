@@ -43,9 +43,9 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
       {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
         
-        {/* Affinita Clean Text Wordmark */}
+        {/* Amiga Brand Name Wordmark */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => {
@@ -58,14 +58,14 @@ export default function Navbar({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-2xl font-display tracking-wider text-[#2C221E] uppercase group-hover:text-[#C85A65] transition-colors">
-                  Affinita
+                  Amiga
                 </span>
                 <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
                 </span>
               </div>
               <p className="text-[10px] text-[#6C5E58] font-medium tracking-wider uppercase hidden sm:block">
-                Curated Female Outings & Routine Synergy
+                Female Friendship Circles & Routine Outings
               </p>
             </div>
           </button>
@@ -135,9 +135,9 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Category & Battery Pills Bar */}
-      <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2.5 overflow-x-auto no-scrollbar">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
+      {/* Category Pills Bar (Non-Scrolling Flex-Wrap Layout) */}
+      <div className="bg-[#FAF6F0] border-t border-b border-[#F3ECE0] px-4 sm:px-8 py-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 justify-start">
           {CATEGORY_PILLS.map((pill) => {
             const isSelected = 
               (pill.id === 'all' && selectedCategory === 'all' && batteryFilter === 'all') ||
@@ -148,7 +148,7 @@ export default function Navbar({
               <button
                 key={pill.id}
                 onClick={() => handlePillClick(pill)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
                     ? 'bg-[#C85A65] text-white shadow-sm scale-105'
                     : 'bg-white text-[#6C5E58] hover:bg-[#F3ECE0] hover:text-[#2C221E] border border-[#E0D4C5]'

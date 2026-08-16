@@ -40,36 +40,37 @@ export default function HeroSection({
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F2]/50 via-[#FAF6F0] to-[#FAF6F0] pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Scrapbook Hero Grid */}
+        {/* Editorial Moodboard Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Left Column: Headlines & Personality Engine */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Cute Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold shadow-xs font-handwriting text-base border border-white transform -rotate-1">
-              <Sparkles className="w-4 h-4 text-[#C85A65]" />
-              Dublin Outing Planner for Female Friendships
+            {/* Editorial Brand Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#2C221E] text-xs font-bold shadow-xs border border-[#E0D4C5]">
+              <span className="w-2 h-2 rounded-full bg-[#C85A65] animate-pulse"></span>
+              <span className="font-mono tracking-widest uppercase text-[11px]">AFFINITA • DUBLIN EDITION</span>
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#2C221E] leading-[1.15]">
-              Plan Outings Matched to Your <span className="underline decoration-[#C85A65] decoration-wavy decoration-2">Squad’s Routine & Vibe</span>
+            {/* Title with Serif Editorial Typography */}
+            <h1 className="text-4xl sm:text-6xl font-black font-display tracking-tight text-[#2C221E] leading-[1.1]">
+              A Life Curated. <br />
+              <span className="font-serif italic font-normal text-[#C85A65]">Elevating Every Outing</span>
             </h1>
 
             <p className="text-sm sm:text-base text-[#6C5E58] font-medium leading-relaxed max-w-2xl">
-              From <strong className="text-[#2C221E]">Early Lunch in Coppinger Row</strong> to <strong className="text-[#2C221E]">Wednesday Post-Work Dance</strong>, <strong className="text-[#2C221E]">Wicklow Spa Retreats</strong>, and <strong className="text-[#2C221E]">Lisbon Trips</strong>. Zero invisible planning labor!
+              From <strong className="text-[#2C221E]">Early Dinner at Coppinger Row</strong> to <strong className="text-[#2C221E]">Wicklow Mountain Spa Retreats</strong> and <strong className="text-[#2C221E]">Girls Long Weekends in Lisbon</strong>. Curated for connected women with zero planning friction.
             </p>
 
             {/* Interactive Social Battery Level Filter */}
-            <div className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs space-y-3">
+            <div className="p-4 rounded-2xl bg-white border border-[#E0D4C5] shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] flex items-center gap-1.5">
                   <BatteryCharging className="w-4 h-4 text-[#C85A65]" />
-                  Match Outings to Social Battery Level
+                  Filter Outings by Social Energy Status
                 </span>
-                <span className="text-[11px] font-bold text-[#7B9E87]">
-                  Filter Feed Live
+                <span className="text-[11px] font-bold text-[#7B9E87] font-mono">
+                  LIVE SYNC
                 </span>
               </div>
 
@@ -82,7 +83,7 @@ export default function HeroSection({
                       : 'bg-[#FAF6F0] text-[#6C5E58] border-[#E0D4C5] hover:bg-[#F3ECE0]'
                   }`}
                 >
-                  ⚡ All Batteries
+                  ⚡ All Energy
                 </button>
 
                 <button
@@ -109,17 +110,17 @@ export default function HeroSection({
               </div>
             </div>
 
-            {/* Friend Selector & Vibe Match Card */}
-            <div className="p-5 rounded-2xl bg-white border-2 border-[#E0D4C5] shadow-md space-y-4">
+            {/* Friend Selector & Synergy Calculator */}
+            <div className="p-5 rounded-2xl bg-white border border-[#E0D4C5] shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-[#2C221E] font-display">
                     Select Friends to Compute Squad Match
                   </h3>
-                  <p className="text-xs text-[#6C5E58]">Calculates routine compatibility & social battery sync</p>
+                  <p className="text-xs text-[#6C5E58]">Routine compatibility & social battery alignment</p>
                 </div>
                 <div className="bg-[#FFF0F2] text-[#C85A65] px-3 py-1 rounded-full text-xs font-extrabold border border-[#F7B7A3] font-mono">
-                  {avgScore}% Squad Synergy
+                  {avgScore}% Synergy Score
                 </div>
               </div>
 
@@ -145,7 +146,7 @@ export default function HeroSection({
                 })}
               </div>
 
-              {/* 1-Tap Squad Availability Poller (UX Feature) */}
+              {/* 1-Tap Squad Availability Poller */}
               <div className="pt-3 border-t border-[#F3ECE0] flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xs text-[#6C5E58] font-medium">
                   {availabilityPolled ? (
@@ -189,39 +190,38 @@ export default function HeroSection({
 
           </div>
 
-          {/* Right Column: Polaroid Scrapbook Collage */}
+          {/* Right Column: Editorial Lifestyle Moodboard */}
           <div className="lg:col-span-5 relative flex justify-center">
             
-            {/* Main Polaroid Frame */}
-            <div className="relative w-full max-w-sm">
-              
-              {/* Tape */}
-              <div className="tape-strip tape-top-center"></div>
-
-              {/* Hero Image Card */}
-              <div className="polaroid-frame transform rotate-2 hover:rotate-0 transition-transform duration-300 shadow-xl">
+            {/* Main Editorial Image Card */}
+            <div className="relative w-full max-w-md">
+              <div className="p-3 bg-white rounded-2xl border border-[#E0D4C5] shadow-xl space-y-3">
                 <img
-                  src="/images/scrapbook_afternoon_tea.jpg"
-                  alt="Afternoon Tea in Dublin"
-                  className="polaroid-img aspect-[4/3]"
+                  src="/images/affinita_editorial_hero.jpg"
+                  alt="Affinita Editorial Moodboard"
+                  className="w-full rounded-xl object-cover aspect-[4/3] shadow-xs"
                 />
-                
-                <div className="handwritten-caption mt-2 flex items-center justify-between">
-                  <span className="text-xl">shelbourne tea & pamper 💕</span>
-                  <span className="text-xs font-mono font-bold bg-[#C85A65] text-white px-2 py-0.5 rounded-full">
-                    99% Match
-                  </span>
+
+                <div className="p-2 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-serif font-bold text-[#2C221E] uppercase tracking-wider block">
+                      Affinita Dublin
+                    </span>
+                    <span className="text-[11px] text-[#6C5E58] font-medium">
+                      Curated Outings • Zero Friction
+                    </span>
+                  </div>
+
+                  <div className="w-10 h-10 rounded-full border border-[#E0D4C5] p-0.5 shadow-xs">
+                    <img src="/images/affinita_app_logo.jpg" alt="Affinita Logo" className="w-full h-full rounded-full object-cover" />
+                  </div>
                 </div>
               </div>
 
-              {/* Floating Sticker 1 */}
-              <div className="absolute -top-4 -right-4 bg-[#F9E076] text-[#4A3E00] px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg border-2 border-white transform rotate-12 font-handwriting text-base">
-                ✨ Zero Chat Fatigue!
-              </div>
-
-              {/* Floating Sticker 2 */}
-              <div className="absolute -bottom-6 -left-4 bg-[#7B9E87] text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border-2 border-white transform -rotate-6">
-                👯 Met Before ✓ Tagging
+              {/* Subtle Glassmorphic Overlay Badge */}
+              <div className="absolute -bottom-4 -left-4 bg-white/90 backdrop-blur-md text-[#2C221E] px-4 py-2 rounded-xl text-xs font-extrabold shadow-lg border border-[#E0D4C5] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#7B9E87]"></span>
+                <span>👯 Met Before ✓ Tagging</span>
               </div>
 
             </div>

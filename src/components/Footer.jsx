@@ -10,20 +10,20 @@ export default function Footer() {
           
           {/* Brand */}
           <div className="flex items-center gap-3 text-center md:text-left">
-            <div className="w-10 h-10 rounded-2xl bg-[#C85A65] text-white flex items-center justify-center font-black text-xl shadow-xs">
-              MF
+            <div className="w-10 h-10 rounded-xl bg-[#C85A65] text-white flex items-center justify-center font-serif text-2xl font-bold shadow-xs">
+              A
             </div>
             <div>
-              <div className="flex items-center justify-center md:justify-start gap-1.5">
-                <span className="font-extrabold text-lg font-display text-[#2C221E]">
-                  MeetFriends Planner
+              <div className="flex items-center justify-center md:justify-start gap-2">
+                <span className="font-extrabold text-xl font-display uppercase tracking-tight text-[#2C221E]">
+                  Affinita
                 </span>
-                <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-bold px-2 py-0.5 rounded-full font-handwriting">
+                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
                 </span>
               </div>
               <p className="text-xs text-[#6C5E58] font-medium mt-0.5">
-                Friendship Circles, Personality Matching & Routine Outings
+                Curated Female Friendship Outings, MBTI Matching & Routine Synergy
               </p>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function Footer() {
 
         {/* Bottom Attribution */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[#6C5E58]">
-          <p>© {new Date().getFullYear()} MeetFriends Planner. Designed for female friendship circles in Dublin, Ireland.</p>
+          <p>© {new Date().getFullYear()} Affinita Europe. Designed for connected women in Dublin, Ireland.</p>
           
           <div className="flex items-center gap-1.5 text-sm font-extrabold text-[#2C221E]">
             <span>Made with</span>

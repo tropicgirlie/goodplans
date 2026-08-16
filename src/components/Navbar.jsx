@@ -18,28 +18,28 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F3ECE0] shadow-xs">
       {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         
-        {/* Brand Logo */}
+        {/* Affinita Editorial Brand Logo */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setActiveView('explore')}
             className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-2xl bg-[#C85A65] text-white flex items-center justify-center font-black text-xl shadow-sm group-hover:scale-105 transition-transform">
-              MF
+            <div className="w-10 h-10 rounded-xl bg-[#C85A65] text-white flex items-center justify-center font-serif text-2xl font-bold shadow-xs group-hover:scale-105 transition-transform tracking-tighter">
+              A
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl font-display tracking-tight text-[#2C221E]">
-                  MeetFriends
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-2xl font-display tracking-tight text-[#2C221E] uppercase">
+                  Affinita
                 </span>
-                <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-bold px-2 py-0.5 rounded-full border border-white shadow-xs font-handwriting">
+                <span className="bg-[#FAF6F0] text-[#C85A65] text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#E0D4C5] tracking-widest uppercase">
                   Dublin
                 </span>
               </div>
-              <p className="text-[11px] text-[#6C5E58] font-medium hidden sm:block">
-                Friendship Circles & Personality Outings
+              <p className="text-[10px] text-[#6C5E58] font-medium tracking-wider uppercase hidden sm:block">
+                Curated Female Outings & Routine Synergy
               </p>
             </div>
           </button>
@@ -51,7 +51,7 @@ export default function Navbar({
             <Search className="w-4 h-4 text-[#C85A65]" />
             <input
               type="text"
-              placeholder="Search dinner out, concerts, retreats, trips abroad..."
+              placeholder="Search early dinner, concerts, retreats, trips abroad..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent border-none outline-none text-sm text-[#2C221E] placeholder:text-[#9E8E87] font-medium"

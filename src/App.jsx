@@ -6,6 +6,7 @@ import AffinityMatchMatrix from './components/AffinityMatchMatrix';
 import PlanOutingModal from './components/PlanOutingModal';
 import OutingDetailModal from './components/OutingDetailModal';
 import MobileAppFrame from './components/MobileAppFrame';
+import GoogleMapsExplorer from './components/GoogleMapsExplorer';
 import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
 import { Sparkles, Calendar, Heart, Users, MapPin, Plus } from 'lucide-react';
 
@@ -21,7 +22,7 @@ export default function App() {
   // Modals state
   const [selectedOutingModal, setSelectedOutingModal] = useState(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [rsvpStatus, setRsvpStatus] = useState({ o1: true, o4: true });
+  const [rsvpStatus, setRsvpStatus] = useState({ o_tea: true, o_sauna: true, o1: true, o4: true });
 
   const handleToggleRsvp = (outingId) => {
     setRsvpStatus(prev => ({
@@ -55,7 +56,12 @@ export default function App() {
     }));
   };
 
-  // Relationship & Category filter logic
+  // Select Venue from Google Maps Explorer to open Plan Outing Modal
+  const handleSelectVenueForPlan = (venueLoc) => {
+    setIsPlanModalOpen(true);
+  };
+
+  // Filter logic
   const filteredOutings = outings.filter(outing => {
     let matchesCategory = true;
     if (selectedCategory === 'squad_core') {
@@ -102,7 +108,7 @@ export default function App() {
 
         {/* Main View Switcher */}
         {activeView === 'explore' && (
-          <main>
+          <main className="space-y-10 pb-16">
             {/* Hero Section */}
             <HeroSection
               selectedFriends={selectedFriends}
@@ -112,19 +118,19 @@ export default function App() {
             />
 
             {/* Outings Grid Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-[#F3ECE0]">
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
-                      Dublin Circle & Squad Outings
+                      Top-Rated Outings for Women in Ireland
                     </h2>
                     <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
-                      {filteredOutings.length} Ideas
+                      {filteredOutings.length} Featured
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-[#6C5E58] font-medium mt-1">
-                    Showing outings near <strong className="text-[#2C221E]">{location}</strong> • Matched for social comfort & Vibe Sync
+                    Afternoon teas, thermal saunas, pottery, hikes & board games in <strong className="text-[#2C221E]">{location}</strong>
                   </p>
                 </div>
 
@@ -142,9 +148,9 @@ export default function App() {
               {/* Grid */}
               {filteredOutings.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5]">
-                  <div className="text-4xl mb-2">☕</div>
+                  <div className="text-4xl mb-2">🫖</div>
                   <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this filter</h3>
-                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another circle tier or clearing your search term!</p>
+                  <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another category or resetting search terms!</p>
                   <button
                     onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
                     className="btn btn-secondary text-xs font-bold"
@@ -165,6 +171,11 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </section>
+
+            {/* Google Maps Venue Explorer Section */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <GoogleMapsExplorer onSelectVenueForPlan={handleSelectVenueForPlan} />
             </section>
           </main>
         )}

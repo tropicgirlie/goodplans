@@ -9,8 +9,8 @@ export const FRIENDS_DATA = [
     archetype: 'The Creative Connector',
     energyLevel: 'High Energy',
     ageGroup: '25-29 (Millennial)',
-    interests: ['Specialty Coffee', 'Art & Pottery', 'Coastal Walks', 'Book Clubs', 'Live Music'],
-    color: '#D9777F'
+    interests: ['Afternoon Tea', 'Pottery Workshops', 'Coastal Walks', 'Book Clubs', 'Spa Days'],
+    color: '#C85A65'
   },
   {
     id: 'f2',
@@ -20,7 +20,7 @@ export const FRIENDS_DATA = [
     archetype: 'The Deep Listener',
     energyLevel: 'Low-Pressure / Cozy',
     ageGroup: '25-29 (Millennial)',
-    interests: ['Tea & Pastries', 'Pottery Workshops', 'Nature Hikes', 'Deep Talks', 'Artisan Markets'],
+    interests: ['Tea & Pastries', 'Thermal Saunas', 'Pottery', 'Nature Hikes', 'Artisan Cooking'],
     color: '#7B9E87'
   },
   {
@@ -31,7 +31,7 @@ export const FRIENDS_DATA = [
     archetype: 'The Thoughtful Planner',
     energyLevel: 'Chill & Focused',
     ageGroup: '30-34 (Millennial)',
-    interests: ['Board Games', 'Matcha Lattes', 'Bookshops', 'Co-Working', 'Wine & Cheese'],
+    interests: ['Board Games', 'Castle Gardens', 'Bookshops', 'Co-Working', 'Wine & Cheese'],
     color: '#9B870C'
   },
   {
@@ -42,7 +42,7 @@ export const FRIENDS_DATA = [
     archetype: 'The Social Spark',
     energyLevel: 'High Energy',
     ageGroup: '22-24 (Gen Z)',
-    interests: ['Food Markets', 'Coastal Walks', 'Vintage Shopping', 'Live Music', 'Brunch'],
+    interests: ['Coastal Saunas', 'Food Markets', 'Coastal Walks', 'Vintage Shopping', 'Brunch'],
     color: '#F9E076'
   },
   {
@@ -53,20 +53,93 @@ export const FRIENDS_DATA = [
     archetype: 'The Warm Host',
     energyLevel: 'Balanced',
     ageGroup: '25-29 (Millennial)',
-    interests: ['Picnics', 'Yoga in the Park', 'Art Galleries', 'Baking', 'Coffee Strolls'],
+    interests: ['Afternoon Tea', 'Yoga Retreats', 'Art Galleries', 'Baking', 'Spa Days'],
     color: '#B388EB'
   }
 ];
 
 export const INITIAL_OUTINGS = [
   {
+    id: 'o_tea',
+    title: 'Traditional Irish Afternoon Tea at The Shelbourne',
+    category: 'Afternoon Tea & Treats',
+    connectionType: 'Core Squad',
+    connectionBadge: '👯 Core Squad • High Comfort & Indulgence',
+    image: '/images/scrapbook_afternoon_tea.jpg',
+    date: 'Fri, Aug 22 • 2:30 PM',
+    location: 'The Lord Mayor’s Lounge, Shelbourne Hotel, St Stephen’s Green, Dublin',
+    host: FRIENDS_DATA[4],
+    affinityScore: 99,
+    familiarityBreakdown: {
+      squadType: 'Core Squad (Celebration Outing)',
+      metBeforeCount: 'All 4 friends know each other well',
+      comfortLevel: 'Luxurious & Warm Conversation',
+      vibeSync: 'Clotted cream scones, silver teapot service & champagne'
+    },
+    handwrittenTag: 'afternoon tea dublin',
+    stickerType: 'tea',
+    price: '€65 / person',
+    attendees: [
+      { ...FRIENDS_DATA[4], metBefore: true, relationNote: 'Host (Emma)' },
+      { ...FRIENDS_DATA[0], metBefore: true, relationNote: 'Core Squad' },
+      { ...FRIENDS_DATA[1], metBefore: true, relationNote: 'Core Squad' },
+      { ...FRIENDS_DATA[2], metBefore: true, relationNote: 'Core Squad' }
+    ],
+    maxAttendees: 6,
+    description: 'An elegant Irish tradition in the heart of Dublin. Tiered stands of warm homemade scones, raspberry preserve, delicate cucumber sandwiches, and a glass of champagne accompanied by live harp music.',
+    itinerary: [
+      { time: '2:30 PM', detail: 'Arrival at Lord Mayor’s Lounge & tea selection' },
+      { time: '3:00 PM', detail: 'Scone service, champagne toast & squad catching up' },
+      { time: '4:15 PM', detail: 'Stroll around St Stephen’s Green gardens' }
+    ],
+    comments: [
+      { id: 'c_t1', user: FRIENDS_DATA[0], text: 'DIBS ON THE CLOTTED CREAM! Can’t wait for this girls! ☕🍰', time: '1h ago' }
+    ]
+  },
+  {
+    id: 'o_sauna',
+    title: 'Sandycove Coastal Thermal Sauna & Sea Dip',
+    category: 'Wellness & Spa Days',
+    connectionType: 'Mixed Circle',
+    connectionBadge: '🔀 Mixed Circle • 2 Met Before • 1 First Time Intro',
+    image: '/images/scrapbook_spa_sauna.jpg',
+    date: 'Sat, Aug 23 • 10:00 AM',
+    location: 'Forty Foot Sandycove, Co. Dublin',
+    host: FRIENDS_DATA[3],
+    affinityScore: 97,
+    familiarityBreakdown: {
+      squadType: 'Mixed Circle (Invigorating Wellness)',
+      metBeforeCount: 'Saoirse & Maya know each other • Emma is new intro',
+      comfortLevel: 'Refreshing & High Energy Boost',
+      vibeSync: 'Hot wood-fired sauna steam & cold Irish Sea dip'
+    },
+    handwrittenTag: 'sauna & sea dip',
+    stickerType: 'spa',
+    price: '€15 / person',
+    attendees: [
+      { ...FRIENDS_DATA[3], metBefore: true, relationNote: 'Host (Saoirse)' },
+      { ...FRIENDS_DATA[0], metBefore: true, relationNote: 'Met at Beach Walk' },
+      { ...FRIENDS_DATA[4], metBefore: false, relationNote: 'First Time Intro 👋' }
+    ],
+    maxAttendees: 8,
+    description: 'The ultimate Irish coastal wellness trend! Sweat out stress in a mobile wood-fired barrel sauna overlooking the sea at Sandycove, followed by an invigorating sea dip and hot chai tea.',
+    itinerary: [
+      { time: '10:00 AM', detail: 'Meet at Forty Foot sauna van & change into swimwear' },
+      { time: '10:15 AM', detail: '30-min sauna steam cycles & Irish Sea dip' },
+      { time: '11:15 AM', detail: 'Hot herbal tea & warm towels on the rocks' }
+    ],
+    comments: [
+      { id: 'c_s1', user: FRIENDS_DATA[4], text: 'Brave enough for the sea dip if hot tea is promised! 🌊♨️', time: '2h ago' }
+    ]
+  },
+  {
     id: 'o1',
-    title: 'Monday Coffee Stroll & Dog Walk in Ranelagh',
-    category: 'Coffee & Chill',
-    connectionType: 'Core Squad', // Core Squad, Mixed Circle, 1:1 Outing
+    title: 'Monday Coffee Stroll & Pastry Walk in Ranelagh',
+    category: 'Coffee & Strolls',
+    connectionType: 'Core Squad',
     connectionBadge: '👯 Core Squad • Long-Time Besties',
     image: '/images/scrapbook_coffee_walk.jpg',
-    date: 'Mon, Aug 18 • 10:30 AM',
+    date: 'Mon, Aug 25 • 10:30 AM',
     location: 'Clement & Pekoe, South William St & Stephen’s Green, Dublin 2',
     host: FRIENDS_DATA[0],
     affinityScore: 98,
@@ -86,15 +159,14 @@ export const INITIAL_OUTINGS = [
       { ...FRIENDS_DATA[3], metBefore: true, relationNote: 'Core Squad Member' }
     ],
     maxAttendees: 6,
-    description: 'A cozy Dublin morning catchup starting with oat milk lattes and cardamom buns from Clement & Pekoe, followed by a relaxed stroll through St. Stephen’s Green. Low pressure and warm squad vibes!',
+    description: 'A cozy Dublin morning catchup starting with oat milk lattes and cardamom buns from Clement & Pekoe, followed by a relaxed stroll through St. Stephen’s Green.',
     itinerary: [
       { time: '10:30 AM', detail: 'Meet at Clement & Pekoe outdoor bench for coffee & pastries' },
       { time: '11:15 AM', detail: 'Walk down Grafton Street into St. Stephen’s Green park' },
       { time: '12:00 PM', detail: 'Bench catchup & puppy watching near the pond' }
     ],
     comments: [
-      { id: 'c1', user: FRIENDS_DATA[1], text: 'Can’t wait for this! Bringing my sketchbook for the park ☕🎨', time: '2h ago' },
-      { id: 'c2', user: FRIENDS_DATA[3], text: 'The cinnamon buns there are heavenly! See you girls soon ✨', time: '1h ago' }
+      { id: 'c1', user: FRIENDS_DATA[1], text: 'Can’t wait for this! Bringing my sketchbook for the park ☕🎨', time: '2h ago' }
     ]
   },
   {
@@ -104,7 +176,7 @@ export const INITIAL_OUTINGS = [
     connectionType: 'Mixed Circle',
     connectionBadge: '🔀 Mixed Circle • 2 Have Met • 1 First Time Intro',
     image: '/images/scrapbook_pottery.jpg',
-    date: 'Wed, Aug 20 • 6:30 PM',
+    date: 'Wed, Aug 27 • 6:30 PM',
     location: 'The Pottery Studio, Temple Bar, Dublin 2',
     host: FRIENDS_DATA[1],
     affinityScore: 94,
@@ -123,7 +195,7 @@ export const INITIAL_OUTINGS = [
       { ...FRIENDS_DATA[4], metBefore: false, relationNote: 'First Time Meeting the Girls! 👋' }
     ],
     maxAttendees: 8,
-    description: 'An intimate evening workshop in Temple Bar. Learn wheel throwing and clay pinch pots while sharing organic wine. Great opportunity to introduce new female friends into a relaxed circle!',
+    description: 'An intimate evening workshop in Temple Bar. Learn wheel throwing and clay pinch pots while sharing organic wine.',
     itinerary: [
       { time: '6:30 PM', detail: 'Welcome wine glass & icebreaker introductions' },
       { time: '7:00 PM', detail: 'Hands-on wheel throwing & ceramic painting' },
@@ -136,11 +208,11 @@ export const INITIAL_OUTINGS = [
   {
     id: 'o3',
     title: 'Howth Cliff Walk & Seaside Seafood Picnic',
-    category: 'Outdoors',
+    category: 'Dublin Hikes & Tours',
     connectionType: 'Core Squad',
     connectionBadge: '👯 Core Squad • Long-Time Besties',
     image: '/images/scrapbook_sunset_hike.jpg',
-    date: 'Sat, Aug 23 • 2:00 PM',
+    date: 'Sat, Aug 30 • 2:00 PM',
     location: 'Howth DART Station & Cliff Trail, Co. Dublin',
     host: FRIENDS_DATA[3],
     affinityScore: 96,
@@ -177,11 +249,11 @@ export const INITIAL_OUTINGS = [
     connectionType: '1:1 Outing',
     connectionBadge: '☕ 1:1 Catchup • Deep Conversation & Games',
     image: '/images/scrapbook_pizza_games.jpg',
-    date: 'Sun, Aug 24 • 4:00 PM',
+    date: 'Sun, Aug 31 • 4:00 PM',
     location: 'Clockwork Door & Board Game Cafe, Temple Bar, Dublin',
     host: FRIENDS_DATA[2],
     affinityScore: 99,
-    affinityBreakdown: {
+    familiarityBreakdown: {
       squadType: '1:1 / Small Duo Catchup',
       metBeforeCount: 'Chloe & Maya (Deep 1:1 Connection)',
       comfortLevel: 'Intimate, Low Social Battery Cost',
@@ -195,7 +267,7 @@ export const INITIAL_OUTINGS = [
       { ...FRIENDS_DATA[0], metBefore: true, relationNote: '1:1 Catchup Duo' }
     ],
     maxAttendees: 4,
-    description: 'A cozy 1:1 or small duo session for deep catchups over matcha lattes, sourdough pizza, and relaxed strategy board games. Perfect when you want quality 1:1 time without a big crowd.',
+    description: 'A cozy 1:1 or small duo session for deep catchups over matcha lattes, sourdough pizza, and relaxed strategy board games.',
     itinerary: [
       { time: '4:00 PM', detail: 'Matcha pour-overs & catching up on life updates' },
       { time: '4:45 PM', detail: 'Board games (Wingspan / Azul) & pizza slice' },
@@ -209,10 +281,11 @@ export const INITIAL_OUTINGS = [
 
 export const CATEGORY_PILLS = [
   { id: 'all', label: '🌟 All Outings' },
+  { id: 'Afternoon Tea & Treats', label: '🫖 Afternoon Tea' },
+  { id: 'Wellness & Spa Days', label: '♨️ Coastal Sauna & Spa' },
   { id: 'squad_core', label: '👯 Core Squad' },
   { id: 'squad_mixed', label: '🔀 Mixed Circle (Met / Intros)' },
   { id: 'squad_duo', label: '☕ 1:1 Catchups' },
-  { id: 'Coffee & Chill', label: '☕ Coffee & Strolls' },
-  { id: 'Creative Workshops', label: '🎨 Creative & Pottery' },
-  { id: 'Outdoors', label: '🌲 Dublin Hikes & Sea' }
+  { id: 'Creative Workshops', label: '🎨 Pottery & Workshops' },
+  { id: 'Dublin Hikes & Tours', label: '🌲 Howth Cliff Hikes' }
 ];

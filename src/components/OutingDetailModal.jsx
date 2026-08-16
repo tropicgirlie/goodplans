@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock } from 'lucide-react';
+import { X, Calendar, MapPin, Heart, Users, CheckCircle2, MessageSquare, Send, Sparkles, Clock, ShieldCheck } from 'lucide-react';
 
 export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggleRsvp, onAddComment }) {
   const [commentText, setCommentText] = useState('');
@@ -105,6 +105,15 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
             </div>
           </div>
 
+          {/* Dublin Closing Hours & Timing Safety Banner (UX Finding Applied) */}
+          <div className="p-3.5 rounded-xl bg-[#F9E076]/30 border border-[#F9E076] flex items-center gap-2.5 text-xs text-[#4A3E00] font-medium">
+            <ShieldCheck className="w-4.5 h-4.5 text-[#C85A65] shrink-0" />
+            <div>
+              <strong className="font-bold text-[#2C221E]">Dublin Closing Hours Guarantee: </strong>
+              <span>This outing is timed for prime open hours (early lunch or finishing by 8:30 PM before shops & cafes close). Zero late-night dining rush!</span>
+            </div>
+          </div>
+
           {/* About */}
           <div>
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-1.5">
@@ -120,12 +129,12 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
             <div className="bg-[#F3ECE0] p-4 rounded-xl border border-[#E0D4C5] space-y-2">
               <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#4A3E00] flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#C85A65]" />
-                UX Connection & Social Comfort Analysis
+                Cohort & Timing Compatibility Analysis
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#2C221E]">
                 <div className="bg-white p-2.5 rounded-lg border border-[#E0D4C5]">
-                  <span className="font-bold block text-[#6C5E58]">Familiarity Status:</span>
-                  <span className="font-semibold text-[#C85A65]">{outing.familiarityBreakdown.metBeforeCount}</span>
+                  <span className="font-bold block text-[#6C5E58]">Schedule Fit:</span>
+                  <span className="font-semibold text-[#C85A65]">{outing.familiarityBreakdown.timingFit || outing.familiarityBreakdown.squadType}</span>
                 </div>
                 <div className="bg-white p-2.5 rounded-lg border border-[#E0D4C5]">
                   <span className="font-bold block text-[#6C5E58]">Comfort Level:</span>
@@ -135,7 +144,7 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
             </div>
           )}
 
-          {/* Attendees List with Relationship Notes */}
+          {/* Attendees List */}
           <div>
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-3">
               Attending Friends ({outing.attendees.length})
@@ -147,7 +156,7 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
                     <img src={friend.avatar} alt={friend.name} className="w-9 h-9 rounded-full object-cover border border-white" />
                     <div>
                       <h5 className="text-xs font-bold text-[#2C221E] leading-none">{friend.name}</h5>
-                      <span className="text-[10px] font-mono text-[#C85A65] font-bold">{friend.mbti}</span>
+                      <span className="text-[10px] font-mono text-[#C85A65] font-bold">{friend.mbti} • {friend.lifestyle?.split('/')[0]}</span>
                     </div>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${friend.relationNote?.includes('First') ? 'bg-[#F9E076] text-[#4A3E00]' : 'bg-[#7B9E87] text-white'}`}>
@@ -181,7 +190,7 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
           <div className="pt-4 border-t border-[#F3ECE0]">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#9E8E87] mb-3 flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-[#C85A65]" />
-              Squad Scrapbook Discussion Wall
+              Squad Discussion Wall
             </h4>
 
             <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
@@ -206,7 +215,7 @@ export default function OutingDetailModal({ outing, onClose, rsvpStatus, onToggl
             <form onSubmit={handleCommentSubmit} className="flex gap-2">
               <input
                 type="text"
-                placeholder="Add a note or sticker reaction..."
+                placeholder="Add a note or reaction..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 className="flex-1 px-4 py-2 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-xs font-medium bg-[#FAF6F0]"

@@ -7,23 +7,29 @@ import PlanOutingModal from './components/PlanOutingModal';
 import OutingDetailModal from './components/OutingDetailModal';
 import MobileAppFrame from './components/MobileAppFrame';
 import GoogleMapsExplorer from './components/GoogleMapsExplorer';
+import OnboardingModal from './components/OnboardingModal';
+import SettingsView from './components/SettingsView';
 import Footer from './components/Footer';
 import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
-import { Sparkles, Calendar, Heart, Users, MapPin, Plus } from 'lucide-react';
+import { Sparkles, Calendar, Heart, Users, MapPin, Plus, Database, RotateCcw } from 'lucide-react';
 
 export default function App() {
+  const [appMode, setAppMode] = useState('demo'); // 'demo' or 'empty'
   const [outings, setOutings] = useState(INITIAL_OUTINGS);
+  const [customFriends, setCustomFriends] = useState(FRIENDS_DATA);
   const [selectedFriends, setSelectedFriends] = useState(['f1', 'f2', 'f3', 'f4', 'f5']);
+  
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [batteryFilter, setBatteryFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('Dublin, Ireland');
-  const [activeView, setActiveView] = useState('explore');
+  const [activeView, setActiveView] = useState('explore'); // 'explore', 'affinity', 'outings', 'squad', 'settings'
   const [isMobileFrameView, setIsMobileFrameView] = useState(false);
 
   // Modals state
   const [selectedOutingModal, setSelectedOutingModal] = useState(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [rsvpStatus, setRsvpStatus] = useState({ o_dinner_out: true, o_concert_music: true, o_wellness_retreat: true, o_trip_abroad: true, o_coffee_stroll: true, o_afternoon_tea: true });
 
   const handleToggleRsvp = (outingId) => {
@@ -47,7 +53,7 @@ export default function App() {
             ...o.comments,
             {
               id: 'c_' + Date.now(),
-              user: FRIENDS_DATA[0],
+              user: customFriends[0] || FRIENDS_DATA[0],
               text,
               time: 'Just now'
             }
@@ -58,12 +64,23 @@ export default function App() {
     }));
   };
 
+  const handleResetDemoData = () => {
+    setOutings(INITIAL_OUTINGS);
+    setCustomFriends(FRIENDS_DATA);
+    setAppMode('demo');
+    setSelectedCategory('all');
+    setBatteryFilter('all');
+  };
+
   const handleSelectVenueForPlan = (venueLoc) => {
     setIsPlanModalOpen(true);
   };
 
+  // Determine active outings based on appMode (Demo vs Empty State)
+  const activeOutingsList = appMode === 'demo' ? outings : outings.filter(o => o.id.startsWith('o_custom_'));
+
   // Lifestyle Routine, Social Battery & Category filter logic
-  const filteredOutings = outings.filter(outing => {
+  const filteredOutings = activeOutingsList.filter(outing => {
     let matchesCategory = true;
     if (selectedCategory !== 'all') {
       matchesCategory = outing.category === selectedCategory;
@@ -107,7 +124,21 @@ export default function App() {
             setIsMobileFrameView={setIsMobileFrameView}
             location={location}
             setLocation={setLocation}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
           />
+
+          {/* Mode Banner Indicator */}
+          {appMode === 'empty' && (
+            <div className="bg-[#E8F5E9] border-b border-[#A5D6A7] px-4 py-2 text-center text-xs font-bold text-[#2E7D32] flex items-center justify-center gap-2">
+              <span>🍃 Empty State Mode Active — You are viewing your custom clean state.</span>
+              <button
+                onClick={() => setAppMode('demo')}
+                className="underline font-black hover:text-[#1B5E20] cursor-pointer"
+              >
+                Switch to Demo Mode 🌟
+              </button>
+            </div>
+          )}
 
           {/* Main View Switcher */}
           {activeView === 'explore' && (
@@ -128,7 +159,7 @@ export default function App() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#2C221E]">
-                        Featured Outings in Dublin
+                        {appMode === 'demo' ? 'Featured Outings in Dublin' : 'My Outings'}
                       </h2>
                       <span className="bg-[#F9E076] text-[#4A3E00] text-xs font-extrabold px-2.5 py-0.5 rounded-full font-handwriting text-base">
                         {filteredOutings.length} Available
@@ -150,18 +181,44 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Grid */}
+                {/* Grid vs Empty State */}
                 {filteredOutings.length === 0 ? (
-                  <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5]">
-                    <div className="text-4xl mb-2">✨</div>
-                    <h3 className="text-lg font-bold font-display text-[#2C221E]">No outings match this filter</h3>
-                    <p className="text-xs text-[#6C5E58] mt-1 mb-4">Try selecting another category or resetting battery filters!</p>
-                    <button
-                      onClick={() => { setSelectedCategory('all'); setBatteryFilter('all'); setSearchQuery(''); }}
-                      className="btn btn-secondary text-xs font-bold"
-                    >
-                      Reset Filters
-                    </button>
+                  <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-[#E0D4C5] p-8 space-y-4">
+                    <div className="text-4xl">🍃</div>
+                    <h3 className="text-lg sm:text-xl font-bold font-display text-[#2C221E]">
+                      {appMode === 'empty' ? 'Your Social Circle is Ready for Its First Outing!' : 'No outings match this filter'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#6C5E58] max-w-md mx-auto">
+                      {appMode === 'empty'
+                        ? 'You are in clean empty state mode. Tap "Plan Outing" to create your first custom outing, or load pre-built demo outings.'
+                        : 'Try selecting another category or resetting social battery filters!'}
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      <button
+                        onClick={() => setIsPlanModalOpen(true)}
+                        className="btn btn-primary text-xs font-bold shadow-md"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Plan First Outing
+                      </button>
+
+                      {appMode === 'empty' ? (
+                        <button
+                          onClick={() => setAppMode('demo')}
+                          className="btn bg-[#F9E076] text-[#4A3E00] hover:bg-[#F0D55D] text-xs font-bold shadow-xs"
+                        >
+                          🌟 Load Demo Outings
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => { setSelectedCategory('all'); setBatteryFilter('all'); setSearchQuery(''); }}
+                          className="btn btn-secondary text-xs font-bold"
+                        >
+                          Reset Filters
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -194,6 +251,18 @@ export default function App() {
             />
           )}
 
+          {/* Settings View (Saved Friends, Data Mode, Preferences) */}
+          {activeView === 'settings' && (
+            <SettingsView
+              appMode={appMode}
+              setAppMode={setAppMode}
+              customFriends={customFriends}
+              setCustomFriends={setCustomFriends}
+              onResetDemoData={handleResetDemoData}
+              onOpenOnboarding={() => setIsOnboardingOpen(true)}
+            />
+          )}
+
           {/* My Outings View */}
           {activeView === 'outings' && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -218,10 +287,10 @@ export default function App() {
           {/* Squad Friends List View */}
           {activeView === 'squad' && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Friend Profiles & Social Battery Levels</h2>
+              <h2 className="text-2xl font-black font-display mb-2 text-[#2C221E]">Saved Squad & Friend Profiles</h2>
               <p className="text-xs text-[#6C5E58] mb-6">Generational cohorts & preferred time windows (Dinner Out, Concerts, Retreats, Trips Abroad)</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {FRIENDS_DATA.map(friend => (
+                {customFriends.map(friend => (
                   <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#F3ECE0] shadow-xs flex items-center gap-3">
                     <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
                     <div>
@@ -243,6 +312,12 @@ export default function App() {
         <Footer />
 
         {/* Modals */}
+        <OnboardingModal
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+          onSwitchToDemo={() => setAppMode('demo')}
+        />
+
         <PlanOutingModal
           isOpen={isPlanModalOpen}
           onClose={() => setIsPlanModalOpen(false)}

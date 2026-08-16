@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, MapPin, Plus, Users, Smartphone } from 'lucide-react';
+import { Search, MapPin, Plus, Users, Smartphone, Settings, HelpCircle } from 'lucide-react';
 import { CATEGORY_PILLS } from '../data/mockData';
 
 export default function Navbar({
@@ -15,7 +15,8 @@ export default function Navbar({
   isMobileFrameView,
   setIsMobileFrameView,
   location,
-  setLocation
+  setLocation,
+  onOpenOnboarding
 }) {
   const handlePillClick = (pill) => {
     if (activeView !== 'explore') setActiveView('explore');
@@ -97,10 +98,19 @@ export default function Navbar({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* How It Works Explainer */}
+          <button
+            onClick={onOpenOnboarding}
+            className="p-2.5 rounded-full bg-[#FAF6F0] text-[#6C5E58] border border-[#E0D4C5] hover:text-[#2C221E] transition-colors"
+            title="How Amiga Works (Onboarding Guide)"
+          >
+            <HelpCircle className="w-4 h-4 text-[#C85A65]" />
+          </button>
+
           {/* Squad Vibe Matrix */}
           <button
             onClick={() => setActiveView(activeView === 'affinity' ? 'explore' : 'affinity')}
-            className={`btn sm:px-4 text-xs sm:text-sm font-semibold ${
+            className={`btn sm:px-3.5 text-xs sm:text-sm font-semibold ${
               activeView === 'affinity' 
                 ? 'bg-[#2C221E] text-white' 
                 : 'btn-secondary'
@@ -109,6 +119,20 @@ export default function Navbar({
           >
             <Users className="w-4 h-4 text-[#F9E076]" />
             <span className="hidden sm:inline">Vibe Matrix</span>
+          </button>
+
+          {/* Settings View Button */}
+          <button
+            onClick={() => setActiveView(activeView === 'settings' ? 'explore' : 'settings')}
+            className={`btn sm:px-3 text-xs sm:text-sm font-semibold ${
+              activeView === 'settings' 
+                ? 'bg-[#2C221E] text-white' 
+                : 'btn-secondary'
+            }`}
+            title="Settings & Saved Squad Center"
+          >
+            <Settings className="w-4 h-4 text-[#7B9E87]" />
+            <span className="hidden sm:inline">Settings</span>
           </button>
 
           {/* Create Outing CTA */}

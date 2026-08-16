@@ -4,7 +4,6 @@ import confetti from 'canvas-confetti';
 
 export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggleRsvp }) {
   const isAttending = rsvpStatus[outing.id];
-  const [copiedLink, setCopiedLink] = useState(false);
 
   const handleRsvpClick = (e) => {
     e.stopPropagation();
@@ -42,33 +41,33 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
         {/* Washi Tape Strip */}
         <div className="tape-strip tape-top-center"></div>
 
-        {/* Category Pill with Google Material Symbols */}
-        <div className="absolute top-3 left-3 bg-[#09090B] text-white px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center gap-1.5 font-display border border-white">
-          <span className="material-symbols-outlined text-sm leading-none text-[#F59E0B]">
+        {/* Category Pill */}
+        <div className="absolute top-3 left-3 max-w-[48%] bg-[#09090B] text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black shadow-md flex items-center gap-1 font-display border border-white truncate">
+          <span className="material-symbols-outlined text-xs leading-none text-[#F59E0B] shrink-0">
             {outing.iconName || 'auto_awesome'}
           </span>
-          <span>{outing.category}</span>
+          <span className="truncate">{outing.category}</span>
         </div>
 
         {/* Connection Type Badge (Core Squad / Mixed Circle / 1:1) */}
-        <div className="absolute top-3 right-3 bg-[#2563EB] text-white px-2.5 py-1 rounded-full text-[10px] font-mono font-black shadow-md border border-white">
-          {outing.connectionBadge || '👯 Outing'}
+        <div className="absolute top-3 right-3 max-w-[48%] bg-[#2563EB] text-white px-2.5 py-1 rounded-full text-[10px] font-mono font-black shadow-md border border-white truncate">
+          <span className="truncate">{outing.connectionBadge || '👯 Outing'}</span>
         </div>
 
-        {/* Social Battery & Routine Tag */}
+        {/* Social Battery & Match Tag Bar */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-          <span className="bg-white/95 backdrop-blur-md text-[#09090B] text-[11px] font-bold px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs truncate max-w-[70%]">
+          <span className="bg-white/95 backdrop-blur-md text-[#09090B] text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs truncate max-w-[68%]">
             {outing.lifestyleTag}
           </span>
 
-          <span className="bg-[#FEF3C7] text-[#09090B] text-xs font-mono font-black px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs">
+          <span className="bg-[#FEF3C7] text-[#09090B] text-xs font-mono font-black px-2.5 py-1 rounded-full border-2 border-[#09090B] shadow-xs shrink-0">
             {outing.affinityScore}% Match
           </span>
         </div>
       </div>
 
       {/* Card Content Body */}
-      <div className="p-5 space-y-3.5 flex-1 flex flex-col justify-between">
+      <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
         
         <div className="space-y-2">
           {/* Title with Syne Display Font */}
@@ -95,13 +94,10 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
             </div>
           )}
 
-          {/* Accessibility & Split Bill Tags */}
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            <span className="text-[10px] font-bold bg-[#FAFAFA] text-[#09090B] px-2 py-0.5 rounded-md border border-[#09090B]">
-              {outing.accessibilityTag || '👶 Buggy Accessible'}
-            </span>
-            <span className="text-[10px] font-bold bg-[#FEF3C7] text-[#09090B] px-2 py-0.5 rounded-md border border-[#09090B]">
-              💳 Revolut Ready
+          {/* Single Clean Accessibility / Payment Tag */}
+          <div className="pt-1">
+            <span className="text-[10px] font-bold bg-[#FEF3C7] text-[#09090B] px-2.5 py-1 rounded-md border-2 border-[#09090B] inline-block shadow-2xs">
+              {outing.accessibilityTag || '💳 Revolut Ready'}
             </span>
           </div>
         </div>

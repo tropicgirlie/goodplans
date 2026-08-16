@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Heart, CheckCircle2, ChevronRight, Users, Sparkles } from 'lucide-react';
+import { Calendar, MapPin, Heart, CheckCircle2, ChevronRight, Clock, Users } from 'lucide-react';
 
 export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggleRsvp }) {
   const isRsvped = rsvpStatus[outing.id];
@@ -41,10 +41,11 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
 
         {/* Card Content Details */}
         <div onClick={() => onSelectOuting(outing)} className="space-y-2">
-          {/* Relationship Connection Tier Badge */}
-          {outing.connectionBadge && (
-            <div className="inline-block bg-[#F3ECE0] text-[#2C221E] text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-[#E0D4C5]">
-              {outing.connectionBadge}
+          
+          {/* Lifestyle / Schedule Cohort Tag */}
+          {outing.lifestyleTag && (
+            <div className="inline-block bg-[#F9E076] text-[#4A3E00] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-white shadow-xs">
+              {outing.lifestyleTag}
             </div>
           )}
 
@@ -77,7 +78,7 @@ export default function OutingCard({ outing, onSelectOuting, rsvpStatus, onToggl
                 key={friend.id || idx}
                 src={friend.avatar}
                 alt={friend.name}
-                title={`${friend.name} (${friend.mbti}) • ${friend.relationNote || 'Friend'}`}
+                title={`${friend.name} (${friend.mbti}) • ${friend.lifestyle || 'Friend'}`}
                 className="w-7 h-7 rounded-full object-cover border-2 border-white shadow-xs"
               />
             ))}

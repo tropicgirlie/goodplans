@@ -1,360 +1,79 @@
-import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import OutingCard from './components/OutingCard';
-import AffinityMatchMatrix from './components/AffinityMatchMatrix';
-import PlanOutingModal from './components/PlanOutingModal';
-import OutingDetailModal from './components/OutingDetailModal';
-import MobileAppFrame from './components/MobileAppFrame';
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, CalendarDays, Check, ChevronRight, MapPin, Music2, Paintbrush, Send, Settings2, Sparkles, UsersRound } from 'lucide-react';
 import GoogleMapsExplorer from './components/GoogleMapsExplorer';
-import OnboardingModal from './components/OnboardingModal';
-import SettingsView from './components/SettingsView';
-import Footer from './components/Footer';
-import { INITIAL_OUTINGS, FRIENDS_DATA } from './data/mockData';
-import { Sparkles, Calendar, Heart, Users, MapPin, Plus, Database, RotateCcw } from 'lucide-react';
+import SettingsPanel from './components/SettingsPanel';
+
+const ideas = [
+  { mark: 'make', title: 'Make something', note: 'Pottery, collage, or an after-hours workshop', color: 'coral' },
+  { mark: 'loud', title: 'Go somewhere loud', note: 'A gig, a tiny cinema, a dance floor', color: 'blue' },
+  { mark: 'city', title: 'See your city', note: 'A new neighbourhood, market, or exhibition', color: 'olive' },
+  { mark: 'away', title: 'Get away', note: 'A day trip, sleepover, or long weekend', color: 'orange' },
+];
+
+const defaultSettings = {
+  profile: { city: 'Dublin', radius: '25 km', budget: '€€', pace: 'Easy going', openToNew: true },
+  activities: [
+    { id: 'gallery', name: 'Gallery late', query: 'contemporary art gallery', energy: 'Easy', format: 'One-to-one' },
+    { id: 'cinema', name: 'Tiny cinema', query: 'independent cinema', energy: 'Easy', format: 'Any group' },
+    { id: 'make', name: 'Make something', query: 'pottery or creative workshop', energy: 'Social', format: 'Small group' },
+    { id: 'walk', name: 'Out of town', query: 'coastal walk or day trip', energy: 'Fresh air', format: 'Any group' },
+  ],
+  friends: [
+    { id: 'maya', name: 'Maya', likes: 'film, new food, a slower Sunday', avoids: 'packed places and very late nights', visibility: 'Only me' },
+    { id: 'katie', name: 'Katie', likes: 'music, making things, meeting people', avoids: 'long travel days', visibility: 'Only me' },
+  ],
+  circles: [{ id: 'sunday', name: 'Sunday people', members: 5 }, { id: 'work-friends', name: 'Work friends', members: 4 }],
+  availability: { days: ['Thu', 'Sat', 'Sun'], window: 'Sunday daytime', reminders: true },
+  discovery: { vibe: 'Independent and local', timing: 'Weekend', accessible: true, shortlist: true },
+  invite: { privacy: 'Invite link only', limit: 12, showGuests: true, reminder: true, plusOne: false },
+  organizer: { seriesName: 'Women in Tech Brunch', city: 'Dublin', cadence: 'Once a month', capacity: 24, nextDate: 'Sunday, 19 October', visibility: 'Invite only', note: 'A low-pressure table for women working in and around technology.', template: true, publicReady: false },
+};
+
+function Sticker({ icon: Icon, className = '' }) { return <span className={`sticker ${className}`}><Icon aria-hidden="true" strokeWidth={2.3} /></span>; }
+function Doodle({ type }) { return <span className={`doodle doodle-${type}`} aria-hidden="true"><i /><i /><i /></span>; }
+
+function Invite({ onBack, plan, settings }) {
+  const [rsvp, setRsvp] = useState(null);
+  const venue = plan.venue?.name || 'The Fumbally Stables';
+  const address = plan.venue?.address || `${settings.profile.city} 8`;
+  return <main className="invite-page"><button className="back-link" onClick={onBack}><ChevronRight className="rotate-180" /> Back to planning</button><section className="invite-sheet"><div className="invite-head"><div className="tiny-mark">made with good plans</div><div className="invite-ribbon">a Sunday together</div></div><div className="invite-photo-wrap"><img src={plan.cover || '/images/good-plans-invite-collage.png'} alt="A handmade collage of friends gathering around an invitation" /><span className="tape tape-one" /><span className="tape tape-two" /><Sticker icon={Paintbrush} className="invite-sticker one" /><Sticker icon={Music2} className="invite-sticker two" /></div><div className="invite-title-wrap"><p className="eyebrow">you are invited to</p><h1>{plan.title}</h1><p>an easy afternoon for meeting the people behind the group chat</p></div><div className="invite-details"><div><CalendarDays /><span><b>{plan.date}</b><br />14:00 to 18:00</span></div><div><MapPin /><span><b>{venue}</b><br />{address}</span></div><div><UsersRound /><span><b>Up to {settings.invite.limit} people</b><br />{settings.invite.showGuests ? 'the guest list is visible to everyone' : 'a private invite list'}</span></div></div><p className="invite-note">There is a table booked, a small creative activity nearby, and nothing you need to prepare. Come as you are.</p><div className="rsvp-row"><button className={`rsvp ${rsvp === 'yes' ? 'selected' : ''}`} onClick={() => setRsvp('yes')}><Check /> I’m in</button><button className={`rsvp quiet ${rsvp === 'maybe' ? 'selected' : ''}`} onClick={() => setRsvp('maybe')}>Maybe</button></div>{rsvp && <p className="rsvp-message">{rsvp === 'yes' ? 'Lovely. You are on the list.' : 'No pressure. We will keep you posted.'}</p>}<div className="invite-foot">planned by Tessa · {settings.invite.privacy}</div></section></main>;
+}
 
 export default function App() {
-  const [appMode, setAppMode] = useState('demo'); // 'demo' or 'empty'
-  const [outings, setOutings] = useState(INITIAL_OUTINGS);
-  const [demoFriends, setDemoFriends] = useState(FRIENDS_DATA);
-  const [userCreatedFriends, setUserCreatedFriends] = useState([]);
-  const [selectedFriends, setSelectedFriends] = useState(['f1', 'f2', 'f3', 'f4', 'f5']);
-  
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [batteryFilter, setBatteryFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('Dublin, Ireland');
-  const [activeView, setActiveView] = useState('explore');
-  const [isMobileFrameView, setIsMobileFrameView] = useState(false);
-
-  // Modals state
-  const [selectedOutingModal, setSelectedOutingModal] = useState(null);
-  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
-  const [rsvpStatus, setRsvpStatus] = useState({ o_dinner_out: true, o_concert_music: true, o_wellness_retreat: true, o_trip_abroad: true, o_coffee_stroll: true, o_afternoon_tea: true });
-
-  const handleToggleRsvp = (outingId) => {
-    setRsvpStatus(prev => ({
-      ...prev,
-      [outingId]: !prev[outingId]
-    }));
-  };
-
-  const handleCreateOuting = (newOuting) => {
-    setOutings([newOuting, ...outings]);
-    setRsvpStatus(prev => ({ ...prev, [newOuting.id]: true }));
-  };
-
-  const handleAddComment = (outingId, text) => {
-    setOutings(outings.map(o => {
-      if (o.id === outingId) {
-        return {
-          ...o,
-          comments: [
-            ...o.comments,
-            {
-              id: 'c_' + Date.now(),
-              user: activeFriendsList[0] || FRIENDS_DATA[0],
-              text,
-              time: 'Just now'
-            }
-          ]
-        };
-      }
-      return o;
-    }));
-  };
-
-  const handleResetDemoData = () => {
-    setOutings(INITIAL_OUTINGS);
-    setDemoFriends(FRIENDS_DATA);
-    setUserCreatedFriends([]);
-    setAppMode('demo');
-    setSelectedCategory('all');
-    setBatteryFilter('all');
-    setSelectedFriends(['f1', 'f2', 'f3', 'f4', 'f5']);
-  };
-
-  const handleSelectVenueForPlan = (venueLoc) => {
-    setIsPlanModalOpen(true);
-  };
-
-  // Determine active lists based on appMode
-  const activeFriendsList = appMode === 'demo' ? demoFriends : userCreatedFriends;
-  const activeOutingsList = appMode === 'demo' ? outings : outings.filter(o => o.id.startsWith('o_custom_'));
-
-  // Lifestyle Routine, Social Battery & Category filter logic
-  const filteredOutings = activeOutingsList.filter(outing => {
-    let matchesCategory = true;
-    if (selectedCategory !== 'all') {
-      matchesCategory = outing.category === selectedCategory;
-    }
-
-    let matchesBattery = true;
-    if (batteryFilter !== 'all') {
-      matchesBattery = outing.socialBattery === batteryFilter;
-    }
-
-    const matchesSearch = searchQuery === '' || 
-      outing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      outing.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      outing.location.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesCategory && matchesBattery && matchesSearch;
+  const [settings, setSettings] = useState(() => {
+    try { const saved = JSON.parse(localStorage.getItem('good-plans-settings') || '{}'); return { ...defaultSettings, ...saved, profile: { ...defaultSettings.profile, ...saved.profile }, availability: { ...defaultSettings.availability, ...saved.availability }, discovery: { ...defaultSettings.discovery, ...saved.discovery }, invite: { ...defaultSettings.invite, ...saved.invite }, organizer: { ...defaultSettings.organizer, ...saved.organizer } }; } catch { return defaultSettings; }
   });
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsMode, setSettingsMode] = useState('profile');
+  const [showInvite, setShowInvite] = useState(false);
+  const [showOrganizerInvite, setShowOrganizerInvite] = useState(false);
+  const [friend, setFriend] = useState('Maya');
+  const [activityId, setActivityId] = useState('gallery');
+  const [moment, setMoment] = useState('A free Sunday afternoon');
+  const [madePlan, setMadePlan] = useState(false);
+  const [selectedVenue, setSelectedVenue] = useState(null);
+  const [pickedDate, setPickedDate] = useState('Sun 21');
+  const [dateVotes, setDateVotes] = useState({ 'Sat 20': 3, 'Sun 21': 5, 'Thu 25': 2 });
+  useEffect(() => { localStorage.setItem('good-plans-settings', JSON.stringify(settings)); }, [settings]);
+  const city = settings.profile.city;
+  const selectedActivity = settings.activities.find((activity) => activity.id === activityId) || settings.activities[0];
+  const plan = { title: selectedActivity?.name || 'Sunday soft launch', date: pickedDate === 'Sun 21' ? 'Sunday, 21 September' : `${pickedDate}, September`, venue: selectedVenue };
+  const organizerPlan = { title: settings.organizer.seriesName, date: settings.organizer.nextDate, venue: { name: `${settings.organizer.city} brunch venue`, address: settings.organizer.city }, cover: '/images/good-plans-women-tech-brunch.png' };
+  if (showInvite) return <Invite onBack={() => { setShowInvite(false); setShowOrganizerInvite(false); }} plan={showOrganizerInvite ? organizerPlan : plan} settings={{ ...settings, invite: { ...settings.invite, limit: showOrganizerInvite ? settings.organizer.capacity : settings.invite.limit, privacy: showOrganizerInvite ? settings.organizer.visibility : settings.invite.privacy } }} />;
+  const scrollToPlanner = () => document.querySelector('#planner')?.scrollIntoView({ behavior: 'smooth' });
+  const makePlan = (event) => { event.preventDefault(); setMadePlan(true); };
+  const vote = (date) => { setPickedDate(date); setDateVotes((current) => ({ ...current, [date]: current[date] + (date === pickedDate ? 0 : 1) })); };
 
-  return (
-    <MobileAppFrame
-      isMobileFrameView={isMobileFrameView}
-      activeTab={activeView}
-      setActiveTab={setActiveView}
-      onOpenPlanModal={() => setIsPlanModalOpen(true)}
-    >
-      <div className="min-h-screen bg-[#FAFAFA] text-[#09090B] flex flex-col justify-between">
-        
-        <div>
-          {/* Navigation Bar */}
-          <Navbar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            batteryFilter={batteryFilter}
-            setBatteryFilter={setBatteryFilter}
-            onOpenPlanModal={() => setIsPlanModalOpen(true)}
-            activeView={activeView}
-            setActiveView={setActiveView}
-            isMobileFrameView={isMobileFrameView}
-            setIsMobileFrameView={setIsMobileFrameView}
-            location={location}
-            setLocation={setLocation}
-            onOpenOnboarding={() => setIsOnboardingOpen(true)}
-          />
-
-          {/* Mode Banner Indicator */}
-          {appMode === 'empty' && (
-            <div className="bg-[#FEF3C7] border-b-2 border-[#09090B] px-4 py-2 text-center text-xs font-black text-[#09090B] flex items-center justify-center gap-2 font-display">
-              <span>🍃 Empty State Mode Active: All demo data is hidden. Add your own friends &amp; outings!</span>
-              <button
-                onClick={() => setAppMode('demo')}
-                className="underline font-black hover:text-[#2563EB] cursor-pointer"
-              >
-                Switch to Demo Mode 🌟
-              </button>
-            </div>
-          )}
-
-          {/* Main View Switcher */}
-          {activeView === 'explore' && (
-            <main className="space-y-10 pb-16">
-              {/* Hero Section */}
-              <HeroSection
-                selectedFriends={selectedFriends}
-                setSelectedFriends={setSelectedFriends}
-                onOpenPlanModal={() => setIsPlanModalOpen(true)}
-                onSelectAffinityTab={() => setActiveView('affinity')}
-                batteryFilter={batteryFilter}
-                setBatteryFilter={setBatteryFilter}
-                friendsList={activeFriendsList}
-                appMode={appMode}
-                setAppMode={setAppMode}
-              />
-
-              {/* Outings Grid Section */}
-              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-[#09090B]/10">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#09090B]">
-                        {appMode === 'demo' ? 'Featured Outings in Dublin' : 'My Custom Outings'}
-                      </h2>
-                      <span className="bg-[#FEF3C7] text-[#09090B] text-xs font-black px-2.5 py-0.5 rounded-full border-2 border-[#09090B] font-mono">
-                        {filteredOutings.length} Available
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-[#52525B] font-semibold mt-1">
-                      Matched for <strong className="text-[#09090B]">Early Dinner (6:30 PM)</strong>, <strong className="text-[#09090B]">Concerts</strong>, <strong className="text-[#09090B]">Retreats</strong> &amp; <strong className="text-[#09090B]">Trips Abroad</strong>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsPlanModalOpen(true)}
-                      className="btn-pop-primary text-xs"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Create Custom Outing
-                    </button>
-                  </div>
-                </div>
-
-                {/* Grid vs Empty State */}
-                {filteredOutings.length === 0 ? (
-                  <div className="text-center py-16 bg-white rounded-3xl border-3 border-[#09090B] shadow-[6px_6px_0px_#09090B] p-8 space-y-4">
-                    <div className="text-4xl">🍃</div>
-                    <h3 className="text-lg sm:text-xl font-bold font-display text-[#09090B]">
-                      {appMode === 'empty' ? 'Your Social Circle is Ready for Its First Outing!' : 'No outings match this filter'}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[#52525B] max-w-md mx-auto font-medium">
-                      {appMode === 'empty'
-                        ? 'You are in clean empty state mode. Tap "Plan Outing" to create your first custom outing, or load pre-built demo outings.'
-                        : 'Try selecting another category or resetting social battery filters!'}
-                    </p>
-
-                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                      <button
-                        onClick={() => setIsPlanModalOpen(true)}
-                        className="btn-pop-primary text-xs"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Plan First Outing
-                      </button>
-
-                      {appMode === 'empty' ? (
-                        <button
-                          onClick={() => setAppMode('demo')}
-                          className="btn-pop-secondary text-xs bg-[#FEF3C7]"
-                        >
-                          🌟 Load Demo Outings
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => { setSelectedCategory('all'); setBatteryFilter('all'); setSearchQuery(''); }}
-                          className="btn-pop-secondary text-xs"
-                        >
-                          Reset Filters
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredOutings.map((outing) => (
-                      <OutingCard
-                        key={outing.id}
-                        outing={outing}
-                        onSelectOuting={(o) => setSelectedOutingModal(o)}
-                        rsvpStatus={rsvpStatus}
-                        onToggleRsvp={handleToggleRsvp}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-
-              {/* Google Maps Venue Explorer Section */}
-              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <GoogleMapsExplorer onSelectVenueForPlan={handleSelectVenueForPlan} />
-              </section>
-            </main>
-          )}
-
-          {/* Squad Vibe Matrix View */}
-          {activeView === 'affinity' && (
-            <AffinityMatchMatrix
-              selectedFriends={selectedFriends}
-              setSelectedFriends={setSelectedFriends}
-              onOpenPlanModal={() => setIsPlanModalOpen(true)}
-              friendsList={activeFriendsList}
-            />
-          )}
-
-          {/* Settings View */}
-          {activeView === 'settings' && (
-            <SettingsView
-              appMode={appMode}
-              setAppMode={setAppMode}
-              friendsList={activeFriendsList}
-              setUserCreatedFriends={setUserCreatedFriends}
-              userCreatedFriends={userCreatedFriends}
-              onResetDemoData={handleResetDemoData}
-              onOpenOnboarding={() => setIsOnboardingOpen(true)}
-            />
-          )}
-
-          {/* My Outings View */}
-          {activeView === 'outings' && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-6 text-[#09090B] flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-[#2563EB]" />
-                My Upcoming Dublin RSVPs
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeOutingsList.filter(o => rsvpStatus[o.id]).map(outing => (
-                  <OutingCard
-                    key={outing.id}
-                    outing={outing}
-                    onSelectOuting={(o) => setSelectedOutingModal(o)}
-                    rsvpStatus={rsvpStatus}
-                    onToggleRsvp={handleToggleRsvp}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Squad Friends List View */}
-          {activeView === 'squad' && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <h2 className="text-2xl font-black font-display mb-2 text-[#09090B]">
-                {appMode === 'demo' ? 'Demo Squad & Friend Profiles' : 'My Saved Friends'}
-              </h2>
-              <p className="text-xs text-[#52525B] mb-6 font-semibold">Generational cohorts &amp; preferred time windows (Dinner Out, Concerts, Retreats, Trips Abroad)</p>
-              
-              {activeFriendsList.length === 0 ? (
-                <div className="p-8 rounded-3xl bg-white border-3 border-dashed border-[#09090B] text-center space-y-3">
-                  <div className="text-3xl">👥</div>
-                  <h3 className="text-base font-bold text-[#09090B]">No friends added yet</h3>
-                  <p className="text-xs text-[#52525B]">Go to Settings to add your friends to your squad roster, or load demo mode.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeFriendsList.map(friend => (
-                    <div key={friend.id} className="p-4 rounded-2xl bg-white border-2 border-[#09090B] shadow-2xs flex items-center gap-3">
-                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-full object-cover border-2 border-[#09090B]" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-[#09090B]">{friend.name}</h3>
-                          <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#09090B] font-mono">{friend.mbti}</span>
-                        </div>
-                        <p className="text-xs font-semibold text-[#059669]">{friend.lifestyle}</p>
-                        <p className="text-[11px] text-[#52525B] font-medium mt-0.5">⚡ Battery: {friend.socialBatteryLevel}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <Footer />
-
-        {/* Modals */}
-        <OnboardingModal
-          isOpen={isOnboardingOpen}
-          onClose={() => setIsOnboardingOpen(false)}
-          onSwitchToDemo={() => setAppMode('demo')}
-        />
-
-        <PlanOutingModal
-          isOpen={isPlanModalOpen}
-          onClose={() => setIsPlanModalOpen(false)}
-          onCreateOuting={handleCreateOuting}
-          selectedFriends={selectedFriends}
-          friendsList={activeFriendsList}
-        />
-
-        <OutingDetailModal
-          outing={selectedOutingModal}
-          onClose={() => setSelectedOutingModal(null)}
-          rsvpStatus={rsvpStatus}
-          onToggleRsvp={handleToggleRsvp}
-          onAddComment={handleAddComment}
-        />
-
-      </div>
-    </MobileAppFrame>
-  );
+  const openSettings = (tab = 'profile') => { setSettingsMode(tab); setShowSettings(true); };
+  return <main><SettingsPanel open={showSettings} initialTab={settingsMode} onClose={() => setShowSettings(false)} settings={settings} setSettings={setSettings} onPreviewOrganizer={() => { setShowSettings(false); setShowOrganizerInvite(true); setShowInvite(true); }} />
+    <nav className="nav"><a className="brand" href="#top" aria-label="Good Plans home"><img className="brand-mark" src="/images/good-plans-mark.png" alt="" /><span>good<br /><i>plans</i></span></a><div className="nav-links"><a href="#about">About</a><a href="#how">How it works</a><a href="#ideas">Ideas</a><button onClick={() => openSettings()}><Settings2 /> Settings</button><button onClick={() => openSettings('organizer')}><UsersRound /> Host</button></div><button className="nav-button" onClick={scrollToPlanner}>Start a plan <ArrowUpRight /></button></nav>
+    <section className="hero" id="top"><div className="hero-copy"><p className="eyebrow">for busy lives and better friendships</p><h1>Make time.<br /><em>Make it good.</em></h1><p className="hero-lede">Your friends are not another task on the list. Good Plans helps you turn “we should catch up” into a break that works for the people you love.</p><div className="hero-actions"><button className="primary" onClick={scrollToPlanner}>Plan something <ArrowUpRight /></button><button className="text-action" onClick={() => openSettings()}>Set up your people <Settings2 /></button></div></div><div className="hero-collage" aria-label="A collage of friends making plans"><div className="hero-picture"><img src="/images/good-plans-hero-sticker.png" alt="A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making" /></div></div></section>
+    <section className="ticker" aria-label="Things to plan"><span>the gig</span><i>✳</i><span>the gallery late</span><i>✳</i><span>the one person you never see enough</span><i>✳</i><span>the group escape</span><i>✳</i></section>
+    <section className="about" id="about"><div className="about-mark"><img src="/images/good-plans-mark.png" alt="The Good Plans calendar and map-pin mark" /></div><div className="about-copy"><p className="eyebrow">why good plans exists</p><h2>Friendship needs a place in the diary.</h2><p>Life gets full. Work, motherhood and other care, travel, family and the never-ending group chat can make seeing each other feel strangely hard. Good Plans gives the people you care about a little more thought, so a real break can actually happen.</p></div><div className="about-promises"><div><span>01</span><b>Context, not guesswork</b><p>Keep the small details that make a plan feel right: energy, tastes, travel and what to avoid.</p></div><div><span>02</span><b>A plan for the actual people</b><p>Build around a one-to-one, familiar friends, or a new mixed group with different comfort levels.</p></div><div><span>03</span><b>Less arranging, more showing up</b><p>Find a place, agree a time, then send an invite people want to open.</p></div></div></section>
+    <section className="planner-section" id="planner"><div className="section-intro"><p className="eyebrow">the clever bit</p><h2>Start with your people.</h2><p>Bring the context you already know about your friends. Good Plans pairs it with availability, activity preferences and nearby venues. Nothing in your private notes is sent in an invite.</p><button className="section-settings" onClick={() => openSettings()}><Settings2 /> Edit planning settings</button><button className="organizer-link" onClick={() => openSettings('organizer')}><UsersRound /> Hosting a monthly series? Set it up here.</button></div><form className="planner-card" onSubmit={makePlan}><label>Who are you making time for?<input value={friend} onChange={(event) => setFriend(event.target.value)} list="friends" placeholder="Name or group" /><datalist id="friends">{settings.friends.map((item) => <option key={item.id} value={item.name} />)}{settings.circles.map((item) => <option key={item.id} value={item.name} />)}</datalist></label><label>What could you do?<select value={activityId} onChange={(event) => setActivityId(event.target.value)}>{settings.activities.map((activity) => <option key={activity.id} value={activity.id}>{activity.name} · {activity.energy}</option>)}</select></label><label>What kind of moment?<select value={moment} onChange={(event) => setMoment(event.target.value)}><option>A free Sunday afternoon</option><option>A catch-up after work</option><option>A first meeting with new people</option><option>A weekend away</option></select></label><button className="primary create" type="submit"><Sparkles /> Find a good idea</button>{madePlan && <div className="plan-result"><span>For {friend} in {city}</span><b>{selectedActivity?.name || 'Sunday soft launch'}</b><p>{selectedVenue ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.` : `Start with ${selectedActivity?.query || 'something that fits'} near you, then choose a venue.`}</p><div className="date-poll"><small>Pick a date to send to the group</small><div>{Object.entries(dateVotes).map(([date, votes]) => <button type="button" key={date} className={pickedDate === date ? 'picked' : ''} onClick={() => vote(date)}><b>{date}</b><span>{votes} votes</span></button>)}</div></div><button type="button" onClick={() => setShowInvite(true)}>Preview the invite <Send /></button></div>}</form></section>
+    <GoogleMapsExplorer city={city} activity={selectedActivity?.query} onSelectVenue={(venue) => { setSelectedVenue(venue); setMadePlan(true); document.querySelector('#planner')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} />
+    <section className="ideas" id="ideas"><div className="ideas-head"><p className="eyebrow">start anywhere</p><h2>The plan is the excuse.</h2><p>Good Plans thinks about the details. You get to show up.</p></div><div className="idea-grid">{ideas.map(({ mark, title, note, color }) => <article className={`idea-card ${color}`} key={title}><Doodle type={mark} /><h3>{title}</h3><p>{note}</p><button onClick={() => { const match = settings.activities.find((activity) => activity.name.toLowerCase().includes(title.split(' ')[0].toLowerCase())); if (match) setActivityId(match.id); scrollToPlanner(); }}>Make this a plan <ArrowUpRight /></button></article>)}</div></section>
+    <section className="event-promo" id="how"><div className="event-paper"><div className="event-mini-photo"><img src="/images/good-plans-invite-collage.png" alt="A handmade collage of friends gathering around an invitation" /></div><p className="eyebrow">when it comes together</p><h2>Send an invite<br />worth opening.</h2><p>Every finished plan becomes a warm, simple page your friends can keep, read, and RSVP to.</p><button onClick={() => setShowInvite(true)}>See an event page <ArrowUpRight /></button></div><div className="event-aside"><span>01</span><b>Make a plan</b><span>02</span><b>Share the feeling</b><span>03</span><b>Meet there</b></div></section>
+    <footer><a className="brand" href="#top"><img className="brand-mark" src="/images/good-plans-mark.png" alt="" /><span>good<br /><i>plans</i></span></a><p>for busy women who want to see their people more.</p><button onClick={() => openSettings()}>Settings</button><button onClick={() => openSettings('organizer')}>Host a series</button><span>made by luana.systems</span></footer>
+  </main>;
 }

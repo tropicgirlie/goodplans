@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, CalendarDays, Check, ChevronRight, MapPin, Music2, Paintbrush, Send, Settings2, Sparkles, UsersRound } from 'lucide-react';
 import GoogleMapsExplorer from './components/GoogleMapsExplorer';
 import SettingsPanel from './components/SettingsPanel';
+import { createEvent, exchangeInvite, importEventLink, readEvent, submitRsvp } from './lib/goodPlansApi';
 
 const ideas = [
   { mark: 'make', title: 'Make something', note: 'Pottery, collage, or an after-hours workshop', color: 'coral' },
@@ -26,17 +27,39 @@ const defaultSettings = {
   availability: { days: ['Thu', 'Sat', 'Sun'], window: 'Sunday daytime', reminders: true },
   discovery: { vibe: 'Independent and local', timing: 'Weekend', accessible: true, shortlist: true },
   invite: { privacy: 'Invite link only', limit: 12, showGuests: true, reminder: true, plusOne: false },
-  organizer: { seriesName: 'Women in Tech Brunch', city: 'Dublin', cadence: 'Once a month', capacity: 24, nextDate: 'Sunday, 19 October', visibility: 'Invite only', note: 'A low-pressure table for women working in and around technology.', template: true, publicReady: false },
+  organizer: { seriesName: 'Women in Tech Brunch', city: 'Dublin', cadence: 'Once a month', capacity: 24, nextDate: '2026-10-19', visibility: 'Invite only', note: 'A low-pressure table for women working in and around technology.', template: true, publicReady: false },
 };
 
 function Sticker({ icon: Icon, className = '' }) { return <span className={`sticker ${className}`}><Icon aria-hidden="true" strokeWidth={2.3} /></span>; }
 function Doodle({ type }) { return <span className={`doodle doodle-${type}`} aria-hidden="true"><i /><i /><i /></span>; }
 
+function friendlyDate(value) {
+  if (!value) return 'A date to be confirmed';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : new Intl.DateTimeFormat('en-IE', { weekday: 'long', day: 'numeric', month: 'long' }).format(parsed);
+}
+
+function planFromEvent(event, calendar, cover = '/images/good-plans-women-tech-brunch.png') {
+  return { id: event.id, slug: event.slug, title: event.title, date: friendlyDate(event.starts_at || event.startsAt), venue: { name: event.venue_name || event.venueName, address: event.venue_address || event.venueAddress }, cover: event.cover_url || cover, calendar, counts: event.counts };
+}
+
 function Invite({ onBack, plan, settings }) {
   const [rsvp, setRsvp] = useState(null);
+  const [counts, setCounts] = useState(plan.counts || null);
+  const [responseError, setResponseError] = useState('');
   const venue = plan.venue?.name || 'The Fumbally Stables';
   const address = plan.venue?.address || `${settings.profile.city} 8`;
-  return <main className="invite-page"><button className="back-link" onClick={onBack}><ChevronRight className="rotate-180" /> Back to planning</button><section className="invite-sheet"><div className="invite-head"><div className="tiny-mark">made with good plans</div><div className="invite-ribbon">a Sunday together</div></div><div className="invite-photo-wrap"><img src={plan.cover || '/images/good-plans-invite-collage.png'} alt="A handmade collage of friends gathering around an invitation" /><span className="tape tape-one" /><span className="tape tape-two" /><Sticker icon={Paintbrush} className="invite-sticker one" /><Sticker icon={Music2} className="invite-sticker two" /></div><div className="invite-title-wrap"><p className="eyebrow">you are invited to</p><h1>{plan.title}</h1><p>an easy afternoon for meeting the people behind the group chat</p></div><div className="invite-details"><div><CalendarDays /><span><b>{plan.date}</b><br />14:00 to 18:00</span></div><div><MapPin /><span><b>{venue}</b><br />{address}</span></div><div><UsersRound /><span><b>Up to {settings.invite.limit} people</b><br />{settings.invite.showGuests ? 'the guest list is visible to everyone' : 'a private invite list'}</span></div></div><p className="invite-note">There is a table booked, a small creative activity nearby, and nothing you need to prepare. Come as you are.</p><div className="rsvp-row"><button className={`rsvp ${rsvp === 'yes' ? 'selected' : ''}`} onClick={() => setRsvp('yes')}><Check /> I’m in</button><button className={`rsvp quiet ${rsvp === 'maybe' ? 'selected' : ''}`} onClick={() => setRsvp('maybe')}>Maybe</button></div>{rsvp && <p className="rsvp-message">{rsvp === 'yes' ? 'Lovely. You are on the list.' : 'No pressure. We will keep you posted.'}</p>}<div className="invite-foot">planned by Tessa · {settings.invite.privacy}</div></section></main>;
+  const respond = async (status) => {
+    setResponseError('');
+    setRsvp(status);
+    if (!plan.id) return;
+    try {
+      const result = await submitRsvp(plan.id, status === 'yes' ? 'accepted' : 'maybe');
+      setCounts(result.counts);
+      setRsvp(result.rsvp.status === 'accepted' ? 'yes' : result.rsvp.status);
+    } catch (error) { setResponseError(error.message); }
+  };
+  return <main className="invite-page"><button className="back-link" onClick={onBack}><ChevronRight className="rotate-180" /> Back to planning</button><section className="invite-sheet"><div className="invite-head"><div className="tiny-mark">made with good plans</div><div className="invite-ribbon">a Sunday together</div></div><div className="invite-photo-wrap"><img src={plan.cover || '/images/good-plans-invite-collage.png'} alt="A handmade collage of friends gathering around an invitation" /><span className="tape tape-one" /><span className="tape tape-two" /><Sticker icon={Paintbrush} className="invite-sticker one" /><Sticker icon={Music2} className="invite-sticker two" /></div><div className="invite-title-wrap"><p className="eyebrow">you are invited to</p><h1>{plan.title}</h1><p>an easy afternoon for meeting the people behind the group chat</p></div><div className="invite-details"><div><CalendarDays /><span><b>{plan.date}</b><br />14:00 to 18:00</span></div><div><MapPin /><span><b>{venue}</b><br />{address}</span></div><div><UsersRound /><span><b>Up to {settings.invite.limit} people</b><br />{counts ? `${counts.accepted} going${counts.waitlisted ? ` · ${counts.waitlisted} waitlisted` : ''}` : settings.invite.showGuests ? 'the guest list is visible to everyone' : 'a private invite list'}</span></div></div><p className="invite-note">There is a table booked, a small creative activity nearby, and nothing you need to prepare. Come as you are.</p><div className="rsvp-row"><button className={`rsvp ${rsvp === 'yes' ? 'selected' : ''}`} onClick={() => respond('yes')}><Check /> I’m in</button><button className={`rsvp quiet ${rsvp === 'maybe' ? 'selected' : ''}`} onClick={() => respond('maybe')}>Maybe</button></div>{plan.calendar && <div className="calendar-row"><a href={plan.calendar.google} target="_blank" rel="noreferrer">Add to Google Calendar</a><a href={plan.calendar.ics}>Download calendar file</a></div>}{responseError && <p className="invite-error">{responseError}</p>}{rsvp && <p className="rsvp-message">{rsvp === 'yes' ? 'Lovely. You are on the list.' : rsvp === 'waitlisted' ? 'You are on the waitlist. We will let you know if a place opens.' : 'No pressure. We will keep you posted.'}</p>}<div className="invite-foot">planned by Tessa · {settings.invite.privacy}</div></section></main>;
 }
 
 export default function App() {
@@ -47,6 +70,9 @@ export default function App() {
   const [settingsMode, setSettingsMode] = useState('profile');
   const [showInvite, setShowInvite] = useState(false);
   const [showOrganizerInvite, setShowOrganizerInvite] = useState(false);
+  const [organizerEvent, setOrganizerEvent] = useState(null);
+  const [openedEvent, setOpenedEvent] = useState(null);
+  const [importMessage, setImportMessage] = useState('');
   const [friend, setFriend] = useState('Maya');
   const [activityId, setActivityId] = useState('gallery');
   const [moment, setMoment] = useState('A free Sunday afternoon');
@@ -58,14 +84,45 @@ export default function App() {
   const city = settings.profile.city;
   const selectedActivity = settings.activities.find((activity) => activity.id === activityId) || settings.activities[0];
   const plan = { title: selectedActivity?.name || 'Sunday soft launch', date: pickedDate === 'Sun 21' ? 'Sunday, 21 September' : `${pickedDate}, September`, venue: selectedVenue };
-  const organizerPlan = { title: settings.organizer.seriesName, date: settings.organizer.nextDate, venue: { name: `${settings.organizer.city} brunch venue`, address: settings.organizer.city }, cover: '/images/good-plans-women-tech-brunch.png' };
+  const localOrganizerPlan = { title: settings.organizer.seriesName, date: friendlyDate(settings.organizer.nextDate), venue: { name: `${settings.organizer.city} brunch venue`, address: settings.organizer.city }, cover: '/images/good-plans-women-tech-brunch.png' };
+  const organizerPlan = organizerEvent || localOrganizerPlan;
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/events\/([^/]+)$/);
+    if (!match) return;
+    const slug = decodeURIComponent(match[1]);
+    const token = new URLSearchParams(window.location.hash.slice(1)).get('invite');
+    const openInvite = async () => {
+      try {
+        if (token) { await exchangeInvite(token); window.history.replaceState({}, '', `/events/${slug}`); }
+        const result = await readEvent(slug);
+        setOpenedEvent(planFromEvent({ ...result.event, counts: result.counts }, result.calendar));
+      } catch { /* The normal landing page remains available when an invite is unavailable. */ }
+    };
+    openInvite();
+  }, []);
+  const createOrganizerEvent = async () => {
+    setImportMessage('');
+    try {
+      const date = settings.organizer.nextDate;
+      const result = await createEvent({ title: settings.organizer.seriesName, description: settings.organizer.note, startsAt: `${date}T14:00:00+01:00`, endsAt: `${date}T18:00:00+01:00`, timezone: 'Europe/Dublin', venueName: `${settings.organizer.city} brunch venue`, venueAddress: settings.organizer.city, city: settings.organizer.city, capacity: settings.organizer.capacity, visibility: settings.organizer.visibility === 'Future public release' ? 'public' : 'invite', organisationName: 'Women in Tech', seriesName: settings.organizer.seriesName, cadence: settings.organizer.cadence, templateName: 'Women in Tech brunch', templateFormat: 'brunch', audienceTone: 'women in tech', mood: 'thoughtful and warm', ageRange: '25-55', palette: ['terracotta', 'butter', 'dusty violet', 'ink'], artDirection: 'Refined editorial paper collage with a long-table conversation, city details, flowers and spacious layered paper.' });
+      setOrganizerEvent(planFromEvent(result.event, result.urls));
+      setShowOrganizerInvite(true);
+      setShowInvite(true);
+      setShowSettings(false);
+    } catch (error) { setImportMessage(error.message); }
+  };
+  const importIdea = async (url) => {
+    try { const result = await importEventLink(url); setImportMessage(`Idea received. We are preparing the editable draft: ${result.import.id.slice(-8)}.`); return result; }
+    catch (error) { setImportMessage(error.message); throw error; }
+  };
+  if (openedEvent) return <Invite onBack={() => { setOpenedEvent(null); window.history.pushState({}, '', '/'); }} plan={openedEvent} settings={settings} />;
   if (showInvite) return <Invite onBack={() => { setShowInvite(false); setShowOrganizerInvite(false); }} plan={showOrganizerInvite ? organizerPlan : plan} settings={{ ...settings, invite: { ...settings.invite, limit: showOrganizerInvite ? settings.organizer.capacity : settings.invite.limit, privacy: showOrganizerInvite ? settings.organizer.visibility : settings.invite.privacy } }} />;
   const scrollToPlanner = () => document.querySelector('#planner')?.scrollIntoView({ behavior: 'smooth' });
   const makePlan = (event) => { event.preventDefault(); setMadePlan(true); };
   const vote = (date) => { setPickedDate(date); setDateVotes((current) => ({ ...current, [date]: current[date] + (date === pickedDate ? 0 : 1) })); };
 
   const openSettings = (tab = 'profile') => { setSettingsMode(tab); setShowSettings(true); };
-  return <main><SettingsPanel open={showSettings} initialTab={settingsMode} onClose={() => setShowSettings(false)} settings={settings} setSettings={setSettings} onPreviewOrganizer={() => { setShowSettings(false); setShowOrganizerInvite(true); setShowInvite(true); }} />
+  return <main><SettingsPanel open={showSettings} initialTab={settingsMode} onClose={() => setShowSettings(false)} settings={settings} setSettings={setSettings} importMessage={importMessage} onImportIdea={importIdea} onCreateOrganizer={createOrganizerEvent} onPreviewOrganizer={() => { setShowSettings(false); setShowOrganizerInvite(true); setShowInvite(true); }} />
     <nav className="nav"><a className="brand" href="#top" aria-label="Good Plans home"><img className="brand-mark" src="/images/good-plans-mark.png" alt="" /><span>good<br /><i>plans</i></span></a><div className="nav-links"><a href="#about">About</a><a href="#how">How it works</a><a href="#ideas">Ideas</a><button onClick={() => openSettings()}><Settings2 /> Settings</button><button onClick={() => openSettings('organizer')}><UsersRound /> Host</button></div><button className="nav-button" onClick={scrollToPlanner}>Start a plan <ArrowUpRight /></button></nav>
     <section className="hero" id="top"><div className="hero-copy"><p className="eyebrow">for busy lives and better friendships</p><h1>Make time.<br /><em>Make it good.</em></h1><p className="hero-lede">Your friends are not another task on the list. Good Plans helps you turn “we should catch up” into a break that works for the people you love.</p><div className="hero-actions"><button className="primary" onClick={scrollToPlanner}>Plan something <ArrowUpRight /></button><button className="text-action" onClick={() => openSettings()}>Set up your people <Settings2 /></button></div></div><div className="hero-collage" aria-label="A collage of friends making plans"><div className="hero-picture"><img src="/images/good-plans-hero-sticker.png" alt="A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making" /></div></div></section>
     <section className="ticker" aria-label="Things to plan"><span>the gig</span><i>✳</i><span>the gallery late</span><i>✳</i><span>the one person you never see enough</span><i>✳</i><span>the group escape</span><i>✳</i></section>

@@ -1,0 +1,48 @@
+{
+  "name": "good-plans",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-19",
+  "assets": {
+    "directory": "../dist",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "good-plans",
+      "database_id": "113dac8d-21d5-4232-9f4f-5919b3964322",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ARTWORK",
+      "bucket_name": "good-plans-artwork"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "EVENT_ROOM", "class_name": "EventRoom" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["EventRoom"] }
+  ],
+  "queues": {
+    "producers": [
+      { "binding": "IMPORT_QUEUE", "queue": "good-plans-imports" },
+      { "binding": "ARTWORK_QUEUE", "queue": "good-plans-artwork-jobs" },
+      { "binding": "NOTIFICATION_QUEUE", "queue": "good-plans-notifications" }
+    ],
+    "consumers": [
+      { "queue": "good-plans-imports", "dead_letter_queue": "good-plans-imports-dlq" },
+      { "queue": "good-plans-artwork-jobs", "dead_letter_queue": "good-plans-artwork-dlq" },
+      { "queue": "good-plans-notifications", "dead_letter_queue": "good-plans-notifications-dlq" }
+    ]
+  },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "HOST_EMAILS": "luanagbc@gmail.com",
+    "IMPORT_ALLOWED_HOSTS": "eventbrite.com,tickettailor.com,ticket-tailor.com,maps.google.com,www.google.com"
+  }
+}

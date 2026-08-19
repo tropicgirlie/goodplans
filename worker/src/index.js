@@ -8,15 +8,6 @@ class HttpError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
 }
 
-function legalPage(kind) {
-  const privacy = kind === 'privacy';
-  const title = privacy ? 'Privacy Policy' : 'Terms of Service';
-  const content = privacy
-    ? `<p>Openclawbot processes Discord interaction data only as needed to provide its features. This may include Discord user IDs, server IDs, channel IDs, and the content of commands or messages sent directly to the bot.</p><p>We do not sell personal data. Data is not shared with third parties except service providers necessary to operate the bot, such as hosting, database, or AI providers.</p><p>Data is retained only for as long as needed to operate and improve the service, then deleted or anonymised where feasible.</p><p>To request data access or deletion, contact <a href="mailto:luanagbc@gmail.com">luanagbc@gmail.com</a>.</p><p>By using Openclawbot, you agree to this policy.</p>`
-    : `<h2>Using Openclawbot</h2><p>By adding or using Openclawbot in Discord, you agree to these terms and Discord's applicable terms and community guidelines.</p><h2>Your responsibilities</h2><p>You are responsible for the commands, prompts and content you send to Openclawbot. Do not use the bot to break the law, infringe the rights of others, disrupt servers, or send harmful, abusive or deceptive content.</p><h2>Availability</h2><p>Openclawbot is provided as available. Features may change, be paused or be removed. We do not guarantee uninterrupted availability or that every response will be accurate, complete or suitable for a particular purpose.</p><h2>Suspension or removal</h2><p>We may restrict or end access to Openclawbot when needed to protect users, comply with law, prevent misuse or maintain the service.</p><h2>Changes</h2><p>We may update these terms from time to time. The latest version will be published at this URL.</p><h2>Contact</h2><p>For questions about these terms, contact <a href="mailto:luanagbc@gmail.com">luanagbc@gmail.com</a>.</p>`;
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="${title} for Openclawbot"><title>${title} | Openclawbot</title><style>:root{color:#312b3a;background:#fff8ed;font-family:Georgia,'Times New Roman',serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:48px 20px}main{width:min(680px,100%);margin:0 auto;padding:44px;background:#fffdf8;border:2px solid #312b3a;box-shadow:9px 9px 0 #d8b1ca}.eyebrow{margin:0 0 18px;color:#955d77;font:700 12px/1.1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}h1{margin:0 0 10px;font-size:clamp(2.2rem,7vw,4.2rem);line-height:.95;letter-spacing:-.055em}h2{margin:32px 0 10px;font-size:1.35rem}.updated,footer{color:#6f6872;font:14px/1.5 Arial,sans-serif}.updated{margin:0 0 38px}p{margin:0 0 18px;font-size:1.08rem;line-height:1.65}a{color:#955d77;text-underline-offset:3px}footer{margin-top:38px;padding-top:20px;border-top:1px solid #d8b1ca;font-size:13px}@media(max-width:560px){body{padding:18px}main{padding:30px 24px;box-shadow:6px 6px 0 #d8b1ca}}</style></head><body><main><p class="eyebrow">Openclawbot</p><h1>${title}</h1><p class="updated">Last updated: 19 August 2026</p>${content}<footer>Openclawbot ${privacy ? 'privacy policy' : 'terms of service'}</footer></main></body></html>`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
-}
-
 function response(data, init = {}) { return json(data, { ...init, headers: { ...cors, ...(init.headers || {}) } }); }
 function now() { return new Date().toISOString(); }
 function cookie(name, value, maxAge, production) { return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${production ? '; Secure' : ''}`; }
@@ -422,17 +413,6 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
     const url = new URL(request.url);
-    if (url.hostname === 'openclawbot.luana.systems') {
-      const legalPages = {
-        '/privacy': 'privacy',
-        '/openclawbot-privacy': 'privacy',
-        '/terms': 'terms',
-        '/openclawbot-terms': 'terms',
-      };
-      const page = legalPages[url.pathname];
-      if (!page || request.method !== 'GET') return new Response('Not found', { status: 404 });
-      return legalPage(page);
-    }
     try {
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
       if (url.pathname === '/api/recommendations' && request.method === 'POST') return await recommendations(request, env);

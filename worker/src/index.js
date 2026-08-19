@@ -4,6 +4,10 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 const cors = { 'access-control-allow-headers': 'content-type, x-good-plans-demo-host', 'access-control-allow-methods': 'GET, POST, PATCH, OPTIONS' };
 const accessKeys = new Map();
 
+class HttpError extends Error {
+  constructor(message, status = 400) { super(message); this.status = status; }
+}
+
 function response(data, init = {}) { return json(data, { ...init, headers: { ...cors, ...(init.headers || {}) } }); }
 function now() { return new Date().toISOString(); }
 function cookie(name, value, maxAge, production) { return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${production ? '; Secure' : ''}`; }
@@ -17,7 +21,7 @@ async function hostIdentity(request, env) {
   const demoEmail = env.ENVIRONMENT === 'development' && request.headers.get('x-good-plans-demo-host') === env.DEV_HOST_KEY ? 'tessa@example.com' : null;
   let accessEmail = null;
   if (env.ENVIRONMENT === 'production') {
-    if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) throw new Error('Cloudflare Access verification is not configured.');
+    if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) throw new HttpError('Host sign-in is not configured yet. Finish Cloudflare Access setup before using organiser tools.', 503);
     const token = request.headers.get('cf-access-jwt-assertion');
     if (!token) return null;
     const teamDomain = env.CF_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
@@ -39,7 +43,7 @@ async function hostIdentity(request, env) {
 
 async function requireHost(request, env) {
   const user = await hostIdentity(request, env);
-  if (!user) throw new Error('Host sign-in is required. In production, protect host routes with Cloudflare Access.');
+  if (!user) throw new HttpError('Host sign-in is required. In production, protect host routes with Cloudflare Access.', 401);
   return user;
 }
 
@@ -411,13 +415,13 @@ export default {
     const url = new URL(request.url);
     try {
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
-      if (url.pathname === '/api/recommendations' && request.method === 'POST') return recommendations(request, env);
-      if (url.pathname === '/api/invites/exchange' && request.method === 'POST') return exchangeInvite(request, env);
-      if (url.pathname === '/api/host/event-imports' && request.method === 'POST') return createImport(request, env);
-      if (url.pathname.match(/^\/api\/host\/event-imports\/[^/]+$/) && request.method === 'GET') return getImport(request, env, url.pathname.split('/').pop());
+      if (url.pathname === '/api/recommendations' && request.method === 'POST') return await recommendations(request, env);
+      if (url.pathname === '/api/invites/exchange' && request.method === 'POST') return await exchangeInvite(request, env);
+      if (url.pathname === '/api/host/event-imports' && request.method === 'POST') return await createImport(request, env);
+      if (url.pathname.match(/^\/api\/host\/event-imports\/[^/]+$/) && request.method === 'GET') return await getImport(request, env, url.pathname.split('/').pop());
       const importConfirmMatch = url.pathname.match(/^\/api\/host\/event-imports\/([^/]+)\/confirm$/);
-      if (importConfirmMatch && request.method === 'POST') return confirmImport(request, env, decodeURIComponent(importConfirmMatch[1]));
-      if (url.pathname === '/api/host/events' && request.method === 'POST') return createEvent(request, env);
+      if (importConfirmMatch && request.method === 'POST') return await confirmImport(request, env, decodeURIComponent(importConfirmMatch[1]));
+      if (url.pathname === '/api/host/events' && request.method === 'POST') return await createEvent(request, env);
       const calendarMatch = url.pathname.match(/^\/api\/events\/([^/]+)\/calendar\.ics$/);
       if (calendarMatch && request.method === 'GET') {
         const event = await eventForSlug(env, decodeURIComponent(calendarMatch[1]));
@@ -439,15 +443,15 @@ export default {
         return response({ event: publicEvent(event, originOf(request)), counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
       }
       const updateMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)$/);
-      if (updateMatch && request.method === 'PATCH') return updateEvent(request, env, decodeURIComponent(updateMatch[1]));
+      if (updateMatch && request.method === 'PATCH') return await updateEvent(request, env, decodeURIComponent(updateMatch[1]));
       const publishMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/publish$/);
-      if (publishMatch && request.method === 'POST') return publishEvent(request, env, decodeURIComponent(publishMatch[1]));
+      if (publishMatch && request.method === 'POST') return await publishEvent(request, env, decodeURIComponent(publishMatch[1]));
       const artworkMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/artwork$/);
-      if (artworkMatch && request.method === 'POST') return requestArtwork(request, env, decodeURIComponent(artworkMatch[1]));
+      if (artworkMatch && request.method === 'POST') return await requestArtwork(request, env, decodeURIComponent(artworkMatch[1]));
       const rsvpMatch = url.pathname.match(/^\/api\/events\/([^/]+)\/rsvps$/);
-      if (rsvpMatch && request.method === 'POST') return submitRsvp(request, env, decodeURIComponent(rsvpMatch[1]));
+      if (rsvpMatch && request.method === 'POST') return await submitRsvp(request, env, decodeURIComponent(rsvpMatch[1]));
       const invitationMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/invitations$/);
-      if (invitationMatch && request.method === 'POST') return addInvitations(request, env, decodeURIComponent(invitationMatch[1]));
+      if (invitationMatch && request.method === 'POST') return await addInvitations(request, env, decodeURIComponent(invitationMatch[1]));
       const dashboardMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/dashboard$/);
       if (dashboardMatch && request.method === 'GET') {
         const host = await requireHost(request, env);
@@ -464,10 +468,10 @@ export default {
         const host = await hostIdentity(request, env);
         if (guest?.event_id !== event.id && host?.id !== event.host_user_id) return response({ error: 'Invite access is required.' }, { status: 403 });
         const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(event.id));
-        return room.fetch(new Request('https://event-room/connect', request));
+        return await room.fetch(new Request('https://event-room/connect', request));
       }
-      return env.ASSETS.fetch(request);
-    } catch (error) { return response({ error: error.message || 'Something went wrong.' }, { status: 500 }); }
+      return await env.ASSETS.fetch(request);
+    } catch (error) { return response({ error: error.message || 'Something went wrong.' }, { status: error.status || 500 }); }
   },
   async queue(batch, env) {
     for (const message of batch.messages) {

@@ -46,12 +46,19 @@ function planFromEvent(event, calendar, cover = '/images/good-plans-women-tech-b
   return { id: event.id, slug: event.slug, title: event.title, date: friendlyDate(event.starts_at || event.startsAt), venue: { name: event.venue_name || event.venueName, address: event.venue_address || event.venueAddress }, cover: event.cover_url || cover, calendar, counts: event.counts };
 }
 
-function Invite({ onBack, plan, settings }) {
+function Invite({ onBack, plan, settings, isHostView }) {
   const [rsvp, setRsvp] = useState(null);
   const [counts, setCounts] = useState(plan.counts || null);
   const [responseError, setResponseError] = useState('');
+  
+  // Dynamic voting states
+  const [guestSelectedDates, setGuestSelectedDates] = useState([]);
+  const [lockedDate, setLockedDate] = useState(plan.proposedDates?.length === 1 ? plan.proposedDates[0] : null);
+
   const venue = plan.venue?.name || 'The Fumbally Stables';
   const address = plan.venue?.address || `${settings.profile.city} 8`;
+  const isGroupInvite = plan.isGroupInvite;
+
   const respond = async (status) => {
     setResponseError('');
     setRsvp(status);
@@ -62,7 +69,197 @@ function Invite({ onBack, plan, settings }) {
       setRsvp(result.rsvp.status === 'accepted' ? 'yes' : result.rsvp.status);
     } catch (error) { setResponseError(error.message); }
   };
-  return <main className="invite-page"><button className="back-link" onClick={onBack}><ChevronRight className="rotate-180" /> Back to planning</button><section className="invite-sheet"><div className="invite-head"><div className="tiny-mark">made with good plans</div><div className="invite-ribbon">a Sunday together</div></div><div className="invite-photo-wrap"><img src={plan.cover || '/images/good-plans-invite-collage.png'} alt="A handmade collage of friends gathering around an invitation" /><span className="tape tape-one" /><span className="tape tape-two" /><Sticker icon={Paintbrush} className="invite-sticker one" /><Sticker icon={Music2} className="invite-sticker two" /></div><div className="invite-title-wrap"><p className="eyebrow">you are invited to</p><h1>{plan.title}</h1><p>an easy afternoon for meeting the people behind the group chat</p></div><div className="invite-details"><div><CalendarDays /><span><b>{plan.date}</b><br />14:00 to 18:00</span></div><div><MapPin /><span><b>{venue}</b><br />{address}</span></div><div><UsersRound /><span><b>Up to {settings.invite.limit} people</b><br />{counts ? `${counts.accepted} going${counts.waitlisted ? ` · ${counts.waitlisted} waitlisted` : ''}` : settings.invite.showGuests ? 'the guest list is visible to everyone' : 'a private invite list'}</span></div></div><p className="invite-note">There is a table booked, a small creative activity nearby, and nothing you need to prepare. Come as you are.</p><div className="rsvp-row"><button className={`rsvp ${rsvp === 'yes' ? 'selected' : ''}`} onClick={() => respond('yes')}><Check /> I’m in</button><button className={`rsvp quiet ${rsvp === 'maybe' ? 'selected' : ''}`} onClick={() => respond('maybe')}>Maybe</button></div>{plan.calendar && <div className="calendar-row"><a href={plan.calendar.google} target="_blank" rel="noreferrer">Add to Google Calendar</a><a href={plan.calendar.ics}>Download calendar file</a></div>}{responseError && <p className="invite-error">{responseError}</p>}{rsvp && <p className="rsvp-message">{rsvp === 'yes' ? 'Lovely. You are on the list.' : rsvp === 'waitlisted' ? 'You are on the waitlist. We will let you know if a place opens.' : 'No pressure. We will keep you posted.'}</p>}<div className="invite-foot">planned by Tessa · {settings.invite.privacy}</div></section></main>;
+
+  const handleLockDate = (date) => {
+    setLockedDate(date);
+  };
+
+  const friendlyDateStr = (dateVal) => {
+    if (!dateVal) return 'To be confirmed';
+    if (dateVal === 'Sun 21') return 'Sunday, 21 September';
+    if (dateVal === 'Sat 20') return 'Saturday, 20 September';
+    if (dateVal === 'Thu 25') return 'Thursday, 25 September';
+    return `${dateVal}, September`;
+  };
+
+  const displayDate = lockedDate ? friendlyDateStr(lockedDate) : 'Voting in progress';
+
+  const calendarLinks = lockedDate ? {
+    google: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(plan.title)}&location=${encodeURIComponent(venue)}`,
+    ics: '#'
+  } : null;
+
+  return (
+    <main className="invite-page">
+      <button className="back-link" onClick={onBack}>
+        <ChevronRight className="rotate-180" /> Back to planning
+      </button>
+
+      <section className="invite-sheet">
+        <div className="invite-head">
+          <div className="tiny-mark">made with good plans</div>
+          <div className="invite-ribbon">
+            {isGroupInvite ? 'a Sunday together' : 'a catch-up together'}
+          </div>
+        </div>
+
+        <div className="invite-photo-wrap">
+          <img src={plan.cover || '/images/good-plans-invite-collage.png'} alt="Event collage" />
+          <span className="tape tape-one" />
+          <span className="tape tape-two" />
+          <Sticker icon={Paintbrush} className="invite-sticker one" />
+          <Sticker icon={Music2} className="invite-sticker two" />
+        </div>
+
+        <div className="invite-title-wrap">
+          <p className="eyebrow">you are invited to</p>
+          <h1>{plan.title}</h1>
+          <p>
+            {isGroupInvite 
+              ? 'an easy afternoon for meeting the people behind the group chat'
+              : `a relaxed catch-up with ${settings.profile.displayName || 'Tessa'}`
+            }
+          </p>
+        </div>
+
+        <div className="invite-details">
+          <div>
+            <CalendarDays />
+            <span>
+              <b>{displayDate}</b>
+              <br />
+              14:00 to 18:00
+            </span>
+          </div>
+          <div>
+            <MapPin />
+            <span>
+              <b>{venue}</b>
+              <br />
+              {address}
+            </span>
+          </div>
+          <div>
+            <UsersRound />
+            <span>
+              {isGroupInvite ? (
+                <>
+                  <b>Up to {settings.invite.limit} people</b>
+                  <br />
+                  {counts ? `${counts.accepted} going` : 'the guest list is visible to everyone'}
+                </>
+              ) : (
+                <>
+                  <b>1:1 Catchup</b>
+                  <br />
+                  with {plan.friendName || 'your friend'}
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <p className="invite-note">
+          There is a table booked, a small creative activity nearby, and nothing you need to prepare. Come as you are.
+        </p>
+
+        {/* Dynamic Date Voting Poll */}
+        {plan.proposedDates && plan.proposedDates.length > 1 && (
+          <div className="my-6 p-5 bg-[#FAF6F0] border-2 border-[var(--ink)] rounded-xl shadow-[3px_3px_0px_var(--ink)] text-left">
+            <h3 className="text-xs font-black uppercase tracking-wider text-[var(--ink)] mb-3 flex items-center gap-1.5 font-display">
+              <CalendarDays className="w-4 h-4 text-[#C85A65]" />
+              {lockedDate ? 'Date Confirmed' : isGroupInvite ? 'Which dates work for you?' : `Let ${settings.profile.displayName || 'Tessa'} know when you're free:`}
+            </h3>
+
+            {lockedDate ? (
+              <div className="p-3.5 bg-[#E8F5E9] text-[#2E7D32] border-2 border-[#2E7D32] rounded-xl font-extrabold text-xs text-center flex items-center justify-center gap-2">
+                <Check className="w-4 h-4 stroke-[3]" />
+                Confirmed: <strong>{friendlyDateStr(lockedDate)}</strong>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {plan.proposedDates.map(date => {
+                  const hasVoted = guestSelectedDates.includes(date);
+                  const currentVotes = (plan.dateVotes?.[date] || 0) + (hasVoted ? 1 : 0);
+                  return (
+                    <div key={date} className="flex items-center justify-between p-3 bg-white border-2 border-[var(--ink)] rounded-xl shadow-[2px_2px_0px_var(--ink)]">
+                      <label className="flex items-center gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={hasVoted}
+                          onChange={() => {
+                            if (hasVoted) {
+                              setGuestSelectedDates(guestSelectedDates.filter(d => d !== date));
+                            } else {
+                              setGuestSelectedDates([...guestSelectedDates, date]);
+                            }
+                          }}
+                          className="w-4 h-4 accent-[#C85A65] border-2 border-[var(--ink)] rounded"
+                        />
+                        <div>
+                          <span className="text-xs font-black text-[var(--ink)]">{friendlyDateStr(date)}</span>
+                          {isGroupInvite && (
+                            <span className="text-[10px] text-gray-500 font-bold block mt-0.5">{currentVotes} vote{currentVotes !== 1 ? 's' : ''} so far</span>
+                          )}
+                        </div>
+                      </label>
+
+                      {isHostView && (
+                        <button
+                          type="button"
+                          onClick={() => handleLockDate(date)}
+                          className="px-2.5 py-1 bg-[#2563EB] text-white border-2 border-black rounded-lg text-[9px] font-black hover:bg-blue-700 transition-colors shadow-[1px_1px_0px_black]"
+                        >
+                          Confirm &amp; Lock
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="rsvp-row">
+          <button className={`rsvp ${rsvp === 'yes' ? 'selected' : ''}`} onClick={() => respond('yes')}>
+            <Check /> I’m in
+          </button>
+          <button className={`rsvp quiet ${rsvp === 'maybe' ? 'selected' : ''}`} onClick={() => respond('maybe')}>
+            Maybe
+          </button>
+        </div>
+
+        {calendarLinks && (
+          <div className="calendar-row">
+            <a href={calendarLinks.google} target="_blank" rel="noreferrer">
+              Add to Google Calendar
+            </a>
+            <a href={calendarLinks.ics}>
+              Download calendar file
+            </a>
+          </div>
+        )}
+
+        {responseError && <p className="invite-error">{responseError}</p>}
+        
+        {rsvp && (
+          <p className="rsvp-message">
+            {rsvp === 'yes' 
+              ? 'Lovely. You are on the list.' 
+              : rsvp === 'waitlisted' 
+                ? 'You are on the waitlist. We will let you know if a place opens.' 
+                : 'No pressure. We will keep you posted.'
+            }
+          </p>
+        )}
+
+        <div className="invite-foot">
+          planned by {settings.profile.displayName || 'Tessa'} · {isGroupInvite ? settings.invite.privacy : 'personal invitation'}
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default function App() {
@@ -82,6 +279,7 @@ export default function App() {
   const [madePlan, setMadePlan] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [pickedDate, setPickedDate] = useState('Sun 21');
+  const [proposedDates, setProposedDates] = useState(['Sun 21']);
   const [dateVotes, setDateVotes] = useState({ 'Sat 20': 3, 'Sun 21': 5, 'Thu 25': 2 });
 
   // Host Auth & Cloud Sync States
@@ -160,9 +358,18 @@ export default function App() {
       console.error('Logout failed:', error);
     }
   };
+  const isGroupInvite = friend.includes(',') || friend.includes('&') || friend.toLowerCase().includes('circle') || friend.toLowerCase().includes('squad') || friend.toLowerCase().includes('group') || settings.circles.some(circle => circle.name.toLowerCase() === friend.toLowerCase());
   const city = settings.profile.city;
   const selectedActivity = settings.activities.find((activity) => activity.id === activityId) || settings.activities[0];
-  const plan = { title: selectedActivity?.name || 'Sunday soft launch', date: pickedDate === 'Sun 21' ? 'Sunday, 21 September' : `${pickedDate}, September`, venue: selectedVenue };
+  const plan = { 
+    title: selectedActivity?.name || 'Sunday soft launch', 
+    date: pickedDate === 'Sun 21' ? 'Sunday, 21 September' : `${pickedDate}, September`, 
+    venue: selectedVenue,
+    proposedDates,
+    isGroupInvite,
+    friendName: friend,
+    dateVotes
+  };
   const localOrganizerPlan = { title: settings.organizer.seriesName, date: friendlyDate(settings.organizer.nextDate), venue: { name: `${settings.organizer.city} brunch venue`, address: settings.organizer.city }, cover: '/images/good-plans-women-tech-brunch.png' };
   const organizerPlan = organizerEvent || localOrganizerPlan;
   useEffect(() => {
@@ -201,10 +408,19 @@ export default function App() {
     try { const result = await importEventLink(url); setImportMessage(`Idea received. We are preparing the editable draft: ${result.import.id.slice(-8)}.`); return result; }
     catch (error) { setImportMessage(error.message); throw error; }
   };
-  if (openedEvent) return <Invite onBack={() => { setOpenedEvent(null); window.history.pushState({}, '', '/'); }} plan={openedEvent} settings={settings} />;
-  if (showLogin) return <LoginScreen onBack={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />;
-  if (showInvite) return <Invite onBack={() => { setShowInvite(false); setShowOrganizerInvite(false); }} plan={showOrganizerInvite ? organizerPlan : plan} settings={{ ...settings, invite: { ...settings.invite, limit: showOrganizerInvite ? settings.organizer.capacity : settings.invite.limit, privacy: showOrganizerInvite ? settings.organizer.visibility : settings.invite.privacy } }} />;
+  if (openedEvent) return <Invite onBack={() => { setOpenedEvent(null); window.history.replaceState({}, '', '/'); }} plan={openedEvent} settings={settings} isHostView={false} />;
+  if (showInvite) return <Invite onBack={() => { setShowInvite(false); setShowOrganizerInvite(false); }} plan={showOrganizerInvite ? organizerPlan : plan} settings={{ ...settings, invite: { ...settings.invite, limit: showOrganizerInvite ? settings.organizer.capacity : settings.invite.limit, privacy: showOrganizerInvite ? settings.organizer.visibility : settings.invite.privacy } }} isHostView={true} />;
   const scrollToPlanner = () => document.querySelector('#planner')?.scrollIntoView({ behavior: 'smooth' });
+  const toggleProposedDate = (date) => {
+    if (proposedDates.includes(date)) {
+      if (proposedDates.length > 1) {
+        setProposedDates(proposedDates.filter((d) => d !== date));
+      }
+    } else {
+      setProposedDates([...proposedDates, date]);
+    }
+  };
+
   const makePlan = (event) => { event.preventDefault(); setMadePlan(true); };
   const vote = (date) => { setPickedDate(date); setDateVotes((current) => ({ ...current, [date]: current[date] + (date === pickedDate ? 0 : 1) })); };
 
@@ -243,7 +459,7 @@ export default function App() {
     <section className="bg-white py-12 border-t-2 border-b-2 border-[var(--ink)]">
       <AffinityMatchMatrix selectedFriends={selectedFriends} setSelectedFriends={setSelectedFriends} onOpenPlanModal={handlePlanOutingForFriends} />
     </section>
-    <section className="planner-section" id="planner"><div className="section-intro"><p className="eyebrow">the clever bit</p><h2>Start with your people.</h2><p>Bring the context you already know about your friends. Good Plans pairs it with availability, activity preferences and nearby venues. Nothing in your private notes is sent in an invite.</p><button className="section-settings" onClick={() => openSettings('profile')}><Settings2 /> Edit planning settings</button><button className="organizer-link" onClick={() => openSettings('organizer')}><UsersRound /> Hosting a monthly series? Set it up here.</button></div><form className="planner-card" onSubmit={makePlan}><label>Who are you making time for?<input value={friend} onChange={(event) => setFriend(event.target.value)} list="friends" placeholder="Name or group" /><datalist id="friends">{settings.friends.map((item) => <option key={item.id} value={item.name} />)}{settings.circles.map((item) => <option key={item.id} value={item.name} />)}</datalist></label><label>What could you do?<select value={activityId} onChange={(event) => setActivityId(event.target.value)}>{settings.activities.map((activity) => <option key={activity.id} value={activity.id}>{activity.name} · {activity.energy}</option>)}</select></label><label>What kind of moment?<select value={moment} onChange={(event) => setMoment(event.target.value)}><option>A free Sunday afternoon</option><option>A catch-up after work</option><option>A first meeting with new people</option><option>A weekend away</option></select></label><button className="primary create" type="submit"><Sparkles /> Find a good idea</button>{madePlan && <div className="plan-result"><span>For {friend} in {city}</span><b>{selectedActivity?.name || 'Sunday soft launch'}</b><p>{selectedVenue ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.` : `Start with ${selectedActivity?.query || 'something that fits'} near you, then choose a venue.`}</p><div className="date-poll"><small>Pick a date to send to the group</small><div>{Object.entries(dateVotes).map(([date, votes]) => <button type="button" key={date} className={pickedDate === date ? 'picked' : ''} onClick={() => vote(date)}><b>{date}</b><span>{votes} votes</span></button>)}</div></div><button type="button" onClick={() => setShowInvite(true)}>Preview the invite <Send /></button></div>}</form></section>
+    <section className="planner-section" id="planner"><div className="section-intro"><p className="eyebrow">the clever bit</p><h2>Start with your people.</h2><p>Bring the context you already know about your friends. Good Plans pairs it with availability, activity preferences and nearby venues. Nothing in your private notes is sent in an invite.</p><button className="section-settings" onClick={() => openSettings('profile')}><Settings2 /> Edit planning settings</button><button className="organizer-link" onClick={() => openSettings('organizer')}><UsersRound /> Hosting a monthly series? Set it up here.</button></div><form className="planner-card" onSubmit={makePlan}><label>Who are you making time for?<input value={friend} onChange={(event) => setFriend(event.target.value)} list="friends" placeholder="Name or group" /><datalist id="friends">{settings.friends.map((item) => <option key={item.id} value={item.name} />)}{settings.circles.map((item) => <option key={item.id} value={item.name} />)}</datalist></label><label>What could you do?<select value={activityId} onChange={(event) => setActivityId(event.target.value)}>{settings.activities.map((activity) => <option key={activity.id} value={activity.id}>{activity.name} · {activity.energy}</option>)}</select></label><label>What kind of moment?<select value={moment} onChange={(event) => setMoment(event.target.value)}><option>A free Sunday afternoon</option><option>A catch-up after work</option><option>A first meeting with new people</option><option>A weekend away</option></select></label><button className="primary create" type="submit"><Sparkles /> Find a good idea</button>{madePlan && <div className="plan-result"><span>For {friend} in {city}</span><b>{selectedActivity?.name || 'Sunday soft launch'}</b><p>{selectedVenue ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.` : `Start with ${selectedActivity?.query || 'something that fits'} near you, then choose a venue.`}</p><div className="date-poll"><small>{isGroupInvite ? 'Pick dates to propose to the group' : `Pick dates to propose to ${friend}`}</small><div>{Object.entries(dateVotes).map(([date, votes]) => { const isProposed = proposedDates.includes(date); return <button type="button" key={date} className={isProposed ? 'picked' : ''} onClick={() => toggleProposedDate(date)}><b>{date}</b><span>{isProposed ? 'Proposed' : 'Propose'}</span></button>; })}</div></div><button type="button" onClick={() => setShowInvite(true)}>{isGroupInvite ? 'Preview the invite' : 'Preview invitation'} <Send /></button></div>}</form></section>
     <GoogleMapsExplorer city={city} activity={selectedActivity?.query} onSelectVenue={(venue) => { setSelectedVenue(venue); setMadePlan(true); document.querySelector('#planner')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} />
     <section className="ideas" id="ideas"><div className="ideas-head"><p className="eyebrow">start anywhere</p><h2>The plan is the excuse.</h2><p>Good Plans thinks about the details. You get to show up.</p></div><div className="idea-grid">{ideas.map(({ mark, title, note, color }) => <article className={`idea-card ${color}`} key={title}><Doodle type={mark} /><h3>{title}</h3><p>{note}</p><button onClick={() => { const match = settings.activities.find((activity) => activity.name.toLowerCase().includes(title.split(' ')[0].toLowerCase())); if (match) setActivityId(match.id); scrollToPlanner(); }}>Make this a plan <ArrowUpRight /></button></article>)}</div></section>
     <section className="event-promo" id="how"><div className="event-paper"><div className="event-mini-photo"><img src="/images/good-plans-invite-collage.png" alt="A handmade collage of friends gathering around an invitation" /></div><p className="eyebrow">when it comes together</p><h2>Send an invite<br />worth opening.</h2><p>Every finished plan becomes a warm, simple page your friends can keep, read, and RSVP to.</p><button onClick={() => setShowInvite(true)}>See an event page <ArrowUpRight /></button></div><div className="event-aside"><span>01</span><b>Make a plan</b><span>02</span><b>Share the feeling</b><span>03</span><b>Meet there</b></div></section>

@@ -22,3 +22,14 @@ export function confirmImportedEvent(importId, input) { return request(`/api/hos
 export function readEvent(slug) { return request(`/api/events/${encodeURIComponent(slug)}`); }
 export function exchangeInvite(token) { return request('/api/invites/exchange', { method: 'POST', body: JSON.stringify({ token }) }); }
 export function calendarDownload(slug) { return endpoint(`/api/events/${encodeURIComponent(slug)}/calendar.ics`); }
+
+// Auth API Calls
+export function getAuthStatus() { return request('/api/auth/status'); }
+export function requestOtp(email) { return request('/api/auth/otp/request', { method: 'POST', body: JSON.stringify({ email }) }); }
+export function verifyOtp(email, code) { return request('/api/auth/otp/verify', { method: 'POST', body: JSON.stringify({ email, code }) }); }
+export function logout() { return request('/api/auth/logout', { method: 'POST' }); }
+
+// Settings Sync API Calls
+export function getBackendSettings() { return request('/api/host/settings'); }
+export function saveBackendSettings(settings) { return request('/api/host/settings', { method: 'PUT', body: JSON.stringify({ settings }) }); }
+

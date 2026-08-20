@@ -20,20 +20,34 @@ async function body(request) {
 async function hostIdentity(request, env) {
   const demoEmail = env.ENVIRONMENT === 'development' && request.headers.get('x-good-plans-demo-host') === env.DEV_HOST_KEY ? 'tessa@example.com' : null;
   let accessEmail = null;
+
+  // Check custom session token in cookies
+  const cookies = parseCookies(request.headers.get('cookie') || '');
+  const sessionToken = cookies.good_plans_host;
+  if (sessionToken) {
+    const hash = await sha256(sessionToken);
+    const sessionUser = await env.DB.prepare(`SELECT u.id, u.email, u.display_name
+      FROM host_sessions hs JOIN users u ON u.id = hs.user_id
+      WHERE hs.session_hash = ? AND hs.expires_at > ?`).bind(hash, now()).first();
+    if (sessionUser) return sessionUser;
+  }
+
   if (env.ENVIRONMENT === 'production') {
     if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) throw new HttpError('Host sign-in is not configured yet. Finish Cloudflare Access setup before using organiser tools.', 503);
     const token = request.headers.get('cf-access-jwt-assertion');
-    if (!token) return null;
-    const teamDomain = env.CF_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
-    if (!accessKeys.has(teamDomain)) accessKeys.set(teamDomain, createRemoteJWKSet(new URL(`${teamDomain}/cdn-cgi/access/certs`)));
-    try {
-      const { payload } = await jwtVerify(token, accessKeys.get(teamDomain), { issuer: teamDomain, audience: env.CF_ACCESS_AUD });
-      accessEmail = typeof payload.email === 'string' ? payload.email : null;
-    } catch { return null; }
+    if (token) {
+      const teamDomain = env.CF_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
+      if (!accessKeys.has(teamDomain)) accessKeys.set(teamDomain, createRemoteJWKSet(new URL(`${teamDomain}/cdn-cgi/access/certs`)));
+      try {
+        const { payload } = await jwtVerify(token, accessKeys.get(teamDomain), { issuer: teamDomain, audience: env.CF_ACCESS_AUD });
+        accessEmail = typeof payload.email === 'string' ? payload.email : null;
+      } catch { return null; }
+    }
   }
   const email = (accessEmail || demoEmail || '').toLowerCase();
+  if (!email) return null;
   const permitted = (env.HOST_EMAILS || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
-  if (!email || !permitted.includes(email)) return null;
+  if (!permitted.includes(email)) return null;
   const existing = await env.DB.prepare('SELECT id, email, display_name FROM users WHERE email = ?').bind(email).first();
   if (existing) return existing;
   const user = { id: id('user'), email, display_name: email.split('@')[0] };
@@ -395,18 +409,99 @@ async function confirmImport(request, env, sourceId) {
 
 async function recommendations(request, env) {
   const input = await body(request);
+  const friends = input.friends || [];
   const city = input.city || 'Dublin';
-  const activity = input.activity || 'something social';
-  if (!env.GOOGLE_PLACES_API_KEY) return response({ source: 'demo', venues: DEMO_VENUES.map((venue) => ({ ...venue, explanation: `${venue.fit}. A good ${activity.toLowerCase()} option in ${city}.` })) });
-  const placesResponse = await fetch('https://places.googleapis.com/v1/places:searchText', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GOOGLE_PLACES_API_KEY, 'x-goog-fieldmask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.googleMapsUri,places.regularOpeningHours' },
-    body: JSON.stringify({ textQuery: `${activity} in ${city}`, languageCode: 'en' }),
+
+  const parseAge = (ageStr) => {
+    const match = String(ageStr || '').match(/\d+/);
+    return match ? parseInt(match[0], 10) : 30;
+  };
+
+  const ages = friends.map((f) => parseAge(f.ageGroup || f.age));
+  const avgAge = ages.length ? ages.reduce((a, b) => a + b, 0) / ages.length : 30;
+  const maxAge = ages.length ? Math.max(...ages) : 30;
+  const minAge = ages.length ? Math.min(...ages) : 30;
+  const ageDelta = maxAge - minAge;
+
+  const introverts = friends.filter((f) => /^[I]/i.test(f.mbti || '')).length;
+  const introvertRatio = friends.length ? introverts / friends.length : 0.5;
+
+  const cozyBattery = friends.filter((f) => f.socialBatteryLevel === 'cozy' || f.socialBatteryLevel === 'balanced').length;
+  const cozyRatio = friends.length ? cozyBattery / friends.length : 0.5;
+
+  const allCurated = await env.DB.prepare('SELECT * FROM venues WHERE city = ?').bind(city).all();
+  const venues = allCurated.results || [];
+
+  const scoredVenues = venues.map((v) => {
+    let score = 50; // base score
+    const ageAppeal = JSON.parse(v.age_cohort_appeal || '[]');
+    const vibeTags = JSON.parse(v.mbti_vibe_tags || '[]');
+
+    // 1. Sensory match (noise)
+    if (cozyRatio > 0.5 || introvertRatio > 0.5) {
+      if (v.sensory_noise === 'low') score += 25;
+      else if (v.sensory_noise === 'medium') score += 10;
+      else score -= 15;
+    } else {
+      if (v.sensory_noise === 'high') score += 20;
+      else if (v.sensory_noise === 'medium') score += 15;
+      else score += 5;
+    }
+
+    // 2. Accessibility / Age
+    const hasOlderMembers = maxAge > 50 || ageDelta > 20;
+    if (hasOlderMembers && !v.mobility_accessible) {
+      score -= 25;
+    }
+
+    // 3. Age appeal overlap
+    let ageCohort = '30s';
+    if (avgAge < 30) ageCohort = '20s';
+    else if (avgAge >= 50) ageCohort = '50s';
+    else if (avgAge >= 40) ageCohort = '40s';
+    else if (avgAge >= 60) ageCohort = '60s';
+
+    if (ageAppeal.includes(ageCohort)) {
+      score += 15;
+    }
+
+    // 4. MBTI vibes
+    if (introvertRatio > 0.5 && vibeTags.includes('introvert-friendly')) {
+      score += 15;
+    }
+    if (introvertRatio <= 0.5 && vibeTags.includes('social')) {
+      score += 15;
+    }
+
+    // Clamp score
+    score = Math.max(10, Math.min(100, score));
+    return { ...v, score };
   });
-  if (!placesResponse.ok) return response({ error: 'Venue search is unavailable right now.' }, { status: 502 });
-  const data = await placesResponse.json();
-  const venues = (data.places || []).slice(0, 8).map((place) => ({ id: place.id, name: place.displayName?.text, address: place.formattedAddress, kind: place.types?.[0]?.replaceAll('_', ' ') || activity, rating: place.rating || null, mapsUrl: place.googleMapsUri, explanation: `A real ${activity.toLowerCase()} option in ${city}. Check current availability before booking.` }));
-  return response({ source: 'google_places', venues });
+
+  // Sort and format into activities categories
+  const sorted = scoredVenues.sort((a, b) => b.score - a.score);
+
+  const categoryMap = {
+    'coffee-stroll': { name: 'Coffee & Strolls', iconName: 'coffee-stroll', label: 'Coffee & Strolls' },
+    'board-games': { name: 'Matcha & Board Game Duo', iconName: 'board-games', label: 'Board Games' },
+    'pottery-workshop': { name: 'Pottery & Wine Workshop', iconName: 'pottery-workshop', label: 'Workshops' },
+    'outdoor-walk': { name: 'Howth Cliff Walk Coastal Hike', iconName: 'outdoor-walk', label: 'Walks' },
+    'dinner-out': { name: 'Early Tapas & Natural Wine', iconName: 'dinner-out', label: 'Dining' },
+    'retreat': { name: 'Wicklow Mountain Spa Retreat', iconName: 'retreat', label: 'Retreats' },
+  };
+
+  const activities = sorted.map((v) => {
+    const cat = categoryMap[v.category] || { name: v.name, iconName: 'coffee-stroll', label: v.category };
+    return {
+      name: `${cat.name} at ${v.name.split(' ')[0]}`,
+      iconName: v.category,
+      score: v.score,
+      vibe: `${v.name}, ${v.address} · suitable for ${friends.length ? friends.map((f) => f.name.split(' ')[0]).join(' & ') : 'your group'}`,
+      venue: { name: v.name, address: v.address }
+    };
+  });
+
+  return response({ source: 'curated_harmony', venues: activities });
 }
 
 export default {
@@ -415,6 +510,86 @@ export default {
     const url = new URL(request.url);
     try {
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
+
+      // Authentication and Cloud Sync Endpoints
+      if (url.pathname === '/api/auth/otp/request' && request.method === 'POST') {
+        const { email } = await body(request);
+        if (!email) throw new HttpError('Email is required.', 400);
+        const normEmail = email.trim().toLowerCase();
+        const permitted = (env.HOST_EMAILS || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
+        if (!permitted.includes(normEmail)) {
+          throw new HttpError('This email is not permitted to access this planner.', 403);
+        }
+        // Generate a 6-digit random code
+        const code = Math.floor(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)).toString();
+        const codeId = id('otp');
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+        await env.DB.prepare('INSERT INTO login_codes (id, email, code, expires_at) VALUES (?, ?, ?, ?)').bind(codeId, normEmail, code, expiresAt).run();
+        console.log(`[OTP LOGIN] Code for ${normEmail}: ${code}`);
+        const devCode = env.ENVIRONMENT === 'development' ? code : null;
+        return response({ ok: true, devCode });
+      }
+
+      if (url.pathname === '/api/auth/otp/verify' && request.method === 'POST') {
+        const { email, code } = await body(request);
+        if (!email || !code) throw new HttpError('Email and code are required.', 400);
+        const normEmail = email.trim().toLowerCase();
+        const match = await env.DB.prepare('SELECT id FROM login_codes WHERE email = ? AND code = ? AND expires_at > ?').bind(normEmail, code.trim(), now()).first();
+        if (!match) throw new HttpError('Invalid or expired login code.', 400);
+        await env.DB.prepare('DELETE FROM login_codes WHERE email = ?').bind(normEmail).run();
+        
+        let user = await env.DB.prepare('SELECT id, email, display_name FROM users WHERE email = ?').bind(normEmail).first();
+        if (!user) {
+          user = { id: id('user'), email: normEmail, display_name: normEmail.split('@')[0] };
+          await env.DB.prepare('INSERT INTO users (id, email, display_name) VALUES (?, ?, ?)').bind(user.id, user.email, user.display_name).run();
+        }
+        
+        const rawSession = randomToken();
+        const sessionHash = await sha256(rawSession);
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        await env.DB.prepare('INSERT INTO host_sessions (id, user_id, session_hash, expires_at) VALUES (?, ?, ?, ?)').bind(id('session'), user.id, sessionHash, expiresAt).run();
+        
+        return response({ ok: true, user }, {
+          headers: {
+            'set-cookie': cookie('good_plans_host', rawSession, 60 * 60 * 24 * 30, env.ENVIRONMENT === 'production')
+          }
+        });
+      }
+
+      if (url.pathname === '/api/auth/status' && request.method === 'GET') {
+        const user = await hostIdentity(request, env);
+        return response({ user });
+      }
+
+      if (url.pathname === '/api/auth/logout' && request.method === 'POST') {
+        const cookies = parseCookies(request.headers.get('cookie') || '');
+        const sessionToken = cookies.good_plans_host;
+        if (sessionToken) {
+          const hash = await sha256(sessionToken);
+          await env.DB.prepare('DELETE FROM host_sessions WHERE session_hash = ?').bind(hash).run();
+        }
+        return response({ ok: true }, {
+          headers: {
+            'set-cookie': cookie('good_plans_host', '', 0, env.ENVIRONMENT === 'production')
+          }
+        });
+      }
+
+      if (url.pathname === '/api/host/settings' && request.method === 'GET') {
+        const host = await requireHost(request, env);
+        const row = await env.DB.prepare('SELECT settings_json FROM user_settings WHERE user_id = ?').bind(host.id).first();
+        return response({ settings: row ? JSON.parse(row.settings_json) : null });
+      }
+
+      if (url.pathname === '/api/host/settings' && request.method === 'PUT') {
+        const host = await requireHost(request, env);
+        const { settings } = await body(request);
+        if (!settings) throw new HttpError('Settings are required.', 400);
+        await env.DB.prepare(`INSERT INTO user_settings (user_id, settings_json, updated_at) VALUES (?, ?, ?)
+          ON CONFLICT(user_id) DO UPDATE SET settings_json = excluded.settings_json, updated_at = excluded.updated_at`)
+          .bind(host.id, JSON.stringify(settings), now()).run();
+        return response({ ok: true });
+      }
       if (url.pathname === '/api/recommendations' && request.method === 'POST') return await recommendations(request, env);
       if (url.pathname === '/api/invites/exchange' && request.method === 'POST') return await exchangeInvite(request, env);
       if (url.pathname === '/api/host/event-imports' && request.method === 'POST') return await createImport(request, env);

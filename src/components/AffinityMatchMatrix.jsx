@@ -1,20 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, Users, Sparkles, Check, Coffee, Palette, Trees, Pizza, UserCheck, ShieldCheck, HeartHandshake } from 'lucide-react';
+import VibeDoodle from './VibeDoodle';
+import { findVenues } from '../lib/goodPlansApi';
 import { FRIENDS_DATA } from '../data/mockData';
 
 export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriends, onOpenPlanModal }) {
+  const [categoryScores, setCategoryScores] = useState([]);
+  const [harmonyScore, setHarmonyScore] = useState(95);
+  const [loading, setLoading] = useState(false);
+
   const activeFriends = FRIENDS_DATA.filter(f => selectedFriends.includes(f.id));
 
   // Compute stats
   const mbtiTypes = activeFriends.map(f => f.mbti).join(', ');
-  const totalInterests = Array.from(new Set(activeFriends.flatMap(f => f.interests)));
+  const introverts = activeFriends.filter(f => /^[I]/i.test(f.mbti || '')).length;
   
-  const categoryScores = [
-    { name: 'Coffee & Strolls in Dublin', icon: Coffee, score: 98, vibe: 'Clement & Pekoe, St Stephen’s Green & low key chat' },
-    { name: 'Matcha & Board Game Duo', icon: Pizza, score: 96, vibe: 'Temple Bar board game cafe & sourdough pizza' },
-    { name: 'Pottery & Wine Workshop', icon: Palette, score: 94, vibe: 'Ranelagh clay sculpting & organic wine' },
-    { name: 'Howth Cliff Walk & Sea', icon: Trees, score: 91, vibe: 'Coastal hike, fresh sea breeze & fish & chips' }
-  ];
+  useEffect(() => {
+    const loadRecs = async () => {
+      setLoading(true);
+      try {
+        const res = await findVenues({ friends: activeFriends });
+        if (res.venues) {
+          setCategoryScores(res.venues);
+          const avg = res.venues.length
+            ? Math.round(res.venues.reduce((sum, item) => sum + item.score, 0) / res.venues.length)
+            : 90;
+          setHarmonyScore(avg);
+        }
+      } catch (err) {
+        console.error('Recommendations failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRecs();
+  }, [selectedFriends]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -43,7 +63,7 @@ export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriend
             </h3>
 
             <div className="space-y-3">
-              {FRIENDS_DATA.map((friend, idx) => {
+              {FRIENDS_DATA.map((friend) => {
                 const isSelected = selectedFriends.includes(friend.id);
                 return (
                   <div
@@ -99,9 +119,9 @@ export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriend
               Familiarity &amp; Comfort Breakdown:
             </h4>
             <div className="text-xs text-[#09090B] space-y-1 font-semibold">
-              <p><strong>Circle Type:</strong> {activeFriends.length === 2 ? '☕ 1:1 Catchup Duo' : activeFriends.length <= 4 ? '👯 Core Squad Circle' : '🔀 Mixed Intro Circle'}</p>
+              <p><strong>Circle Type:</strong> {activeFriends.length === 1 ? '☕ 1:1 Solo/Catchup' : activeFriends.length === 2 ? '☕ 1:1 Catchup Duo' : activeFriends.length <= 4 ? '👯 Core Squad Circle' : '🔀 Mixed Intro Circle'}</p>
               <p><strong>MBTI Alignment:</strong> {mbtiTypes}</p>
-              <p><strong>Social Battery Cost:</strong> Low • High Comfort Sync</p>
+              <p><strong>Social Battery Cost:</strong> {introverts > activeFriends.length / 2 ? 'Cozy Low-Key Sync' : 'Lively Energized Sync'}</p>
             </div>
           </div>
         </div>
@@ -121,7 +141,7 @@ export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriend
               </div>
               <div className="text-right">
                 <div className="text-3xl font-black font-display text-[#2563EB]">
-                  96%
+                  {loading ? '...' : `${harmonyScore}%`}
                 </div>
                 <div className="text-[11px] font-bold text-[#52525B]">
                   Vibe Harmony
@@ -131,15 +151,20 @@ export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriend
 
             {/* Category Scores */}
             <div className="space-y-4 mb-8">
-              {categoryScores.map((cat, i) => {
-                const IconComp = cat.icon;
-                return (
-                  <div key={i} className="p-4 rounded-xl bg-[#FAFAFA] border-2 border-[#09090B]">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] text-[#09090B] border-2 border-[#09090B] flex items-center justify-center font-bold">
-                          <IconComp className="w-4 h-4 text-[#2563EB]" />
-                        </div>
+              {loading ? (
+                <div className="p-12 text-center text-xs font-bold text-[#6c5e58]">
+                  Calculating vibe matches...
+                </div>
+              ) : categoryScores.length === 0 ? (
+                <div className="p-12 text-center text-xs font-bold text-[#6c5e58]">
+                  No curated matches found for this city.
+                </div>
+              ) : (
+                categoryScores.map((cat, i) => (
+                  <div key={i} className="p-4 rounded-xl bg-[#FAFAFA] border-2 border-[#09090B] flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <VibeDoodle type={cat.iconName} size={42} />
                         <div>
                           <h4 className="text-sm font-extrabold text-[#09090B]">{cat.name}</h4>
                           <p className="text-xs text-[#52525B] font-medium">{cat.vibe}</p>
@@ -150,20 +175,25 @@ export default function AffinityMatchMatrix({ selectedFriends, setSelectedFriend
                       </span>
                     </div>
 
-                    <div className="w-full bg-white h-2.5 rounded-full overflow-hidden border border-[#09090B]">
+                    <div className="w-full bg-white h-2.5 rounded-full overflow-hidden border border-[#09090B] mt-1">
                       <div 
                         className="bg-[#2563EB] h-full rounded-full transition-all duration-700" 
                         style={{ width: `${cat.score}%` }}
                       ></div>
                     </div>
                   </div>
-                );
-              })}
+                ))
+              )}
             </div>
 
             <div className="text-center pt-2">
               <button
-                onClick={onOpenPlanModal}
+                onClick={() => {
+                  if (categoryScores.length > 0) {
+                    onOpenPlanModal(categoryScores[0]);
+                  }
+                }}
+                disabled={categoryScores.length === 0 || loading}
                 className="btn-pop-primary text-base px-8 py-3.5 shadow-md w-full sm:w-auto"
               >
                 <Sparkles className="w-5 h-5 text-[#FEF3C7]" />

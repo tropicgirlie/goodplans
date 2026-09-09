@@ -1,0 +1,12 @@
+ALTER TABLE login_codes ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE auth_limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, expires_at INTEGER NOT NULL);
+CREATE TABLE host_workspaces (user_id TEXT PRIMARY KEY REFERENCES users(id), data_json TEXT NOT NULL, revision INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE host_requests (user_id TEXT NOT NULL REFERENCES users(id), request_key TEXT NOT NULL, response_json TEXT NOT NULL, PRIMARY KEY(user_id, request_key));
+ALTER TABLE events ADD COLUMN plus_one INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE events ADD COLUMN show_guests INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE events ADD COLUMN reminder INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE events ADD COLUMN client_id TEXT;
+ALTER TABLE rsvps ADD COLUMN party_size INTEGER NOT NULL DEFAULT 1;
+CREATE TABLE email_deliveries (id TEXT PRIMARY KEY, event_id TEXT REFERENCES events(id), invitation_id TEXT REFERENCES invitations(id), recipient TEXT NOT NULL, subject TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', attempts INTEGER NOT NULL DEFAULT 0, error TEXT, provider_id TEXT, created_at TEXT NOT NULL, sent_at TEXT);
+CREATE INDEX email_deliveries_status_idx ON email_deliveries(status, created_at);
+CREATE TABLE local_mailbox (id TEXT PRIMARY KEY, recipient TEXT NOT NULL, subject TEXT NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL);

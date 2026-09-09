@@ -1,3 +1,6 @@
+import { hosting } from './hosting.js';
+import { partyStatus } from './hosting-core.js';
+import { processNotifications } from './mail.js';
 import { DEMO_VENUES, allowedImportUrl, calendarUrls, draftFromPage, id, json, makeIcs, parseCookies, randomToken, resolveRsvp, sha256, slugify } from './core.js';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
@@ -18,7 +21,7 @@ async function body(request) {
 }
 
 async function hostIdentity(request, env) {
-  const demoEmail = env.ENVIRONMENT === 'development' && request.headers.get('x-good-plans-demo-host') === env.DEV_HOST_KEY ? 'tessa@example.com' : null;
+  const demoEmail = env.ENVIRONMENT === 'development' && env.DEV_HOST_KEY && request.headers.get('x-good-plans-demo-host') === env.DEV_HOST_KEY ? 'tessa@example.com' : null;
   let accessEmail = null;
 
   // Check custom session token in cookies
@@ -29,11 +32,11 @@ async function hostIdentity(request, env) {
     const sessionUser = await env.DB.prepare(`SELECT u.id, u.email, u.display_name
       FROM host_sessions hs JOIN users u ON u.id = hs.user_id
       WHERE hs.session_hash = ? AND hs.expires_at > ?`).bind(hash, now()).first();
-    if (sessionUser) return sessionUser;
+    if (sessionUser && (env.HOST_EMAILS || '').split(',').map(e=>e.trim().toLowerCase()).includes(sessionUser.email)) return sessionUser;
   }
 
   if (env.ENVIRONMENT === 'production') {
-    if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) throw new HttpError('Host sign-in is not configured yet. Finish Cloudflare Access setup before using organiser tools.', 503);
+    if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) return null;
     const token = request.headers.get('cf-access-jwt-assertion');
     if (token) {
       const teamDomain = env.CF_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
@@ -62,12 +65,12 @@ async function requireHost(request, env) {
 }
 
 async function guestIdentity(request, env) {
-  const session = parseCookies(request.headers.get('cookie')).good_plans_guest;
+  const session = parseCookies(request.headers.get('cookie') || '').good_plans_guest;
   if (!session) return null;
   const hash = await sha256(session);
   return env.DB.prepare(`SELECT gs.id AS session_id, i.id AS invitation_id, i.event_id, i.guest_name, i.guest_email
     FROM guest_sessions gs JOIN invitations i ON i.id = gs.invitation_id
-    WHERE gs.session_hash = ? AND gs.expires_at > ?`).bind(hash, now()).first();
+    WHERE gs.session_hash = ? AND gs.expires_at > ? AND (i.expires_at IS NULL OR i.expires_at > ?)`).bind(hash, now(), now()).first();
 }
 
 async function eventForSlug(env, slug) {
@@ -78,7 +81,7 @@ async function eventForSlug(env, slug) {
 async function canReadEvent(request, env, event) {
   const host = await hostIdentity(request, env);
   if (host?.id === event.host_user_id) return true;
-  if (event.status !== 'published') return false;
+  if (event.status === 'draft') return false;
   if (event.visibility === 'public') return true;
   const guest = await guestIdentity(request, env);
   return guest?.event_id === event.id;
@@ -196,31 +199,34 @@ export class EventRoom {
       this.ctx.acceptWebSocket(server);
       return new Response(null, { status: 101, webSocket: client });
     }
-    if (url.pathname === '/rsvp' && request.method === 'POST') return this.rsvp(await request.json());
-    if (url.pathname === '/rebalance' && request.method === 'POST') return this.rebalance(await request.json());
+    if (url.pathname === '/rsvp' && request.method === 'POST') return this.ctx.blockConcurrencyWhile(async () => this.rsvp(await request.json()));
+    if (url.pathname === '/rebalance' && request.method === 'POST') return this.ctx.blockConcurrencyWhile(async () => this.rebalance(await request.json()));
     return new Response('Not found', { status: 404 });
   }
 
-  async rsvp({ eventId, invitationId, requestedStatus }) {
-    const event = await this.env.DB.prepare('SELECT id, capacity FROM events WHERE id = ?').bind(eventId).first();
+  async rsvp({ eventId, invitationId, requestedStatus, partySize = 1 }) {
+    const event = await this.env.DB.prepare('SELECT id, capacity, plus_one, status FROM events WHERE id = ?').bind(eventId).first();
     const invitation = await this.env.DB.prepare('SELECT id, event_id FROM invitations WHERE id = ?').bind(invitationId).first();
     if (!event || !invitation || invitation.event_id !== event.id) return response({ error: 'Invitation is not valid for this event.' }, { status: 403 });
+    if(event.status!=='published') return response({error:'This event is not accepting responses.'},{status:409});
+    if(![1,2].includes(partySize)||(!event.plus_one&&partySize!==1))return response({error:'A plus-one is not available for this event.'},{status:400});
     const current = await this.env.DB.prepare('SELECT * FROM rsvps WHERE invitation_id = ?').bind(invitationId).first();
-    const accepted = await this.env.DB.prepare(`SELECT COUNT(*) AS count FROM rsvps WHERE event_id = ? AND status = 'accepted'`).bind(eventId).first();
+    const accepted = await this.env.DB.prepare(`SELECT COALESCE(SUM(party_size),0) AS count FROM rsvps WHERE event_id = ? AND status = 'accepted'`).bind(eventId).first();
     let status;
-    try { status = resolveRsvp({ capacity: event.capacity, acceptedCount: Number(accepted.count), currentStatus: current?.status, requestedStatus }); } catch (error) { return response({ error: error.message }, { status: 400 }); }
+    try { status = partyStatus({capacity:event.capacity,occupied:Number(accepted.count),currentSize:current?.status==='accepted'?current.party_size:0,requestedSize:partySize,requestedStatus}); } catch (error) { return response({ error: error.message }, { status: 400 }); }
     const rsvpId = current?.id || id('rsvp');
-    await this.env.DB.prepare(`INSERT INTO rsvps (id, event_id, invitation_id, status, responded_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(invitation_id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`).bind(rsvpId, eventId, invitationId, status, now(), now()).run();
-    if (current?.status === 'accepted' && status !== 'accepted') await this.promote(eventId, event.capacity);
+    const saved = await this.env.DB.prepare(`INSERT INTO rsvps (id, event_id, invitation_id, status, party_size, responded_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, ? FROM events WHERE id=? AND status='published' AND capacity=?
+      ON CONFLICT(invitation_id) DO UPDATE SET status = excluded.status, party_size=excluded.party_size, updated_at = excluded.updated_at`).bind(rsvpId, eventId, invitationId, status, partySize, now(), now(), eventId, event.capacity).run();
+    if (!saved.meta.changes) return response({error:'The event changed while you replied. Please try again.'},{status:409});
+    if (current?.status === 'accepted' && (status !== 'accepted' || partySize < current.party_size)) await this.promote(eventId, event.capacity);
     const latestCounts = await counts(this.env, eventId);
     this.broadcast({ type: 'rsvp_counts', eventId, counts: latestCounts });
     return response({ rsvp: { id: rsvpId, status }, counts: latestCounts });
   }
 
   async rebalance({ eventId }) {
-    const event = await this.env.DB.prepare('SELECT id, capacity FROM events WHERE id = ?').bind(eventId).first();
-    if (!event) return response({ error: 'Event not found.' }, { status: 404 });
+    const event = await this.env.DB.prepare('SELECT id, capacity, plus_one, status FROM events WHERE id = ?').bind(eventId).first();
+    if (!event || event.status!=='published') return response({ error: 'Event not accepting responses.' }, { status: 409 });
     await this.promote(eventId, event.capacity);
     const latestCounts = await counts(this.env, eventId);
     this.broadcast({ type: 'rsvp_counts', eventId, counts: latestCounts });
@@ -228,14 +234,16 @@ export class EventRoom {
   }
 
   async promote(eventId, capacity) {
-    const accepted = await this.env.DB.prepare(`SELECT COUNT(*) AS count FROM rsvps WHERE event_id = ? AND status = 'accepted'`).bind(eventId).first();
+    const accepted = await this.env.DB.prepare(`SELECT COALESCE(SUM(party_size),0) AS count FROM rsvps WHERE event_id = ? AND status = 'accepted'`).bind(eventId).first();
     if (Number(accepted.count) >= capacity) return;
-    const next = await this.env.DB.prepare(`SELECT id, invitation_id FROM rsvps WHERE event_id = ? AND status = 'waitlisted' ORDER BY responded_at ASC LIMIT 1`).bind(eventId).first();
-    if (!next) return;
-    await this.env.DB.prepare(`UPDATE rsvps SET status = 'accepted', updated_at = ? WHERE id = ?`).bind(now(), next.id).run();
+    const next = await this.env.DB.prepare(`SELECT id, invitation_id, party_size FROM rsvps WHERE event_id = ? AND status = 'waitlisted' ORDER BY responded_at ASC LIMIT 1`).bind(eventId).first();
+    if (!next || Number(accepted.count)+next.party_size>capacity) return;
+    const promoted = await this.env.DB.prepare(`UPDATE rsvps SET status = 'accepted', updated_at = ? WHERE id = ? AND EXISTS (SELECT 1 FROM events WHERE id=? AND status='published' AND capacity>=?+(SELECT COALESCE(SUM(party_size),0) FROM rsvps WHERE event_id=? AND status='accepted'))`).bind(now(), next.id, eventId, next.party_size, eventId).run();
+    if (!promoted.meta.changes) return;
     const notification = { id: id('notify'), eventId, invitationId: next.invitation_id, kind: 'waitlist_promoted' };
     await this.env.DB.prepare(`INSERT INTO notification_outbox (id, event_id, invitation_id, kind, payload_json) VALUES (?, ?, ?, ?, ?)`).bind(notification.id, notification.eventId, notification.invitationId, notification.kind, JSON.stringify(notification)).run();
     if (this.env.NOTIFICATION_QUEUE) await this.env.NOTIFICATION_QUEUE.send(notification);
+    await this.promote(eventId,capacity);
   }
 
   broadcast(payload) { for (const socket of this.ctx.getWebSockets()) { try { socket.send(JSON.stringify(payload)); } catch { /* Closed clients are removed by the runtime. */ } } }
@@ -312,7 +320,8 @@ async function publishEvent(request, env, eventId) {
   const host = await requireHost(request, env);
   const event = await env.DB.prepare('SELECT * FROM events WHERE id = ? AND host_user_id = ?').bind(eventId, host.id).first();
   if (!event) return response({ error: 'Event not found.' }, { status: 404 });
-  await env.DB.prepare(`UPDATE events SET status = 'published', revision = revision + 1, updated_at = ? WHERE id = ?`).bind(now(), event.id).run();
+  if (event.status === 'cancelled') return response({error:'Cancelled events cannot be published.'},{status:409});
+  await env.DB.prepare(`UPDATE events SET status = 'published', revision = revision + 1, updated_at = ? WHERE id = ? AND status='draft'`).bind(now(), event.id).run();
   return response({ event: await env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(event.id).first() });
 }
 
@@ -354,7 +363,7 @@ async function submitRsvp(request, env, eventId) {
   if (!guest || guest.event_id !== eventId) return response({ error: 'Open this event from your invite link to respond.' }, { status: 403 });
   const input = await body(request);
   const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
-  return room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status }) });
+  return room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status, partySize: input.partySize ?? 1 }) });
 }
 
 async function createImport(request, env) {
@@ -509,53 +518,10 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
     const url = new URL(request.url);
     try {
+      const handled=await hosting(request,env,{response,requireHost,body,cookie,counts}); if(handled)return handled;
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
 
       // Authentication and Cloud Sync Endpoints
-      if (url.pathname === '/api/auth/otp/request' && request.method === 'POST') {
-        const { email } = await body(request);
-        if (!email) throw new HttpError('Email is required.', 400);
-        const normEmail = email.trim().toLowerCase();
-        const permitted = (env.HOST_EMAILS || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
-        if (!permitted.includes(normEmail)) {
-          throw new HttpError('This email is not permitted to access this planner.', 403);
-        }
-        // Generate a 6-digit random code
-        const code = Math.floor(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)).toString();
-        const codeId = id('otp');
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-        await env.DB.prepare('INSERT INTO login_codes (id, email, code, expires_at) VALUES (?, ?, ?, ?)').bind(codeId, normEmail, code, expiresAt).run();
-        console.log(`[OTP LOGIN] Code for ${normEmail}: ${code}`);
-        const devCode = env.ENVIRONMENT === 'development' ? code : null;
-        return response({ ok: true, devCode });
-      }
-
-      if (url.pathname === '/api/auth/otp/verify' && request.method === 'POST') {
-        const { email, code } = await body(request);
-        if (!email || !code) throw new HttpError('Email and code are required.', 400);
-        const normEmail = email.trim().toLowerCase();
-        const match = await env.DB.prepare('SELECT id FROM login_codes WHERE email = ? AND code = ? AND expires_at > ?').bind(normEmail, code.trim(), now()).first();
-        if (!match) throw new HttpError('Invalid or expired login code.', 400);
-        await env.DB.prepare('DELETE FROM login_codes WHERE email = ?').bind(normEmail).run();
-        
-        let user = await env.DB.prepare('SELECT id, email, display_name FROM users WHERE email = ?').bind(normEmail).first();
-        if (!user) {
-          user = { id: id('user'), email: normEmail, display_name: normEmail.split('@')[0] };
-          await env.DB.prepare('INSERT INTO users (id, email, display_name) VALUES (?, ?, ?)').bind(user.id, user.email, user.display_name).run();
-        }
-        
-        const rawSession = randomToken();
-        const sessionHash = await sha256(rawSession);
-        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-        await env.DB.prepare('INSERT INTO host_sessions (id, user_id, session_hash, expires_at) VALUES (?, ?, ?, ?)').bind(id('session'), user.id, sessionHash, expiresAt).run();
-        
-        return response({ ok: true, user }, {
-          headers: {
-            'set-cookie': cookie('good_plans_host', rawSession, 60 * 60 * 24 * 30, env.ENVIRONMENT === 'production')
-          }
-        });
-      }
-
       if (url.pathname === '/api/auth/status' && request.method === 'GET') {
         const user = await hostIdentity(request, env);
         return response({ user });
@@ -615,7 +581,10 @@ export default {
       if (eventMatch && request.method === 'GET') {
         const event = await eventForSlug(env, decodeURIComponent(eventMatch[1]));
         if (!event || !(await canReadEvent(request, env, event))) return response({ error: 'Event not found.' }, { status: 404 });
-        return response({ event: publicEvent(event, originOf(request)), counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
+        const guest=await guestIdentity(request,env);
+        const rsvp=guest?await env.DB.prepare('SELECT status,party_size FROM rsvps WHERE invitation_id=?').bind(guest.invitation_id).first():null;
+        const guests=event.show_guests?(await env.DB.prepare("SELECT i.guest_name,r.party_size FROM invitations i JOIN rsvps r ON r.invitation_id=i.id WHERE i.event_id=? AND r.status='accepted'").bind(event.id).all()).results:[];
+        return response({ event: publicEvent(event, originOf(request)), rsvp,guests, counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
       }
       const updateMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)$/);
       if (updateMatch && request.method === 'PATCH') return await updateEvent(request, env, decodeURIComponent(updateMatch[1]));
@@ -645,15 +614,17 @@ export default {
         const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(event.id));
         return await room.fetch(new Request('https://event-room/connect', request));
       }
+      if(url.pathname.startsWith('/api/'))return response({error:'API route not found.'},{status:404});
       return await env.ASSETS.fetch(request);
     } catch (error) { return response({ error: error.message || 'Something went wrong.' }, { status: error.status || 500 }); }
   },
+  async scheduled(controller,env,ctx) {ctx.waitUntil(processNotifications(env));},
   async queue(batch, env) {
     for (const message of batch.messages) {
       try {
         if (message.body?.sourceId) await processImport(env, message.body.sourceId);
         if (message.body?.eventId && message.body?.prompt) await env.DB.prepare(`UPDATE event_artwork SET status = 'ready_for_approval' WHERE id = ?`).bind(message.body.id).run();
-        if (message.body?.kind) await env.DB.prepare(`UPDATE notification_outbox SET status = 'sent', sent_at = ? WHERE id = ?`).bind(now(), message.body.id).run();
+        if (message.body?.kind) await processNotifications(env);
         message.ack();
       } catch { message.retry(); }
     }

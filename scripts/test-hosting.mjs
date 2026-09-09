@@ -1,7 +1,9 @@
+import { randomBytes } from "node:crypto";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
 import { spawn } from "node:child_process";
+const webhookSecret = randomBytes(32).toString("base64");
 const dir = await mkdtemp(join(tmpdir(), "good-plans-integration-"));
 const config = join(dir, "wrangler.json");
 const root = process.cwd(),
@@ -29,7 +31,7 @@ await writeFile(
       bindings: [{ name: "EVENT_ROOM", class_name: "EventRoom" }],
     },
     migrations: [{ tag: "v1", new_sqlite_classes: ["EventRoom"] }],
-    vars: { RESEND_WEBHOOK_SECRET: "whsec_dGVzdC1vbmx5LXdlYmhvb2stc2VjcmV0", ENVIRONMENT: "development", HOST_EMAILS: "tessa@example.com" },
+    vars: { RESEND_WEBHOOK_SECRET: webhookSecret, ENVIRONMENT: "development", HOST_EMAILS: "tessa@example.com" },
     triggers: { crons: ["*/15 * * * *"] },
   }),
 );
@@ -97,6 +99,7 @@ try {
   process.stdout.write(
     await run(["--test", "worker/tests/hosting.integration.test.mjs"], {
       TEST_API_URL: "http://127.0.0.1:8791",
+      TEST_WEBHOOK_SECRET: webhookSecret,
     }),
   );
 } catch (e) {

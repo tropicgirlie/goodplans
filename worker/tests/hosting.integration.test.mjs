@@ -470,7 +470,7 @@ test("Dublin newsletter: discovery, opt-in, interests, preview, approval, idempo
   const raw=JSON.stringify({type:'email.complained',data:{email_id:'provider-test',to:['blocked@example.com']}});
   assert.equal((await fetch(`${root}/api/webhooks/resend`,{method:'POST',body:raw})).status,401);
   const timestamp=new Date(), msgId='test-complaint';
-  const signature=new Webhook('whsec_dGVzdC1vbmx5LXdlYmhvb2stc2VjcmV0').sign(msgId,timestamp,raw);
+  const signature=new Webhook(process.env.TEST_WEBHOOK_SECRET).sign(msgId,timestamp,raw);
   const webhook=()=>fetch(`${root}/api/webhooks/resend`,{method:'POST',body:raw,headers:{'svix-id':msgId,'svix-timestamp':String(Math.floor(+timestamp/1000)),'svix-signature':signature}});
   const hookResult=await webhook(); assert.equal(hookResult.status,200,await hookResult.text());
   assert.equal((await webhook()).status,200);

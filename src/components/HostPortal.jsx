@@ -1,3 +1,5 @@
+import { OperationsPanel } from "./ServicePages";
+import NewsletterStudio from "./NewsletterStudio";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import {
@@ -11,6 +13,8 @@ import {
 } from "../lib/goodPlansApi";
 import { localDate, prettyDate } from "../lib/plans";
 export default function HostPortal({ user, onLogin, onCreate }) {
+  const [showOperations, setShowOperations] = useState(false);
+  const [showNewsletter, setShowNewsletter] = useState(false);
   const [events, setEvents] = useState([]),
     [selected, setSelected] = useState(null),
     [detail, setDetail] = useState(null),
@@ -57,9 +61,22 @@ export default function HostPortal({ user, onLogin, onCreate }) {
         </button>
       </section>
     );
+  if (showOperations) return <><button className="gp-text-button" onClick={()=>setShowOperations(false)}>← Back to hosted events</button><OperationsPanel /></>;
+  if (showNewsletter)
+    return (
+      <>
+        <button
+          className="gp-text-button"
+          onClick={() => setShowNewsletter(false)}
+        >
+          ← Back to hosted events
+        </button>
+        <NewsletterStudio />
+      </>
+    );
   const event = detail?.event;
   return (
-    <section className="host-portal">
+    <section className="host-portal"><button className="gp-text-button" onClick={()=>setShowOperations(true)}>Support & service status</button>
       <div className="gp-section-heading">
         <h2>{event?.title || "Your hosted events"}</h2>
         <button
@@ -84,6 +101,12 @@ export default function HostPortal({ user, onLogin, onCreate }) {
           >
             <Plus />
             Create event or series
+          </button>
+          <button
+            className="gp-button secondary"
+            onClick={() => setShowNewsletter(true)}
+          >
+            Weekly Dublin newsletter
           </button>
           <div className="host-event-list">
             {events.map((e) => (

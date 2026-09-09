@@ -82,6 +82,7 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
+    "PUBLIC_ORIGIN": "https://goodplans.luana.systems",
     "HOST_EMAILS": "luanagbc@gmail.com",
     "IMPORT_ALLOWED_HOSTS": "eventbrite.com,tickettailor.com,ticket-tailor.com,maps.google.com,www.google.com"
   },
@@ -89,5 +90,8 @@
     "crons": [
       "*/15 * * * *"
     ]
+  },
+  "observability": {
+    "enabled": true
   }
 }

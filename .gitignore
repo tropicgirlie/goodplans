@@ -23,3 +23,9 @@ worker/.wrangler/
 *.njsproj
 *.sln
 *.sw?
+
+# Local credentials and database backups
+.env*
+!.env.example
+worker/.dev.vars
+*.backup.sql

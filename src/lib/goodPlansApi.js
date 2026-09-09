@@ -153,3 +153,37 @@ export function publishHostEvent(id) {
     body: "{}",
   });
 }
+
+export function discoveryEvents() {
+  return request("/api/discovery");
+}
+export function discoveryEvent(id) {
+  return request(`/api/discovery/${encodeURIComponent(id)}`);
+}
+export function newsletterSubscribe(input) {
+  return request("/api/newsletter/subscribe", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+export function newsletterManage(input) {
+  return request("/api/newsletter/manage", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+export function newsletterDashboard() {
+  return request("/api/host/newsletter");
+}
+export function newsletterAction(action, input = {}) {
+  return request(`/api/host/newsletter/${action}`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+export function newsletterSave(id, input) {
+  return request(`/api/host/newsletter/issues/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}

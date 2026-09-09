@@ -150,7 +150,8 @@ function Doodle({ type }) {
 }
 
 export default function OriginalHome({
-  syncError, syncRecovery,
+  syncError,
+  syncRecovery,
   preferences,
   onPreferencesChange,
   syncStatus,
@@ -240,20 +241,48 @@ export default function OriginalHome({
   };
   const importIdea = async (url) => {
     try {
-      const result=await importEventLink(url);
-      setImportMessage('Reading the source. You will review the details before publishing.');
-      for(let attempt=0;attempt<20;attempt++){
-        const {import:source}=await readImportedIdea(result.import.id);
-        if(source.status==='failed')throw new Error('This page could not be imported. Create a plan manually or try another link.');
-        if(source.status==='ready_for_review'){
-          const draft=JSON.parse(source.draft_json||'{}');const start=draft.startsAt?new Date(draft.startsAt):null;
-          const valid=start&&!Number.isNaN(+start);const time=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-          setShowSettings(false);onCreate({title:draft.title||'',date:valid?localDate(start):'',time:valid?time(start):'14:00',endTime:valid?time(new Date(+start+7200000)):'16:00',location:[draft.venueName,draft.venueAddress].filter(Boolean).join(', '),notes:[draft.description,`Source: ${url}`].filter(Boolean).join('\n\n'),kind:'Single event'});setImportMessage('Imported details are ready for your review.');return result;
+      const result = await importEventLink(url);
+      setImportMessage(
+        "Reading the source. You will review the details before publishing.",
+      );
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const { import: source } = await readImportedIdea(result.import.id);
+        if (source.status === "failed")
+          throw new Error(
+            "This page could not be imported. Create a plan manually or try another link.",
+          );
+        if (source.status === "ready_for_review") {
+          const draft = JSON.parse(source.draft_json || "{}");
+          const start = draft.startsAt ? new Date(draft.startsAt) : null;
+          const valid = start && !Number.isNaN(+start);
+          const time = (d) =>
+            `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+          setShowSettings(false);
+          onCreate({
+            title: draft.title || "",
+            date: valid ? localDate(start) : "",
+            time: valid ? time(start) : "14:00",
+            endTime: valid ? time(new Date(+start + 7200000)) : "16:00",
+            location: [draft.venueName, draft.venueAddress]
+              .filter(Boolean)
+              .join(", "),
+            notes: [draft.description, `Source: ${url}`]
+              .filter(Boolean)
+              .join("\n\n"),
+            kind: "Single event",
+          });
+          setImportMessage("Imported details are ready for your review.");
+          return result;
         }
-        await new Promise(resolve=>setTimeout(resolve,1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      throw new Error('The source is still processing. Try again shortly, or create a plan manually.');
-    }catch(error){setImportMessage(error.message);throw error;}
+      throw new Error(
+        "The source is still processing. Try again shortly, or create a plan manually.",
+      );
+    } catch (error) {
+      setImportMessage(error.message);
+      throw error;
+    }
   };
   const handlePlanOutingForFriends = (recommended) => {
     setFriend(
@@ -313,6 +342,9 @@ export default function OriginalHome({
           <a href="#how">How it works</a>
           <a href="#ideas">Ideas</a>
           <button onClick={() => onManage("My plans")}>My plans</button>
+          <button onClick={() => onManage("Dublin this week")}>
+            Dublin this week
+          </button>
           {currentUser ? (
             <>
               <button onClick={() => onManage("Organiser portal")}>
@@ -430,16 +462,19 @@ export default function OriginalHome({
           </div>
         </div>
       </section>
-      <section className="bg-white py-12 border-t-2 border-b-2 border-[var(--ink)]">
-        <p className="original-demo-note">
-          Example circle · sample friends and compatibility scores
-        </p>
+      <div
+        style={{
+          background: "var(--paper)",
+          borderTop: "1px solid var(--line)",
+          borderBottom: "1px solid var(--line)",
+        }}
+      >
         <AffinityMatchMatrix
           selectedFriends={selectedFriends}
           setSelectedFriends={setSelectedFriends}
           onOpenPlanModal={handlePlanOutingForFriends}
         />
-      </section>
+      </div>
       <section className="planner-section" id="planner">
         <div className="section-intro">
           <p className="eyebrow">the clever bit</p>
@@ -570,6 +605,12 @@ export default function OriginalHome({
         <button className="text-action" onClick={() => onManage("My people")}>
           My people <UsersRound />
         </button>
+        <button
+          className="text-action"
+          onClick={() => onManage("Dublin this week")}
+        >
+          This week in Dublin <ArrowUpRight />
+        </button>
         <button className="text-action" onClick={() => onManage("Saved ideas")}>
           Saved ideas <ArrowUpRight />
         </button>
@@ -642,7 +683,7 @@ export default function OriginalHome({
           <b>Meet there</b>
         </div>
       </section>
-      <footer>
+      <footer><a href="/?page=privacy">Privacy</a><a href="/?page=support">Help & data requests</a>
         <a className="brand" href="#top">
           <img
             className="brand-mark"

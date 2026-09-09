@@ -1,3 +1,4 @@
+const DB = { prepare: () => ({ bind: () => ({ first: async () => null }) }) };
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -64,7 +65,7 @@ test("production email fails closed without credentials", async () => {
   await assert.rejects(
     () =>
       sendEmail(
-        { ENVIRONMENT: "production" },
+        { DB, ENVIRONMENT: "production" },
         { key: "test", to: "test@example.com", subject: "test", text: "test" },
       ),
     /not configured/,
@@ -80,7 +81,7 @@ test("email provider failures never report sent", async (t) => {
   await assert.rejects(
     () =>
       sendEmail(
-        { RESEND_API_KEY: "test-only", EMAIL_FROM: "test@example.com" },
+        { DB, RESEND_API_KEY: "test-only", EMAIL_FROM: "test@example.com" },
         {
           key: "failure-test",
           to: "guest@example.com",
@@ -100,7 +101,7 @@ test("email provider receives stable idempotency key and confirms acceptance", a
   });
   assert.equal(
     await sendEmail(
-      { RESEND_API_KEY: "test-only", EMAIL_FROM: "test@example.com" },
+      { DB, RESEND_API_KEY: "test-only", EMAIL_FROM: "test@example.com" },
       {
         key: "stable-test-key",
         to: "guest@example.com",

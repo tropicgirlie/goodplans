@@ -1,6 +1,8 @@
-import { id } from "./core.js";
+import { id, sha256 } from "./core.js";
 import { fail } from "./hosting-core.js";
-export async function sendEmail(env, { key, to, subject, text }) {
+export async function sendEmail(env, { key, to, subject, text, html }) {
+  if (await env.DB.prepare('SELECT reason FROM email_suppressions WHERE email_hash=?').bind(await sha256(to.trim().toLowerCase())).first())
+    throw Object.assign(new Error('Delivery suppressed after a bounce or complaint.'), { suppressed: true, status: 400 });
   if (env.ENVIRONMENT === "development") {
     await env.DB.prepare(
       "INSERT OR IGNORE INTO local_mailbox (id,recipient,subject,body,created_at) VALUES (?,?,?,?,?)",
@@ -21,7 +23,13 @@ export async function sendEmail(env, { key, to, subject, text }) {
       "Content-Type": "application/json",
       "Idempotency-Key": key,
     },
-    body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, text }),
+    body: JSON.stringify({
+      from: env.EMAIL_FROM,
+      to: [to],
+      subject,
+      text,
+      ...(html ? { html } : {}),
+    }),
   });
   if (!result.ok)
     fail(`Email provider rejected delivery (${result.status}).`, 503);
@@ -64,9 +72,9 @@ export async function deliverPending(env) {
         .run();
     } catch (error) {
       await env.DB.prepare(
-        "UPDATE email_deliveries SET status='failed',error=?,attempts=attempts+1 WHERE id=?",
+        "UPDATE email_deliveries SET status=?,error=?,attempts=attempts+1 WHERE id=?",
       )
-        .bind(error.message, row.id)
+        .bind(error.suppressed ? "suppressed" : "failed", error.message, row.id)
         .run();
     }
   }

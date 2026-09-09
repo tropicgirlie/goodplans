@@ -1,3 +1,8 @@
+import ServicePages from "./components/ServicePages";
+import DublinDiscovery, {
+  NewsletterPreferences,
+} from "./components/DublinDiscovery";
+import { discoveryDraft } from "./lib/discovery";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -32,6 +37,7 @@ import {
   getAuthStatus,
   hostDashboard,
   listHostEvents,
+  discoveryEvent,
   readEvent,
   submitRsvp,
   logout,
@@ -955,6 +961,33 @@ export default function App() {
     const timer = setTimeout(() => setToast(""), 4500);
     return () => clearTimeout(timer);
   }, [toast]);
+  async function addDiscovery(event) {
+    try {
+      const existing = plans.find((p) => p.discoveryId === event.id);
+      const result = await discoveryEvent(event.id);
+      navigate("My plans");
+      if (existing) setActiveId(existing.id);
+      else setForm(discoveryDraft(result.event));
+    } catch (error) {
+      setToast(error.message);
+    }
+  }
+  useEffect(() => {
+    const discoveryId = new URLSearchParams(window.location.search).get(
+      "discover",
+    );
+    if (!discoveryId) return;
+    discoveryEvent(discoveryId)
+      .then(({ event }) => {
+        setPage("My plans");
+        setForm(discoveryDraft(event));
+      })
+      .catch((error) => {
+        setPage("Dublin this week");
+        setToast(error.message);
+      });
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
   function navigate(next) {
     setPage(next);
     setQuery("");
@@ -1118,6 +1151,11 @@ export default function App() {
       </button>
     );
   }
+  if (
+    new URLSearchParams(window.location.search).get("newsletter") === "manage"
+  )
+    return <NewsletterPreferences />;
+  if (["privacy", "support"].includes(new URLSearchParams(window.location.search).get("page"))) return <ServicePages page={new URLSearchParams(window.location.search).get("page")} />;
   if (login)
     return (
       <LoginScreen
@@ -1222,6 +1260,7 @@ export default function App() {
                   "My people",
                   "Saved ideas",
                   "Organiser portal",
+                  "Dublin this week",
                 ].map((label) => (
                   <button
                     key={label}
@@ -1279,7 +1318,10 @@ export default function App() {
                     onCreate={setForm}
                   />
                 )}
-                {page !== "Organiser portal" && (
+                {page === "Dublin this week" && (
+                  <DublinDiscovery onAdd={addDiscovery} />
+                )}
+                {page !== "Organiser portal" && page !== "Dublin this week" && (
                   <div className="gp-heading">
                     <div>
                       <p className="gp-eyebrow">
@@ -1768,7 +1810,7 @@ export default function App() {
                     )}
                   </section>
                 )}
-                <footer className="gp-footer">
+                <footer className="gp-footer"><a href="/?page=privacy">Privacy</a><a href="/?page=support">Help & data requests</a>
                   <span>
                     <Heart />
                     Made for real life. And the people in it.

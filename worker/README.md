@@ -58,3 +58,28 @@ Cloudflare Access is optional alongside OTP. If using it, configure `CF_ACCESS_T
 - Google Calendar and ICS are add-to-calendar helpers, not two-way calendar sync. Shared date voting is not implemented.
 - The homepage affinity matrix and starter venue suggestions are illustrative. Public-source imports require an approved host, allowlisted URL and host review. Imported information must be confirmed before publishing.
 - Artwork generation remains an optional backend integration; the host flow uses the existing collage assets. The artwork queue is not a connected image generator.
+
+## Weekly Dublin discovery and newsletter
+
+Migration `0006_dublin_newsletter.sql` adds the public event catalogue, confirmed subscribers, weekly editions, consent records and a separate newsletter delivery queue. Apply it locally with `npm run db:local`; remote migration and deployment are still required before release.
+
+Add a Ticketmaster Discovery API credential securely:
+
+```sh
+npx wrangler secret put TICKETMASTER_API_KEY --config worker/wrangler.jsonc
+```
+
+Use Workers Paid for the combined collection and notification batches; the free per-invocation D1 query limit is too low for a full run. Audience inserts are grouped into JSON row batches.
+
+The newsletter also uses `RESEND_API_KEY`, `EMAIL_FROM` and the canonical `PUBLIC_ORIGIN` in the Worker configuration. The existing 15-minute cron checks for a new Dublin calendar week. It collects Dublin events for the next 14 days once per week, then prepares one draft of up to eight varied picks. It does **not** approve or email an edition automatically. The organiser can collect again, add verified local events manually, edit the subject/introduction and event selection, and approve the saved preview in **Organiser portal → Weekly Dublin newsletter**.
+
+- Collection uses the official Ticketmaster Discovery API; no general-purpose scraping. Its key and applicable provider access are needed. There is no synthetic public event feed. Manual listings allow smaller events from other sources.
+- Up to 500 provider records are fetched per run. Undated, non-Dublin, cancelled/postponed/off-sale events are filtered. Provider records older than eight days and events whose start time passed are unavailable in discovery. Curated duplicates are collapsed by title, start time and venue.
+- Each card and newsletter entry has a source link and an `/?discover=…` link that opens a reviewed planning draft. Adding a plan never reserves tickets. Unknown end times are explicitly labelled as a suggested planning window.
+- Signup requires consent and a confirmation email. Pending subscribers receive no newsletters. Confirmation expires in 24 hours. Active subscribers can change interests or unsubscribe using their private email link; existing subscribers' preferences are not changed by an unauthenticated signup request.
+- Interests choose which editions a subscriber receives: at least one selected event category must match. Empty interests means every edition. The first release caps the confirmed audience at 500; larger lists need paged audience preparation.
+- Approval checks the saved revision and event freshness, captures the audience and queues one delivery per issue/subscriber transactionally. Repeated approval cannot resend an edition. Delivery processes 25 messages per run, checks subscription status again, and retries provider failures up to five attempts. Unsubscribe suppresses queued and failed messages; already in-flight messages may finish.
+- Emails include plain text and escaped HTML versions, source attribution, and private preferences/unsubscribe links. Provider acceptance is not proof of inbox delivery. Failed newsletter sends can be retried in the studio. Never treat local mailbox delivery as a production email test.
+- Weekly collection errors appear in the studio. If collection fails, use **Collect Dublin events** after fixing the credential/service, then **Prepare this week's draft**. Existing drafts retain the host's selections; **Save preview** refreshes selected event details before approval.
+
+Tests cover normalization, category selection, deduplication, unsafe links, Dublin week boundaries, consent, confirmation, interests, stale previews, approval idempotence, unsubscribe and the original organiser journey. Before enabling subscriptions in production, verify a real confirmation email and approved test issue, its plan link and unsubscribe action in a separate browser. Live API credentials, email delivery and production configuration have not been verified locally.

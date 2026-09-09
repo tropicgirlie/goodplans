@@ -28,3 +28,11 @@ Build output is written to a temporary directory during verification, preserving
 Implementation is available locally. Production email credentials are not configured; no deployment or remote migration has been performed during this work. Follow [backend activation instructions](../worker/README.md) and complete the live two-browser/real-mailbox smoke test before launch. Local tests cannot prove production DNS, email delivery or live bindings.
 
 The affinity matrix is explicitly a sample demonstration. Shared date voting, two-way Google Calendar sync and generated custom artwork remain outside the implemented hosting flow. Starter venue suggestions and inspiration are not live availability or booking promises.
+
+## Dublin discovery and newsletter addition
+
+Added a scrapbook-styled **Dublin this week** page with category/search filters and **Add to my plans**. The existing home layout remains intact, with navigation links to discovery. Newsletter links open prefilled drafts with the original ticket URL, device-local date/time, venue and price; unknown duration is labelled for review.
+
+The organiser's newsletter studio supports automatic weekly Ticketmaster collection, manual local picks, one draft per Dublin calendar week, up to eight selected events, subject/introduction editing, saved preview approval and delivery counts/retry. Signup uses explicit consent and email confirmation, optional interests and private preferences/unsubscribe links. No edition is sent without organiser approval.
+
+Verification includes 21 unit tests and two isolated integration journeys, plus browser checks of local listing creation, edition preparation, the email-link-to-draft handoff, subscription confirmation/unsubscribe and a phone-width discovery layout without horizontal overflow. Test data stays in local development; test emails go to the local mailbox. Production requires migration 0006, Ticketmaster and Resend secrets, a verified sender and live smoke testing. No live newsletter has been sent.

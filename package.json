@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:backend": "node --test worker/tests/core.test.mjs",
-    "test": "node --test src/lib/plans.test.js worker/tests/core.test.mjs worker/tests/hosting-core.test.mjs",
+    "test": "node --test src/lib/plans.test.js worker/tests/core.test.mjs worker/tests/hosting-core.test.mjs worker/tests/discovery-core.test.mjs",
     "db:local": "wrangler d1 migrations apply good-plans --local --config worker/wrangler.jsonc",
     "test:integration": "node scripts/test-hosting.mjs"
   },
@@ -21,6 +21,7 @@
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "svix": "^2.3.0",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

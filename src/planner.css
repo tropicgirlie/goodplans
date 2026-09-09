@@ -2115,7 +2115,325 @@
     left: 50%;
   }
 }
-.original-demo-note{max-width:1120px;margin:0 auto 16px;padding:0 24px;font:10px 'DM Mono',monospace;color:#746750}
-.host-portal{margin:20px 0 40px}.host-event-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:24px 0}.host-event-list>button{display:grid;gap:9px;text-align:left;padding:22px;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--pink)}.host-event-list b{font-size:22px}.host-event-list span,.host-event-list small{font-size:12px}.host-counts{display:flex;gap:15px;flex-wrap:wrap;margin:20px 0}.host-counts>span{display:grid;text-transform:capitalize;padding:16px;background:var(--paper);border:1px solid var(--ink);min-width:100px}.host-counts b{font-size:28px}.host-edit{padding:24px;margin:24px 0;background:var(--paper);border:1px solid var(--ink);max-width:700px}.host-subtitle{margin:30px 0 15px!important;font-size:26px}.host-guests>div{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);padding:14px 0}.host-guests small{display:block}.host-guests>div>div{display:flex;gap:14px}.host-delivery small{display:block;color:#9e3f2a}.host-options{display:grid;gap:14px}.host-options input[type=checkbox]{margin-right:8px}.host-options select{padding:11px;border:1px solid var(--ink);width:100%;margin-top:7px}.host-portal input:not([type=checkbox]){min-height:44px;padding:10px;border:1px solid var(--ink);width:100%;background:var(--paper)}
-@media(max-width:700px){.scrapbook-links{flex-wrap:wrap;justify-content:flex-start}.host-guests>div{flex-direction:column}}
-.sync-recovery{display:flex;gap:10px;justify-content:center;margin:12px}.sync-recovery button{padding:9px 14px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);font-size:12px}
+.original-demo-note {
+  max-width: 1120px;
+  margin: 0 auto 16px;
+  padding: 0 24px;
+  font:
+    10px "DM Mono",
+    monospace;
+  color: #746750;
+}
+.host-portal {
+  margin: 20px 0 40px;
+}
+.host-event-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin: 24px 0;
+}
+.host-event-list > button {
+  display: grid;
+  gap: 9px;
+  text-align: left;
+  padding: 22px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--pink);
+}
+.host-event-list b {
+  font-size: 22px;
+}
+.host-event-list span,
+.host-event-list small {
+  font-size: 12px;
+}
+.host-counts {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.host-counts > span {
+  display: grid;
+  text-transform: capitalize;
+  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  min-width: 100px;
+}
+.host-counts b {
+  font-size: 28px;
+}
+.host-edit {
+  padding: 24px;
+  margin: 24px 0;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  max-width: 700px;
+}
+.host-subtitle {
+  margin: 30px 0 15px !important;
+  font-size: 26px;
+}
+.host-guests > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
+}
+.host-guests small {
+  display: block;
+}
+.host-guests > div > div {
+  display: flex;
+  gap: 14px;
+}
+.host-delivery small {
+  display: block;
+  color: #9e3f2a;
+}
+.host-options {
+  display: grid;
+  gap: 14px;
+}
+.host-options input[type="checkbox"] {
+  margin-right: 8px;
+}
+.host-options select {
+  padding: 11px;
+  border: 1px solid var(--ink);
+  width: 100%;
+  margin-top: 7px;
+}
+.host-portal input:not([type="checkbox"]) {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--ink);
+  width: 100%;
+  background: var(--paper);
+}
+@media (max-width: 700px) {
+  .scrapbook-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .host-guests > div {
+    flex-direction: column;
+  }
+}
+.sync-recovery {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px;
+}
+.sync-recovery button {
+  padding: 9px 14px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+/* Dublin discovery and the organiser's weekly edit share the scrapbook palette. */
+.dublin-discovery h1,
+.newsletter-studio h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  line-height: 1.05;
+  color: #58468d;
+  margin: 16px 0;
+}
+.dublin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin: 24px 0;
+}
+.dublin-pick {
+  background: #fffaf0;
+  border: 2px solid #25241f;
+  border-radius: 6px;
+  padding: 24px;
+  box-shadow: 4px 4px 0 #eadfc8;
+  min-width: 0;
+}
+.dublin-pick h3 {
+  font-family: Georgia, serif;
+  font-size: 1.55rem;
+  line-height: 1.2;
+  margin: 20px 0 12px;
+  overflow-wrap: anywhere;
+}
+.dublin-pick p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.dublin-pick .gp-detail-actions {
+  margin-top: 20px;
+}
+.dublin-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+  margin: 30px 0;
+}
+.dublin-signup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+  margin: 55px 0 20px;
+  padding: 32px;
+  background: #f2e9ff;
+  border: 2px solid #25241f;
+  border-radius: 8px;
+}
+.dublin-signup h2 {
+  font-family: Georgia, serif;
+  font-size: 2.1rem;
+  line-height: 1.15;
+  margin: 18px 0;
+}
+.dublin-signup p {
+  line-height: 1.65;
+}
+.dublin-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #9b8cac;
+}
+.dublin-interests legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.gp-app .dublin-interests label,
+.gp-app .dublin-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.9rem;
+}
+.gp-app .dublin-interests input,
+.gp-app .dublin-consent input,
+.gp-app .newsletter-selection input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: #675193;
+}
+.dublin-honey {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.dublin-preferences {
+  max-width: 650px;
+  margin: 8vh auto;
+  padding: 30px;
+}
+.newsletter-manual,
+.newsletter-studio > details {
+  margin: 24px 0;
+  border: 1px solid #b9ad98;
+  padding: 18px;
+  background: #fffaf0;
+}
+.newsletter-studio summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.newsletter-manual .gp-form {
+  margin-top: 20px;
+}
+.newsletter-studio > .gp-publish {
+  margin: 24px 0;
+}
+.newsletter-preview {
+  margin: 30px 0;
+  border-top: 2px solid #25241f;
+  padding-top: 25px;
+}
+.newsletter-selection {
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid #b9ad98;
+  padding: 15px;
+}
+.newsletter-selection label {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+}
+.newsletter-selection small {
+  display: block;
+  color: #655c50;
+  margin-top: 5px;
+}
+.newsletter-paper {
+  background: #fff7e5;
+  padding: 24px;
+  margin: 25px 0;
+  border: 2px solid #25241f;
+}
+.newsletter-intro {
+  white-space: pre-wrap;
+}
+.newsletter-list-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #d8ceba;
+  padding: 12px 0;
+}
+@media (max-width: 700px) {
+  .dublin-grid,
+  .dublin-signup,
+  .dublin-filters {
+    grid-template-columns: 1fr;
+  }
+  .dublin-signup,
+  .newsletter-paper {
+    padding: 20px;
+  }
+  .dublin-pick {
+    padding: 20px;
+  }
+  .newsletter-list-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dublin-preferences {
+    margin: 20px auto;
+    padding: 20px;
+  }
+}
+.gp-app .dublin-filters select,
+.gp-app .newsletter-manual select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  border: 2px solid #302b24;
+  padding: 10px 12px;
+  background: #fffaf0;
+  font: inherit;
+  border-radius: 0;
+}
+
+.service-page h1 { font-family: Georgia, serif; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.12; letter-spacing: -.035em; margin: 24px 0 12px; }
+.service-page h2 { font-family: Georgia, serif; font-size: 1.55rem; margin: 24px 0 6px; }
+.service-page p { line-height: 1.7; }
+.service-page a { text-decoration: underline; text-underline-offset: 4px; }
+.service-page select { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d8d4cc; border-radius: 6px; background: #fffdfa; color: inherit; }
+.service-page button { min-height: 44px; }

@@ -1,3 +1,5 @@
+import { operations, trackJob } from './operations.js';
+import { newsletter, scheduledNewsletter } from './newsletter.js';
 import { hosting } from './hosting.js';
 import { partyStatus } from './hosting-core.js';
 import { processNotifications } from './mail.js';
@@ -519,6 +521,8 @@ export default {
     const url = new URL(request.url);
     try {
       const handled=await hosting(request,env,{response,requireHost,body,cookie,counts}); if(handled)return handled;
+      const ops=await operations(request,env,{response,requireHost,body}); if(ops)return ops;
+      const news=await newsletter(request,env,{response,requireHost,body}); if(news)return news;
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
 
       // Authentication and Cloud Sync Endpoints
@@ -618,7 +622,7 @@ export default {
       return await env.ASSETS.fetch(request);
     } catch (error) { return response({ error: error.message || 'Something went wrong.' }, { status: error.status || 500 }); }
   },
-  async scheduled(controller,env,ctx) {ctx.waitUntil(processNotifications(env));},
+  async scheduled(controller,env,ctx) {ctx.waitUntil(Promise.all([trackJob(env,'notifications',()=>processNotifications(env)),trackJob(env,'newsletter',()=>scheduledNewsletter(env))]));},
   async queue(batch, env) {
     for (const message of batch.messages) {
       try {

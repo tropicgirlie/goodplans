@@ -1,0 +1,30 @@
+import { useEffect, useState } from 'react';
+async function api(path, data) {
+  const r=await fetch(path,data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{});
+  const result=await r.json(); if(!r.ok) throw new Error(result.error||'Please try again.'); return result;
+}
+export function OperationsPanel() {
+  const [data,setData]=useState(null),[error,setError]=useState('');
+  const load=()=>api('/api/host/operations').then(setData).catch(e=>setError(e.message));
+  useEffect(()=>{load();},[]);
+  return <section className="gp-form"><h2>Support & service status</h2><button className="gp-text-button" onClick={load}>Refresh</button>{error&&<p role="alert">{error}</p>}{data&&<>
+    <h3>Production connections</h3>{Object.entries(data.ready).map(([key,ready])=><p key={key}>{key}: {ready?'Configured':'Needs configuration'}</p>)}
+    <h3>Scheduled jobs</h3>{!data.jobs.length&&<p>No scheduled run recorded yet.</p>}{data.jobs.map(j=><p key={j.name}>{j.name}: {j.status} · {new Date(j.updated_at).toLocaleString()}</p>)}
+    <h3>Email outcomes</h3><p>Sent means accepted by the provider. Delivered means accepted by the recipient’s mail server.</p>{['mail','newsletter'].map(key=><p key={key}>{key}: {data[key].map(x=>`${x.count} ${x.status}`).join(', ')||'No deliveries yet'}</p>)}
+    <h3>Support requests</h3><p>Verify ownership before sharing or deleting personal data. Mark a request resolved only after completing it.</p>{!data.requests.length&&<p>No requests yet.</p>}{data.requests.map(r=><article key={r.id}><h4>{r.kind} · {r.status}</h4><p>{r.email} · {new Date(r.created_at).toLocaleString()}</p><p style={{whiteSpace:'pre-wrap'}}>{r.message}</p><small>{r.id}</small><p><button className="gp-button secondary" onClick={async()=>{try{await api('/api/host/operations',{id:r.id,status:r.status==='open'?'resolved':'open'});load();}catch(e){setError(e.message);}}}>{r.status==='open'?'Mark resolved':'Reopen'}</button></p></article>)}
+  </>}</section>;
+}
+export default function ServicePages({page}) {
+  const [status,setStatus]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  async function submit(e){e.preventDefault();setBusy(true);setError('');const values=Object.fromEntries(new FormData(e.currentTarget));try{const r=await api('/api/support',values);setStatus(`Request saved. Keep this reference: ${r.reference}. The organiser will review it and may contact you to verify ownership.`);}catch(e){setError(e.message);}finally{setBusy(false);}}
+  return <main className="gp-app service-page"><section className="gp-form" style={{maxWidth:760,margin:'40px auto',padding:24}}><a href="/">← Good Plans home</a>{page==='privacy'?<>
+    <h1>Your plans, your privacy.</h1><p>Updated 9 September 2026. Good Plans is a creator-run planner by luana.systems. Use our <a href="/?page=support">support form</a> for privacy questions or requests.</p>
+    <h2>What we store and why</h2><p>Your browser stores your plans, saved people and preferences. When you sign in as an organiser, your workspace is also stored on our server so you can use it across devices. Avoid adding sensitive information about friends without their permission.</p>
+    <p>Hosted events store organiser details, invited names and email addresses, RSVP choices and party sizes. Private invitation links and session cookies provide access. Keep invitation links private. We use this information to operate your events and send invitations, reminders and changes.</p>
+    <p>The optional Dublin newsletter stores your email, interests and confirmation record. We send it only after you confirm. Each edition includes a link to change interests, unsubscribe or delete your newsletter record. Unsubscribing stops future editions; deletion removes your subscriber and delivery records from our application database.</p>
+    <h2>Service providers and storage</h2><p>Cloudflare hosts the application and database. Resend processes email delivery when configured. Ticketmaster supplies public event listings. Opening external event, map or calendar links takes you to those providers. We do not sell your contact details or use newsletter tracking pixels.</p>
+    <p>Workspace and event data remain until removed or a verified deletion request is completed. Support requests are retained while needed to resolve your request. A hashed email suppression record may remain after a bounce or spam complaint to prevent unwanted mail. Database backups and provider logs may persist beyond deletion from the active database.</p>
+    <h2>Access, export and deletion</h2><p>Use the support form to request a copy or deletion of your account, event or guest data. The organiser verifies ownership before acting; sending the form does not immediately delete an account. Newsletter deletion is available directly through your private preferences link. Browser data is separate from server data and can be removed through your browser’s site settings.</p>
+    <p>Questions or concerns can also be raised with Ireland’s <a href="https://www.dataprotection.ie/">Data Protection Commission</a>.</p>
+  </>:<><h1>A little help with your plans.</h1><p>Ask for help, a copy of your data, or deletion. Please use the email associated with your invitation or account. Don’t include passwords, private invitation links or sensitive friend notes.</p>{status?<p role="status">{status}</p>:<form onSubmit={submit} className="gp-form"><label>Email<input name="email" type="email" required maxLength={254}/></label><label>What do you need?<select name="kind"><option value="help">Help with Good Plans</option><option value="export">A copy of my data</option><option value="delete">Delete my data</option></select></label><label>Tell us a little more<textarea name="message" required minLength={10} maxLength={2000} rows={5}/></label>{error&&<p role="alert">{error}</p>}<button className="gp-button" disabled={busy}>{busy?'Saving…':'Send request'}</button></form>}<p><a href="/?page=privacy">How we use your data</a></p></>}</section></main>;
+}

@@ -1,3 +1,4 @@
+import { Webhook } from "svix";
 import test from "node:test";
 import assert from "node:assert/strict";
 const root = process.env.TEST_API_URL || "http://127.0.0.1:8787";
@@ -284,4 +285,197 @@ test("host journey: sign-in, series, private invites, plus-ones, waitlist, edit,
     body: JSON.stringify({ email: "tessa@example.com" }),
   });
   assert.equal(csrf.status, 403);
+});
+
+test("Dublin newsletter: discovery, opt-in, interests, preview, approval, idempotence and unsubscribe", async () => {
+  const host = client(),
+    guest = client();
+  assert.equal((await guest("/api/host/newsletter")).status, 401);
+  const login = await host("/api/auth/otp/request", "POST", {
+    email: "tessa@example.com",
+  });
+  assert.equal(login.status, 200, JSON.stringify(login.data));
+  assert.equal(
+    (
+      await host("/api/auth/otp/verify", "POST", {
+        email: "tessa@example.com",
+        code: login.data.devCode,
+      })
+    ).status,
+    200,
+  );
+  const listing = {
+    title: "Newsletter integration concert",
+    venue: "Dublin test venue",
+    starts_at: new Date(Date.now() + 3 * 86400000).toISOString(),
+    category: "Music",
+    price: "Free",
+    url: "https://example.com/dublin-test-event",
+  };
+  assert.equal(
+    (await host("/api/host/newsletter/listings", "POST", listing)).status,
+    200,
+  );
+  assert.equal(
+    (await host("/api/host/newsletter/listings", "POST", listing)).status,
+    200,
+  );
+  const discovery = await guest("/api/discovery");
+  assert.equal(
+    discovery.data.events.filter((e) => e.title === listing.title).length,
+    1,
+  );
+  const e = discovery.data.events.find((e) => e.title === listing.title);
+  assert.equal(
+    (await guest(`/api/discovery/${e.id}`)).data.event.title,
+    listing.title,
+  );
+  const subscribe = await guest("/api/newsletter/subscribe", "POST", {
+    email: "weekly-reader@example.com",
+    interests: ["Music"],
+    consent: true,
+  });
+  assert.equal(subscribe.status, 200, JSON.stringify(subscribe.data));
+  const token = new URLSearchParams(
+    new URL(subscribe.data.devLink).hash.slice(1),
+  ).get("token");
+  const manage = (action, extra = {}) =>
+    guest("/api/newsletter/manage", "POST", { token, action, ...extra });
+  assert.equal((await manage("read")).data.status, "pending");
+  assert.equal((await host("/api/host/newsletter")).data.subscribers, 0);
+  assert.equal((await manage("confirm")).data.status, "active");
+  const nonmatch = await guest("/api/newsletter/subscribe", "POST", {
+    email: "outdoor-reader@example.com",
+    interests: ["Outdoors"],
+    consent: true,
+  });
+  const otherToken = new URLSearchParams(
+    new URL(nonmatch.data.devLink).hash.slice(1),
+  ).get("token");
+  await guest("/api/newsletter/manage", "POST", {
+    token: otherToken,
+    action: "confirm",
+  });
+  const prepared = await host("/api/host/newsletter/prepare", "POST", {});
+  assert.equal(prepared.status, 200, JSON.stringify(prepared.data));
+  let issue = prepared.data.issue;
+  assert.equal(
+    (await host("/api/host/newsletter/prepare", "POST", {})).data.issue.id,
+    issue.id,
+  );
+  assert.equal(
+    (await host("/api/host/newsletter")).data.deliveries.length,
+    0,
+    "preparing must not send emails",
+  );
+  const saved = await host(`/api/host/newsletter/issues/${issue.id}`, "PATCH", {
+    revision: issue.revision,
+    subject: "This week in Dublin",
+    intro: "A test edition.",
+    eventIds: [e.id],
+  });
+  assert.equal(saved.status, 200, JSON.stringify(saved.data));
+  assert.equal(
+    (
+      await host(`/api/host/newsletter/issues/${issue.id}/approve`, "POST", {
+        revision: issue.revision,
+      })
+    ).status,
+    409,
+  );
+  issue = (await host("/api/host/newsletter")).data.issues.find(
+    (i) => i.id === issue.id,
+  );
+  await host("/api/host/newsletter/listings", "POST", {
+    ...listing,
+    id: e.id,
+    price: "EUR 5",
+  });
+  assert.equal(
+    (
+      await host(`/api/host/newsletter/issues/${issue.id}/approve`, "POST", {
+        revision: issue.revision,
+      })
+    ).status,
+    409,
+    "changed listing must be reviewed again",
+  );
+  await host(`/api/host/newsletter/issues/${issue.id}`, "PATCH", {
+    revision: issue.revision,
+    subject: issue.subject,
+    intro: issue.intro,
+    eventIds: [e.id],
+  });
+  issue = (await host("/api/host/newsletter")).data.issues.find(
+    (i) => i.id === issue.id,
+  );
+  const approved = await host(
+    `/api/host/newsletter/issues/${issue.id}/approve`,
+    "POST",
+    { revision: issue.revision },
+  );
+  assert.equal(approved.status, 200, JSON.stringify(approved.data));
+  assert.equal(approved.data.recipients, 1);
+  assert.equal(
+    (
+      await host(`/api/host/newsletter/issues/${issue.id}/approve`, "POST", {
+        revision: issue.revision,
+      })
+    ).status,
+    409,
+  );
+  let dashboard = (await host("/api/host/newsletter")).data;
+  assert.equal(
+    dashboard.deliveries.find(
+      (d) => d.issue_id === issue.id && d.status === "sent",
+    ).count,
+    1,
+  );
+  assert.equal(
+    (await manage("preferences", { interests: ["Arts & culture"] })).data
+      .interests[0],
+    "Arts & culture",
+  );
+  assert.equal((await manage("unsubscribe")).data.status, "unsubscribed");
+  assert.equal(
+    (await manage("confirm")).status,
+    400,
+    "old link cannot resubscribe without fresh consent",
+  );
+  assert.equal(
+    (await host("/api/host/newsletter/hide", "POST", { id: e.id })).status,
+    200,
+  );
+  assert.equal((await guest(`/api/discovery/${e.id}`)).status, 404);
+  assert.equal(
+    (
+      await guest("/api/newsletter/subscribe", "POST", {
+        email: "no-consent@example.com",
+        consent: false,
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    (await host("/api/host/newsletter/collect", "POST", {})).status,
+    503,
+    "missing feed key is explicit",
+  );
+  assert.equal((await guest('/api/host/operations')).status,401);
+  const support=await guest('/api/support','POST',{email:'guest@example.com',kind:'delete',message:'Please remove my guest record.'});
+  assert.equal(support.status,200);
+  const ops=(await host('/api/host/operations')).data;
+  assert.ok(ops.requests.some(r=>r.id===support.data.reference));
+  assert.equal((await host('/api/host/operations','POST',{id:support.data.reference,status:'resolved'})).status,200);
+  const raw=JSON.stringify({type:'email.complained',data:{email_id:'provider-test',to:['blocked@example.com']}});
+  assert.equal((await fetch(`${root}/api/webhooks/resend`,{method:'POST',body:raw})).status,401);
+  const timestamp=new Date(), msgId='test-complaint';
+  const signature=new Webhook('whsec_dGVzdC1vbmx5LXdlYmhvb2stc2VjcmV0').sign(msgId,timestamp,raw);
+  const webhook=()=>fetch(`${root}/api/webhooks/resend`,{method:'POST',body:raw,headers:{'svix-id':msgId,'svix-timestamp':String(Math.floor(+timestamp/1000)),'svix-signature':signature}});
+  const hookResult=await webhook(); assert.equal(hookResult.status,200,await hookResult.text());
+  assert.equal((await webhook()).status,200);
+  assert.equal((await guest('/api/newsletter/subscribe','POST',{email:'blocked@example.com',consent:true,interests:[]})).status,400);
+  assert.equal((await manage('delete')).data.status,'deleted');
+  assert.equal((await manage('read')).status,404);
+
 });

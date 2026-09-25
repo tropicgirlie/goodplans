@@ -10,6 +10,7 @@ export const categories = [
   "Music",
   "Arts & culture",
   "Comedy",
+  "Sports & games",
   "Outdoors",
   "Food & social",
   "Other",
@@ -28,15 +29,51 @@ export const discoverySearches = [
   { query: "festival", label: "Festivals", themes: [], boost: 18 },
   { query: "Christmas", label: "Christmas and winter", themes: [], boost: 24 },
   { query: "family", label: "Family-friendly events", themes: [], boost: 16 },
+  {
+    query: "date night",
+    label: "Date-night ideas",
+    themes: ["partners"],
+    boost: 18,
+  },
+  {
+    query: "live music",
+    label: "Live music for two",
+    themes: ["partners"],
+    boost: 16,
+  },
+  { query: "comedy", label: "Comedy nights", themes: ["partners"], boost: 16 },
+  {
+    query: "theatre",
+    label: "Theatre and shows",
+    themes: ["partners"],
+    boost: 16,
+  },
+  { query: "sport", label: "Live sport", themes: ["partners"], boost: 14 },
+  {
+    query: "tasting",
+    label: "Food and drink experiences",
+    themes: ["partners"],
+    boost: 18,
+  },
 ];
 const themeRules = [
   ["women", /\b(wom[ae]n|female|girls?|sisterhood|mums?|mothers?|menopause)\b/i, 34],
   ["caregiving", /\b(caregiv(?:er|ing)|carers?|parents?|mothers?|baby|babies|toddlers?|family|children|kids?)\b/i, 24],
+  [
+    "partner-explicit",
+    /\b(couples?|partners? welcome|date night|romantic)\b/i,
+    18,
+  ],
   ["creative", /\b(watercolou?r|paint(?:ing)?|pottery|ceramics?|crafts?|sewing|floral|drawing|printmaking|art class|workshop)\b/i, 20],
   ["dance", /\b(dance|dancing|salsa|bachata|ballet|movement|zumba|heels class)\b/i, 20],
   ["wellbeing", /\b(retreat|wellness|wellbeing|yoga|pilates|mindful(?:ness)?|spa|sound bath|meditat(?:e|ion))\b/i, 20],
   ["seasonal", /\b(christmas|xmas|elf|santa|winter lights?|halloween|pumpkin|festive market)\b/i, 20],
   ["festival", /\b(festival|fair|feis)\b/i, 16],
+  [
+    "partners",
+    /\b(date night|couples?|romantic|tasting|comedy|concert|gig|live music|music|theatre|cinema|film|escape room|quiz|sports?|rugby|football)\b/i,
+    14,
+  ],
 ];
 const themeLabels = {
   women: "Women-centred",
@@ -46,6 +83,8 @@ const themeLabels = {
   wellbeing: "Wellbeing",
   seasonal: "Seasonal",
   festival: "Festival",
+  "partner-explicit": "Partners welcome",
+  partners: "Good for two",
 };
 export function discoveryMatch(event, search = discoverySearches[0]) {
   const classification = event.classifications?.[0] || {};
@@ -147,6 +186,8 @@ export function normaliseTicketmaster(event, search = discoverySearches[0]) {
                         ? "Festivals"
                         : /comedy/i.test(kind)
                           ? "Comedy"
+                          : /sport/i.test(kind)
+                            ? "Sports & games"
                           : /music/i.test(kind)
                             ? "Music"
                             : /arts|theatre|film/i.test(kind)

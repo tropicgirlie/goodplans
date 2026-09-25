@@ -100,6 +100,8 @@ export default function NewsletterStudio() {
               Approve accurate, useful listings before they appear publicly.
               Women-centred means the source explicitly mentions women; other
               matches describe the activity or audience without guessing.
+              “Good for two” covers broad partner-friendly ideas and does not
+              assume what either person enjoys.
             </p>
             {(data.candidates || []).length ? (
               <div className="discovery-candidate-grid">

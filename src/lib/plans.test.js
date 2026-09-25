@@ -6,6 +6,7 @@ import {
   prettyDate,
   invitationText,
 } from "./plans.js";
+import { discoveryDraft, fitsPlanningContext } from "./discovery.js";
 const plan = {
   id: "test",
   title: "Coffee, cake; catch-up",
@@ -57,4 +58,40 @@ test("folds unicode calendar lines to 75 UTF-8 bytes", () => {
   const result = calendarData({ ...plan, notes: "☕é".repeat(100) });
   for (const line of result.ics.split("\r\n"))
     assert.ok(Buffer.byteLength(line, "utf8") <= 75);
+});
+test("partner planning includes broad shared activities and records the context", () => {
+  const music = {
+    id: "music",
+    title: "Live music",
+    starts_at: "2026-10-01T19:00:00Z",
+    ends_at: null,
+    venue: "Dublin",
+    category: "Music",
+    url: "https://example.com/music",
+    themes_json: '["partners"]',
+  };
+  assert.equal(fitsPlanningContext(music, "partner"), true);
+  assert.equal(
+    fitsPlanningContext(
+      {
+        ...music,
+        category: "Women & community",
+        themes_json: '["women","partners"]',
+      },
+      "partner",
+    ),
+    false,
+  );
+  assert.equal(
+    fitsPlanningContext(
+      {
+        ...music,
+        category: "Women & community",
+        themes_json: '["women","partner-explicit"]',
+      },
+      "partner",
+    ),
+    true,
+  );
+  assert.match(discoveryDraft(music, "partner").notes, /my partner/);
 });

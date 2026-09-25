@@ -62,6 +62,23 @@ test("focused discovery explains women, caregiving, creative and seasonal matche
   assert.match(match.reason, /women-centred/);
   assert.match(match.reason, /caregiving-friendly/);
 });
+test("partner discovery includes broad shared activities without gender assumptions", () => {
+  const match = discoveryMatch({
+    name: "Friday live comedy and music",
+    info: "A show followed by a tasting experience",
+    classifications: [{ segment: { name: "Arts" } }],
+  });
+  assert.ok(match.themes.includes("partners"));
+  assert.match(match.reason, /good for two/);
+});
+test("explicit couple language is kept separate from broad good-for-two signals", () => {
+  const match = discoveryMatch({
+    name: "Couples pottery date night",
+    classifications: [{ segment: { name: "Arts" } }],
+  });
+  assert.ok(match.themes.includes("partner-explicit"));
+  assert.match(match.reason, /partners welcome/);
+});
 test("unsafe source links and reversed event dates are rejected", () => {
   assert.throws(() =>
     validateListing({

@@ -961,13 +961,13 @@ export default function App() {
     const timer = setTimeout(() => setToast(""), 4500);
     return () => clearTimeout(timer);
   }, [toast]);
-  async function addDiscovery(event) {
+  async function addDiscovery(event, planningContext = "all") {
     try {
       const existing = plans.find((p) => p.discoveryId === event.id);
       const result = await discoveryEvent(event.id);
       navigate("My plans");
       if (existing) setActiveId(existing.id);
-      else setForm(discoveryDraft(result.event));
+      else setForm(discoveryDraft(result.event, planningContext));
     } catch (error) {
       setToast(error.message);
     }

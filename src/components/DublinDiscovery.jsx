@@ -5,11 +5,21 @@ import {
   newsletterSubscribe,
   newsletterManage,
 } from "../lib/goodPlansApi";
-import { DUBLIN_INTERESTS } from "../lib/discovery";
+import {
+  DUBLIN_INTERESTS,
+  discoveryThemes,
+  fitsPlanningContext,
+} from "../lib/discovery";
 export function EventPick({ event, onAdd, children }) {
+  const themes = discoveryThemes(event);
   return (
     <article className="dublin-pick">
-      <span className="gp-tag">{event.category}</span>
+      <div className="dublin-pick-tags">
+        <span className="gp-tag">{event.category}</span>
+        {themes.includes("partners") && (
+          <span className="gp-tag dublin-context-tag">Good for two</span>
+        )}
+      </div>
       <h3>{event.title}</h3>
       <p>
         <CalendarDays size={16} />
@@ -161,6 +171,7 @@ export default function DublinDiscovery({ onAdd }) {
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
     [category, setCategory] = useState("All"),
+    [planningContext, setPlanningContext] = useState("all"),
     [query, setQuery] = useState("");
   useEffect(() => {
     let active = true;
@@ -181,6 +192,7 @@ export default function DublinDiscovery({ onAdd }) {
   const visible = events.filter(
     (e) =>
       (category === "All" || e.category === category) &&
+      fitsPlanningContext(e, planningContext) &&
       `${e.title} ${e.venue}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
@@ -191,6 +203,31 @@ export default function DublinDiscovery({ onAdd }) {
         Good reasons to meet up over the next two weeks. Pick an event, make it
         a plan, and bring your people.
       </p>
+      <fieldset className="dublin-context-picker">
+        <legend>Who are you planning with?</legend>
+        {[
+          ["all", "All ideas"],
+          ["partner", "My partner"],
+          ["friends", "Friends"],
+          ["family", "Family or caregiving"],
+        ].map(([value, label]) => (
+          <button
+            type="button"
+            key={value}
+            aria-pressed={planningContext === value}
+            className={planningContext === value ? "selected" : ""}
+            onClick={() => setPlanningContext(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </fieldset>
+      {planningContext === "partner" && (
+        <p className="dublin-context-copy">
+          Ideas for time together, including music, comedy, culture, sport,
+          outdoors, workshops, festivals, and food experiences.
+        </p>
+      )}
       <div className="dublin-filters gp-form">
         <label>
           Find an event
@@ -222,7 +259,11 @@ export default function DublinDiscovery({ onAdd }) {
       ) : visible.length ? (
         <div className="dublin-grid">
           {visible.map((e) => (
-            <EventPick key={e.id} event={e} onAdd={onAdd} />
+            <EventPick
+              key={e.id}
+              event={e}
+              onAdd={(event) => onAdd(event, planningContext)}
+            />
           ))}
         </div>
       ) : (

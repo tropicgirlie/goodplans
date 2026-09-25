@@ -34,8 +34,9 @@ export default function NewsletterStudio() {
       <span className="gp-eyebrow">GOOD PLANS DUBLIN</span>
       <h1>Your weekly edit.</h1>
       <p>
-        Collection runs weekly and prepares a draft. Review your picks here,
-        then approve the email for confirmed subscribers.
+        The background finder checks Dublin every day. Review new candidates,
+        prepare your weekly edit, then approve the email for confirmed
+        subscribers.
       </p>
       {error && (
         <p role="alert" className="gp-error">
@@ -50,7 +51,7 @@ export default function NewsletterStudio() {
             <b>{data.subscribers} confirmed subscribers</b>
             <p>
               {data.collectionReady
-                ? "Automatic Ticketmaster collection is connected."
+                ? "Daily Ticketmaster discovery is connected."
                 : "Automatic collection needs TICKETMASTER_API_KEY. You can add local events below."}
             </p>
             {!data.emailReady && (
@@ -88,6 +89,94 @@ export default function NewsletterStudio() {
               </button>
             </div>
           </div>
+          <section className="discovery-review">
+            <div className="gp-section-heading">
+              <div>
+                <span className="gp-eyebrow">REVIEW QUEUE</span>
+                <h2>{data.candidates?.length || 0} new event candidates</h2>
+              </div>
+            </div>
+            <p>
+              Approve accurate, useful listings before they appear publicly.
+              Women-centred means the source explicitly mentions women; other
+              matches describe the activity or audience without guessing.
+            </p>
+            {(data.candidates || []).length ? (
+              <div className="discovery-candidate-grid">
+                {data.candidates.map((event) => (
+                  <article className="discovery-candidate" key={event.id}>
+                    <div className="discovery-candidate-score">
+                      {event.discovery_score} fit
+                    </div>
+                    <span className="gp-tag">{event.category}</span>
+                    <h3>{event.title}</h3>
+                    <p>
+                      {new Date(event.starts_at).toLocaleString("en-IE", {
+                        timeZone: "Europe/Dublin",
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <p>{event.venue}</p>
+                    <p>{event.match_reason}</p>
+                    <div className="gp-detail-actions">
+                      <a
+                        className="gp-text-button"
+                        href={event.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Check source
+                      </a>
+                      <button
+                        className="gp-button"
+                        disabled={busy}
+                        onClick={() =>
+                          action(() =>
+                            newsletterAction("review", {
+                              id: event.id,
+                              decision: "approved",
+                            }),
+                          )
+                        }
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="gp-button secondary"
+                        disabled={busy}
+                        onClick={() =>
+                          action(() =>
+                            newsletterAction("review", {
+                              id: event.id,
+                              decision: "rejected",
+                            }),
+                          )
+                        }
+                      >
+                        Skip
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p>No new candidates. The next background check runs today.</p>
+            )}
+            <details>
+              <summary>What the finder looks for</summary>
+              <div className="discovery-search-list">
+                {(data.searches || []).map((search) => (
+                  <span className="gp-tag" key={search.label}>
+                    {search.label}
+                  </span>
+                ))}
+              </div>
+            </details>
+          </section>
           <details className="newsletter-manual">
             <summary>Add a local event</summary>
             <p>

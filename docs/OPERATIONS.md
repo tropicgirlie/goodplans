@@ -20,7 +20,9 @@ The support form saves requests in D1, visible to authenticated hosts. It does n
 4. For a code regression, use Cloudflare’s deployment rollback to the preceding known-good version. Additive tables can remain. Do not drop production data as a rollback shortcut.
 5. For data recovery, restore the private export to a separate D1 database, verify counts and critical records there, and review changes since the backup before switching bindings. A restore drill and retained backup policy are still required before broad release.
 
-The scheduled handler records job status; the newsletter studio also shows collection errors. A completed scheduler invocation may contain a failed collection recorded in discovery runs. Configure external alerting and inspect both views. No automatic newsletter is sent until an organiser approves its draft.
+The scheduled handler records job status; the newsletter studio also shows collection errors. Once `TICKETMASTER_API_KEY` is configured, the 15-minute scheduler claims one discovery run per Dublin calendar day. It searches a 90-day window using broad and focused terms for creative classes, dance, women-centred gatherings, caregivers, retreats, festivals, family activities and seasonal events. Results are deduplicated and enter a private review queue. A source must explicitly mention women before the system applies the women-centred label. Only organiser-approved candidates become public or eligible for a newsletter. Configure external alerting and inspect both views. No automatic newsletter is sent until an organiser approves its draft.
+
+Ticketmaster is the first licensed discovery source. It does not cover every independent class, community group or retreat. Add verified local listings manually in the studio while additional source adapters are assessed; do not scrape sites that do not provide an authorised API or feed.
 
 ## Known release limits
 

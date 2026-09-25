@@ -31,14 +31,15 @@ Not ready for public launch. The core implementation has passed local testing; a
 - Edit multiple future occurrences together; current editing is per occurrence and cancellation can cover the remaining series.
 - Two-way calendar sync; existing Google Calendar links and ICS exports work as add-to-calendar helpers.
 - More local event sources, beyond Ticketmaster and manually added picks.
+- Review daily discovery candidates in the organiser portal. Automated matching prioritises relevant themes but never establishes whether an event is safe, inclusive, accessible or currently available.
 - Audiences above 500 confirmed newsletter subscribers.
 - Generated custom artwork.
 
 ## Existing evidence
 
-21 unit tests and two isolated Worker/D1 integration journeys passed during newsletter implementation. Production build and Worker dry-run packaging passed. The later circle redesign passed a production build and desktop/mobile interaction checks. These checks are local and are not a full security, deliverability or load audit.
+22 unit tests and two isolated Worker/D1 integration journeys pass. Production build and Worker dry-run packaging pass. The circle redesign and focused discovery review queue passed browser checks. These checks are local and are not a full security, deliverability or load audit.
 
-Newsletter collection prepares a weekly draft. A host must approve each edition before email delivery; unattended sending is intentionally not enabled.
+Daily discovery searches a 90-day window and queues candidates for organiser review. Approved events can populate a weekly draft. A host must approve each edition before email delivery; unattended sending is intentionally not enabled.
 
 ## Latest validation
 

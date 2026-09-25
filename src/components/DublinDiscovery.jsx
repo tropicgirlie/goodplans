@@ -25,6 +25,9 @@ export function EventPick({ event, onAdd, children }) {
       </p>
       <p>{event.venue}</p>
       <strong>{event.price}</strong>
+      {event.match_reason && (
+        <p className="dublin-match-reason">Why it’s here: {event.match_reason}</p>
+      )}
       <div className="gp-detail-actions">
         {onAdd && (
           <button className="gp-button" onClick={() => onAdd(event)}>

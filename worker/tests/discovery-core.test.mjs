@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   normaliseTicketmaster,
+  discoveryMatch,
   curate,
   weekKey,
   validateListing,
@@ -26,6 +27,7 @@ test("provider data maps safely without inventing prices or end times", () => {
   assert.equal(e.price, "Check booking page");
   assert.equal(e.ends_at, null);
   assert.equal(e.id, "tm-sample");
+  assert.equal(e.review_status, "candidate");
   assert.equal(
     normaliseTicketmaster({ ...fixture, dates: { start: { dateTBA: true } } }),
     null,
@@ -44,6 +46,21 @@ test("provider data maps safely without inventing prices or end times", () => {
     }).status,
     "unavailable",
   );
+});
+test("focused discovery explains women, caregiving, creative and seasonal matches", () => {
+  const event = {
+    name: "Women carers Christmas watercolour workshop",
+    info: "A relaxed class for mothers and caregivers",
+    classifications: [{ segment: { name: "Arts" } }],
+  };
+  const match = discoveryMatch(event);
+  assert.deepEqual(
+    match.themes,
+    ["women", "caregiving", "creative", "seasonal"],
+  );
+  assert.ok(match.score >= 90);
+  assert.match(match.reason, /women-centred/);
+  assert.match(match.reason, /caregiving-friendly/);
 });
 test("unsafe source links and reversed event dates are rejected", () => {
   assert.throws(() =>
@@ -109,5 +126,7 @@ test("collection is configuration-gated and normalises real API shape", async (t
     },
   };
   assert.equal(await collectDublin(env), 1);
+  assert.ok(fetch.mock.callCount() > 10, "runs broad and themed searches");
   assert.equal(writes[0].args[0], "tm-sample");
+  assert.equal(writes[0].args[15], "candidate");
 });

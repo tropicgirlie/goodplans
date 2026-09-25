@@ -61,7 +61,7 @@ Cloudflare Access is optional alongside OTP. If using it, configure `CF_ACCESS_T
 
 ## Weekly Dublin discovery and newsletter
 
-Migration `0006_dublin_newsletter.sql` adds the public event catalogue, confirmed subscribers, weekly editions, consent records and a separate newsletter delivery queue. Apply it locally with `npm run db:local`; remote migration and deployment are still required before release.
+Migration `0006_dublin_newsletter.sql` adds the public event catalogue, confirmed subscribers, weekly editions, consent records and a separate newsletter delivery queue. Migration `0008_focused_discovery.sql` adds themed matching, relevance scores and the organiser review state. Apply migrations locally with `npm run db:local`; remote migration and deployment are still required before release.
 
 Add a Ticketmaster Discovery API credential securely:
 
@@ -71,7 +71,7 @@ npx wrangler secret put TICKETMASTER_API_KEY --config worker/wrangler.jsonc
 
 Use Workers Paid for the combined collection and notification batches; the free per-invocation D1 query limit is too low for a full run. Audience inserts are grouped into JSON row batches.
 
-The newsletter also uses `RESEND_API_KEY`, `EMAIL_FROM` and the canonical `PUBLIC_ORIGIN` in the Worker configuration. The existing 15-minute cron checks for a new Dublin calendar week. It collects Dublin events for the next 14 days once per week, then prepares one draft of up to eight varied picks. It does **not** approve or email an edition automatically. The organiser can collect again, add verified local events manually, edit the subject/introduction and event selection, and approve the saved preview in **Organiser portal → Weekly Dublin newsletter**.
+The newsletter also uses `RESEND_API_KEY`, `EMAIL_FROM` and the canonical `PUBLIC_ORIGIN` in the Worker configuration. The existing 15-minute cron claims one discovery run per Dublin calendar day. It searches Ticketmaster across the next 90 days using broad and focused queries, deduplicates the results, explains each match and places it in a private organiser review queue. Approved events can appear publicly and populate one draft per Dublin calendar week. It does **not** approve an event or email an edition automatically. The organiser can collect again, approve or skip candidates, add verified local events manually, edit the subject/introduction and event selection, and approve the saved preview in **Organiser portal → Weekly Dublin newsletter**.
 
 - Collection uses the official Ticketmaster Discovery API; no general-purpose scraping. Its key and applicable provider access are needed. There is no synthetic public event feed. Manual listings allow smaller events from other sources.
 - Up to 500 provider records are fetched per run. Undated, non-Dublin, cancelled/postponed/off-sale events are filtered. Provider records older than eight days and events whose start time passed are unavailable in discovery. Curated duplicates are collapsed by title, start time and venue.
@@ -80,6 +80,6 @@ The newsletter also uses `RESEND_API_KEY`, `EMAIL_FROM` and the canonical `PUBLI
 - Interests choose which editions a subscriber receives: at least one selected event category must match. Empty interests means every edition. The first release caps the confirmed audience at 500; larger lists need paged audience preparation.
 - Approval checks the saved revision and event freshness, captures the audience and queues one delivery per issue/subscriber transactionally. Repeated approval cannot resend an edition. Delivery processes 25 messages per run, checks subscription status again, and retries provider failures up to five attempts. Unsubscribe suppresses queued and failed messages; already in-flight messages may finish.
 - Emails include plain text and escaped HTML versions, source attribution, and private preferences/unsubscribe links. Provider acceptance is not proof of inbox delivery. Failed newsletter sends can be retried in the studio. Never treat local mailbox delivery as a production email test.
-- Weekly collection errors appear in the studio. If collection fails, use **Collect Dublin events** after fixing the credential/service, then **Prepare this week's draft**. Existing drafts retain the host's selections; **Save preview** refreshes selected event details before approval.
+- Daily collection errors appear in the studio. If collection fails, use **Collect Dublin events** after fixing the credential/service, review candidates, then **Prepare this week's draft**. Existing drafts retain the host's selections; **Save preview** refreshes selected event details before approval.
 
 Tests cover normalization, category selection, deduplication, unsafe links, Dublin week boundaries, consent, confirmation, interests, stale previews, approval idempotence, unsubscribe and the original organiser journey. Before enabling subscriptions in production, verify a real confirmation email and approved test issue, its plan link and unsubscribe action in a separate browser. Live API credentials, email delivery and production configuration have not been verified locally.

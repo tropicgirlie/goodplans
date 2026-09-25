@@ -2396,6 +2396,40 @@
   border-top: 1px solid #d8ceba;
   padding: 12px 0;
 }
+
+.discovery-review {
+  margin: 28px 0;
+  padding: clamp(18px, 3vw, 30px);
+  border: 2px solid var(--ink);
+  border-radius: 24px;
+  background: #fffaf0;
+  box-shadow: 8px 8px 0 var(--purple);
+}
+
+.discovery-candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.discovery-candidate {
+  position: relative;
+  padding: 20px;
+  border: 1.5px solid var(--ink);
+  border-radius: 16px;
+  background: white;
+}
+
+.discovery-candidate h3 { margin: 12px 0 8px; }
+.discovery-candidate p { margin: 6px 0; }
+.discovery-candidate-score {
+  float: right;
+  color: var(--purple);
+  font-weight: 800;
+}
+.discovery-search-list { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 12px; }
+.dublin-match-reason { color: var(--purple); font-size: .9rem; font-weight: 700; }
 @media (max-width: 700px) {
   .dublin-grid,
   .dublin-signup,

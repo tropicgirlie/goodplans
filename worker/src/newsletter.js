@@ -3,6 +3,7 @@ import { fail } from "./hosting-core.js";
 import { sendEmail } from "./mail.js";
 import {
   categories,
+  discoverySearches,
   validateListing,
   normaliseTicketmaster,
   weekKey,
@@ -46,7 +47,7 @@ function interests(value) {
 async function listingRows(env, days = 14) {
   return (
     await env.DB.prepare(
-      "SELECT * FROM discovered_events WHERE status='active' AND starts_at>? AND starts_at<=? AND (source='manual' OR updated_at>?) ORDER BY starts_at LIMIT 500",
+      "SELECT * FROM discovered_events WHERE status='active' AND review_status='approved' AND starts_at>? AND starts_at<=? AND (source='manual' OR updated_at>?) ORDER BY starts_at LIMIT 500",
     )
       .bind(
         now(),
@@ -56,9 +57,18 @@ async function listingRows(env, days = 14) {
       .all()
   ).results;
 }
+async function candidateRows(env) {
+  return (
+    await env.DB.prepare(
+      "SELECT * FROM discovered_events WHERE status='active' AND review_status='candidate' AND starts_at>? ORDER BY discovery_score DESC,starts_at LIMIT 150",
+    )
+      .bind(now())
+      .all()
+  ).results;
+}
 function listingStatement(env, e) {
   return env.DB.prepare(
-    "INSERT INTO discovered_events(id,source,source_id,title,starts_at,ends_at,venue,category,price,url,status,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(source,source_id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,ends_at=excluded.ends_at,venue=excluded.venue,category=excluded.category,price=excluded.price,url=excluded.url,status=CASE WHEN discovered_events.status='hidden' THEN 'hidden' ELSE excluded.status END,updated_at=excluded.updated_at",
+    "INSERT INTO discovered_events(id,source,source_id,title,starts_at,ends_at,venue,category,price,url,status,updated_at,themes_json,match_reason,discovery_score,review_status,first_seen_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(source,source_id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,ends_at=excluded.ends_at,venue=excluded.venue,category=excluded.category,price=excluded.price,url=excluded.url,status=CASE WHEN discovered_events.status='hidden' THEN 'hidden' ELSE excluded.status END,updated_at=excluded.updated_at,themes_json=excluded.themes_json,match_reason=excluded.match_reason,discovery_score=excluded.discovery_score,review_status=CASE WHEN discovered_events.review_status IN ('approved','rejected') THEN discovered_events.review_status ELSE excluded.review_status END",
   ).bind(
     e.id,
     e.source,
@@ -72,6 +82,11 @@ function listingStatement(env, e) {
     e.url,
     e.status || "active",
     now(),
+    JSON.stringify(e.themes || []),
+    e.match_reason || "Added by the organiser",
+    e.discovery_score || 0,
+    e.review_status || (e.source === "manual" ? "approved" : "candidate"),
+    now(),
   );
 }
 export async function collectDublin(env) {
@@ -80,43 +95,60 @@ export async function collectDublin(env) {
       "Add TICKETMASTER_API_KEY to enable automatic Dublin event collection. You can add local picks manually.",
       503,
     );
-  const collected = [];
-  for (let page = 0; page < 5; page++) {
-    const params = new URLSearchParams({
-      apikey: env.TICKETMASTER_API_KEY,
-      city: "Dublin",
-      countryCode: "IE",
-      startDateTime: now().replace(/\.\d+Z$/, "Z"),
-      endDateTime: new Date(Date.now() + 14 * 86400000)
-        .toISOString()
-        .replace(/\.\d+Z$/, "Z"),
-      size: "100",
-      page: String(page),
-      sort: "date,asc",
-      includeTBA: "no",
-      includeTBD: "no",
-    });
-    let response;
-    try {
-      response = await fetch(
-        `https://app.ticketmaster.com/discovery/v2/events.json?${params}`,
-        { signal: AbortSignal.timeout(15000) },
-      );
-    } catch {
-      fail(
-        "Dublin event collection timed out or could not connect. Try again later.",
-        503,
-      );
+  const byId = new Map();
+  for (const search of discoverySearches) {
+    for (let page = 0; page < (search.pages || 1); page++) {
+      const params = new URLSearchParams({
+        apikey: env.TICKETMASTER_API_KEY,
+        city: "Dublin",
+        countryCode: "IE",
+        startDateTime: now().replace(/\.\d+Z$/, "Z"),
+        endDateTime: new Date(Date.now() + 90 * 86400000)
+          .toISOString()
+          .replace(/\.\d+Z$/, "Z"),
+        size: "50",
+        page: String(page),
+        sort: "date,asc",
+        includeTBA: "no",
+        includeTBD: "no",
+        ...(search.query ? { keyword: search.query } : {}),
+      });
+      let response;
+      try {
+        response = await fetch(
+          `https://app.ticketmaster.com/discovery/v2/events.json?${params}`,
+          { signal: AbortSignal.timeout(15000) },
+        );
+      } catch {
+        fail(
+          "Dublin event collection timed out or could not connect. Try again later.",
+          503,
+        );
+      }
+      if (!response.ok)
+        fail(`Dublin event provider is unavailable (${response.status}).`, 503);
+      const payload = await response.json();
+      for (const raw of payload._embedded?.events || []) {
+        const event = normaliseTicketmaster(raw, search),
+          existing = event && byId.get(event.source_id);
+        if (!event) continue;
+        if (existing) {
+          event.themes = [...new Set([...existing.themes, ...event.themes])];
+          event.discovery_score = Math.max(
+            existing.discovery_score,
+            event.discovery_score,
+          );
+          event.match_reason = [...new Set([
+            existing.match_reason,
+            event.match_reason,
+          ])].join("; ");
+        }
+        byId.set(event.source_id, event);
+      }
+      if (page + 1 >= (payload.page?.totalPages || 1)) break;
     }
-    if (!response.ok)
-      fail(`Dublin event provider is unavailable (${response.status}).`, 503);
-    const payload = await response.json();
-    for (const raw of payload._embedded?.events || []) {
-      const e = normaliseTicketmaster(raw);
-      if (e) collected.push(e);
-    }
-    if (page + 1 >= (payload.page?.totalPages || 1)) break;
   }
+  const collected = [...byId.values()];
   for (let i = 0; i < collected.length; i += 50)
     await env.DB.batch(
       collected.slice(i, i + 50).map((e) => listingStatement(env, e)),
@@ -211,7 +243,13 @@ export async function deliverNewsletters(env) {
   ).run();
 }
 export async function scheduledNewsletter(env) {
-  const key = `weekly-${weekKey()}`;
+  const day = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Dublin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const key = `daily-${day}`;
   const claimed = await env.DB.prepare(
     "INSERT OR IGNORE INTO discovery_runs(key,status,started_at) VALUES (?,'running',?)",
   )
@@ -220,7 +258,8 @@ export async function scheduledNewsletter(env) {
   if (claimed.meta.changes) {
     try {
       const count = await collectDublin(env);
-      await prepareIssue(env, publicOrigin(null, env));
+      if ((await listingRows(env)).length)
+        await prepareIssue(env, publicOrigin(null, env));
       await env.DB.prepare(
         "UPDATE discovery_runs SET status='complete',finished_at=?,count=? WHERE key=?",
       )
@@ -424,6 +463,8 @@ export async function newsletter(
       runs,
       deliveries,
       events: await listingRows(env),
+      candidates: await candidateRows(env),
+      searches: discoverySearches.map(({ query, label }) => ({ query, label })),
       collectionReady: Boolean(env.TICKETMASTER_API_KEY),
       emailReady: emailReady(env),
     });
@@ -486,6 +527,18 @@ export async function newsletter(
     )
       .bind(input.id)
       .run();
+    return response({ ok: true });
+  }
+  if (path === "/api/host/newsletter/review" && method === "POST") {
+    const input = await body(request);
+    if (!['approved', 'rejected'].includes(input.decision))
+      fail("Choose approve or skip.");
+    const result = await env.DB.prepare(
+      "UPDATE discovered_events SET review_status=? WHERE id=? AND review_status='candidate' AND starts_at>?",
+    )
+      .bind(input.decision, input.id, now())
+      .run();
+    if (!result.meta.changes) fail("This candidate is no longer available.", 409);
     return response({ ok: true });
   }
   if (path === "/api/host/newsletter/prepare" && method === "POST")

@@ -1,5 +1,12 @@
 import { localDate } from "./plans";
 export const DUBLIN_INTERESTS = [
+  "Creative classes",
+  "Dance & movement",
+  "Wellbeing & retreats",
+  "Women & community",
+  "Family & caregiving",
+  "Seasonal",
+  "Festivals",
   "Music",
   "Arts & culture",
   "Comedy",

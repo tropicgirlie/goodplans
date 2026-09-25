@@ -1,5 +1,12 @@
 import { fail } from "./hosting-core.js";
 export const categories = [
+  "Creative classes",
+  "Dance & movement",
+  "Wellbeing & retreats",
+  "Women & community",
+  "Family & caregiving",
+  "Seasonal",
+  "Festivals",
   "Music",
   "Arts & culture",
   "Comedy",
@@ -7,6 +14,69 @@ export const categories = [
   "Food & social",
   "Other",
 ];
+export const discoverySearches = [
+  { query: null, label: "What’s on in Dublin", themes: [], boost: 0, pages: 2 },
+  { query: "watercolour", label: "Watercolour and painting", themes: [], boost: 24 },
+  { query: "pottery", label: "Pottery and ceramics", themes: [], boost: 24 },
+  { query: "craft workshop", label: "Creative workshops", themes: [], boost: 20 },
+  { query: "dance class", label: "Dance and movement", themes: [], boost: 24 },
+  { query: "women", label: "Women-centred events", themes: [], boost: 32 },
+  { query: "mother", label: "Mothers and caregivers", themes: [], boost: 30 },
+  { query: "caregiver", label: "Caregiving support", themes: [], boost: 30 },
+  { query: "retreat", label: "Retreats", themes: [], boost: 24 },
+  { query: "wellness", label: "Wellbeing", themes: [], boost: 20 },
+  { query: "festival", label: "Festivals", themes: [], boost: 18 },
+  { query: "Christmas", label: "Christmas and winter", themes: [], boost: 24 },
+  { query: "family", label: "Family-friendly events", themes: [], boost: 16 },
+];
+const themeRules = [
+  ["women", /\b(wom[ae]n|female|girls?|sisterhood|mums?|mothers?|menopause)\b/i, 34],
+  ["caregiving", /\b(caregiv(?:er|ing)|carers?|parents?|mothers?|baby|babies|toddlers?|family|children|kids?)\b/i, 24],
+  ["creative", /\b(watercolou?r|paint(?:ing)?|pottery|ceramics?|crafts?|sewing|floral|drawing|printmaking|art class|workshop)\b/i, 20],
+  ["dance", /\b(dance|dancing|salsa|bachata|ballet|movement|zumba|heels class)\b/i, 20],
+  ["wellbeing", /\b(retreat|wellness|wellbeing|yoga|pilates|mindful(?:ness)?|spa|sound bath|meditat(?:e|ion))\b/i, 20],
+  ["seasonal", /\b(christmas|xmas|elf|santa|winter lights?|halloween|pumpkin|festive market)\b/i, 20],
+  ["festival", /\b(festival|fair|feis)\b/i, 16],
+];
+const themeLabels = {
+  women: "Women-centred",
+  caregiving: "Caregiving-friendly",
+  creative: "Creative class",
+  dance: "Dance & movement",
+  wellbeing: "Wellbeing",
+  seasonal: "Seasonal",
+  festival: "Festival",
+};
+export function discoveryMatch(event, search = discoverySearches[0]) {
+  const classification = event.classifications?.[0] || {};
+  const text = [
+    event.name,
+    event.info,
+    event.pleaseNote,
+    event._embedded?.venues?.[0]?.name,
+    classification.segment?.name,
+    classification.genre?.name,
+    classification.subGenre?.name,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const themes = new Set(search.themes || []);
+  let score = 20 + (search.boost || 0);
+  for (const [theme, pattern, weight] of themeRules) {
+    if (pattern.test(text)) {
+      if (!themes.has(theme)) score += weight;
+      themes.add(theme);
+    }
+  }
+  const labels = [...themes].map((theme) => themeLabels[theme]).filter(Boolean);
+  return {
+    themes: [...themes],
+    score: Math.min(score, 100),
+    reason: labels.length
+      ? `Matched ${labels.join(", ").toLowerCase()}`
+      : "Popular upcoming Dublin event",
+  };
+}
 export function safeLink(raw) {
   try {
     if (typeof raw !== "string" || raw.length > 2048)
@@ -38,7 +108,7 @@ export function validateListing(input) {
     url: safeLink(input.url),
   };
 }
-export function normaliseTicketmaster(event) {
+export function normaliseTicketmaster(event, search = discoverySearches[0]) {
   const start = event.dates?.start;
   if (
     !event.id ||
@@ -53,18 +123,35 @@ export function normaliseTicketmaster(event) {
   const kind = `${event.classifications?.[0]?.segment?.name || ""} ${event.classifications?.[0]?.genre?.name || ""}`;
   const price = event.priceRanges?.[0];
   try {
+    const match = discoveryMatch(event, search);
+    const [primaryTheme] = match.themes;
     return {
       ...validateListing({
         title: event.name,
         starts_at: start.dateTime,
         venue: [venue.name, venue.city?.name].filter(Boolean).join(", "),
-        category: /comedy/i.test(kind)
-          ? "Comedy"
-          : /music/i.test(kind)
-            ? "Music"
-            : /arts|theatre|film/i.test(kind)
-              ? "Arts & culture"
-              : "Other",
+        category:
+          primaryTheme === "women"
+            ? "Women & community"
+            : primaryTheme === "caregiving"
+              ? "Family & caregiving"
+              : primaryTheme === "creative"
+                ? "Creative classes"
+                : primaryTheme === "dance"
+                  ? "Dance & movement"
+                  : primaryTheme === "wellbeing"
+                    ? "Wellbeing & retreats"
+                    : primaryTheme === "seasonal"
+                      ? "Seasonal"
+                      : primaryTheme === "festival"
+                        ? "Festivals"
+                        : /comedy/i.test(kind)
+                          ? "Comedy"
+                          : /music/i.test(kind)
+                            ? "Music"
+                            : /arts|theatre|film/i.test(kind)
+                              ? "Arts & culture"
+                              : "Other",
         price: price
           ? `${price.min === 0 && price.max === 0 ? "Free" : `${price.currency || "EUR"} ${price.min}${price.max > price.min ? `–${price.max}` : ""}`}`
           : "Check booking page",
@@ -73,6 +160,10 @@ export function normaliseTicketmaster(event) {
       id: `tm-${event.id}`,
       source: "ticketmaster",
       source_id: event.id,
+      themes: match.themes,
+      match_reason: match.reason,
+      discovery_score: match.score,
+      review_status: "candidate",
       status: ["cancelled", "postponed", "offsale"].includes(
         event.dates?.status?.code,
       )
@@ -110,7 +201,10 @@ export function curate(events, maximum = 8) {
     const e = unique.find((e) => e.category === category);
     if (e) selected.push(e);
   }
-  for (const e of unique) if (!selected.includes(e)) selected.push(e);
+  for (const e of [...unique].sort(
+    (a, b) => (b.discovery_score || 0) - (a.discovery_score || 0),
+  ))
+    if (!selected.includes(e)) selected.push(e);
   return selected
     .slice(0, maximum)
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at));

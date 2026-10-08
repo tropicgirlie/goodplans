@@ -370,3 +370,27 @@
     transition: none !important;
   }
 }
+
+.circle-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--paper, #fff8ea);
+  color: var(--ink, #29251f);
+  font-weight: 700;
+}
+.circle-heading > p { max-width: 52ch; line-height: 1.65; }
+.circle-heading + .circle-more { margin: 0 0 28px; }
+.gp-main .circle-edit { padding: 32px 0; width: 100%; }
+.circle-friend:focus-visible, .circle-idea:focus-visible, .circle-more:focus-visible {
+  outline: 3px solid #285bc7;
+  outline-offset: 4px;
+}
+@media (max-width: 600px) {
+  .gp-main .circle-edit { padding: 24px 0; }
+  .circle-initial { width: 32px; height: 32px; }
+}

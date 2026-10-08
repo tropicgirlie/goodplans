@@ -43,7 +43,7 @@ const ideas = [
   },
 ];
 
-const defaultSettings = {
+export const defaultSettings = {
   profile: {
     city: "Dublin",
     radius: "25 km",
@@ -196,12 +196,11 @@ export default function OriginalHome({
   const scrollToPlanner = () =>
     document.querySelector("#planner")?.scrollIntoView({ behavior: "smooth" });
   const openSettings = (tab = "profile") => {
-    setSettingsMode(tab);
-    setShowSettings(true);
+    onManage(tab === "organizer" ? "Organiser portal" : "My people");
   };
   const makePlan = (e) => {
     e.preventDefault();
-    setMadePlan(true);
+    onManage("My people");
   };
   const openPlan = () =>
     onCreate({
@@ -472,7 +471,8 @@ export default function OriginalHome({
         <AffinityMatchMatrix
           selectedFriends={selectedFriends}
           setSelectedFriends={setSelectedFriends}
-          onOpenPlanModal={handlePlanOutingForFriends}
+          onOpenPlanModal={() => onManage("My people")}
+          onPersonalise={() => onManage("My people")}
         />
       </div>
       <section className="planner-section" id="planner">
@@ -480,15 +480,13 @@ export default function OriginalHome({
           <p className="eyebrow">the clever bit</p>
           <h2>Start with your people.</h2>
           <p>
-            Bring the context you already know about your friends. Good Plans
-            pairs it with availability, activity preferences and nearby venues.
-            Nothing in your private notes is sent in an invite.
+            Try this illustrative planner with a sample name. Sign in to add your own friends, save private notes and manage planning settings in your dashboard.
           </p>
           <button
             className="section-settings"
             onClick={() => openSettings("profile")}
           >
-            <Settings2 /> Edit planning settings
+            <Settings2 /> Open my people & planning settings
           </button>
           <button
             className="organizer-link"
@@ -504,7 +502,7 @@ export default function OriginalHome({
               value={friend}
               onChange={(event) => setFriend(event.target.value)}
               list="friends"
-              placeholder="Name or group"
+              placeholder="Example: Maya or Sunday friends"
             />
             <datalist id="friends">
               {settings.friends.map((item) => (

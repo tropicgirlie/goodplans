@@ -674,7 +674,7 @@ export default function SettingsPanel({
                   Series are private. Each occurrence has its own invitations
                   and RSVP list.
                 </p>
-                <form className="import-idea" onSubmit={importIdea}>
+                {onImportIdea && <form className="import-idea" onSubmit={importIdea}>
                   <label>
                     Bring an idea
                     <input
@@ -688,6 +688,7 @@ export default function SettingsPanel({
                     {isImporting ? "Checking link…" : "Make an event draft"}
                   </button>
                 </form>
+                }
                 {importMessage && (
                   <p className="import-message">{importMessage}</p>
                 )}

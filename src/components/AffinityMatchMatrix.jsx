@@ -18,13 +18,16 @@ export default function AffinityMatchMatrix({
   selectedFriends,
   setSelectedFriends,
   onOpenPlanModal,
+  friends = FRIENDS_DATA,
+  example = true,
+  onPersonalise,
 }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [retry, setRetry] = useState(0);
-  const activeFriends = FRIENDS_DATA.filter((f) =>
+  const activeFriends = friends.filter((f) =>
     selectedFriends.includes(f.id),
   );
 
@@ -39,7 +42,7 @@ export default function AffinityMatchMatrix({
     }
     setLoading(true);
     findVenues({
-      friends: FRIENDS_DATA.filter((f) => selectedFriends.includes(f.id)),
+      friends: friends.filter((f) => selectedFriends.includes(f.id)),
     })
       .then((result) => {
         if (current) setRecommendations(result.venues || []);
@@ -54,7 +57,7 @@ export default function AffinityMatchMatrix({
     return () => {
       current = false;
     };
-  }, [selectedFriends, retry]);
+  }, [selectedFriends, friends, retry]);
 
   return (
     <section className="circle-edit" aria-labelledby="circle-title">
@@ -68,10 +71,10 @@ export default function AffinityMatchMatrix({
           </h2>
         </div>
         <p>
-          Choose who’s coming. Find a little time together that feels right for
-          your group.
+          {example ? "Interactive example · These are fictional friends and illustrative ideas. Try changing the group, then sign in to add your own people." : "Choose your saved friends and explore ideas for time together. Suggestions are starting points; confirm details with the venue."}
         </p>
       </header>
+      {example && onPersonalise && <button className="circle-more" onClick={onPersonalise}>Add my own people <ArrowUpRight size={18} /></button>}
       <div className="circle-workspace">
         <div className="circle-people">
           <div className="circle-step">
@@ -85,7 +88,7 @@ export default function AffinityMatchMatrix({
             role="group"
             aria-label="Choose friends"
           >
-            {FRIENDS_DATA.map((friend) => {
+            {friends.map((friend) => {
               const selected = selectedFriends.includes(friend.id);
               return (
                 <button
@@ -101,10 +104,10 @@ export default function AffinityMatchMatrix({
                     )
                   }
                 >
-                  <img src={friend.avatar} alt="" loading="lazy" />
+                  {friend.avatar ? <img src={friend.avatar} alt="" loading="lazy" /> : <span className="circle-initial" aria-hidden="true">{friend.name.slice(0, 1)}</span>}
                   <span>
                     <b>{friend.name}</b>
-                    <small>{friend.interests.slice(0, 2).join(" · ")}</small>
+                    <small>{(friend.interests || []).slice(0, 2).join(" · ")}</small>
                   </span>
                   <span className="circle-check" aria-hidden="true">
                     {selected && <Check size={14} />}
@@ -113,7 +116,7 @@ export default function AffinityMatchMatrix({
               );
             })}
           </div>
-          <details className="circle-context">
+          {example && <details className="circle-context">
             <summary>
               About this example <ChevronDown size={15} />
             </summary>
@@ -131,7 +134,7 @@ export default function AffinityMatchMatrix({
                 <b>{f.name.split(" ")[0]}</b> · {f.mbti} · {f.archetype}
               </p>
             ))}
-          </details>
+          </details>}
         </div>
         <div className="circle-ideas" aria-busy={loading}>
           <div className="circle-step">
@@ -212,8 +215,7 @@ export default function AffinityMatchMatrix({
             </>
           )}
           <p className="circle-footnote">
-            An example circle, not a compatibility test. The best plan is the
-            one you’ll enjoy together.
+            {example ? "Illustrative suggestions, not a compatibility test." : "Your circle is private. Choose what you enjoy together."}
           </p>
         </div>
       </div>

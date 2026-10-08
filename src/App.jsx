@@ -29,7 +29,9 @@ import {
 } from "lucide-react";
 import HostPortal from "./components/HostPortal";
 import useCloudWorkspace from "./lib/useCloudWorkspace";
-import OriginalHome from "./components/OriginalHome";
+import OriginalHome, { defaultSettings } from "./components/OriginalHome";
+import AffinityMatchMatrix from "./components/AffinityMatchMatrix";
+import SettingsPanel from "./components/SettingsPanel";
 import LoginScreen from "./components/LoginScreen";
 import {
   createEvent,
@@ -811,6 +813,9 @@ export default function App() {
   const [form, setForm] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [login, setLogin] = useState(false);
+  const [pendingPage, setPendingPage] = useState("Organiser portal");
+  const [planningSettings, setPlanningSettings] = useState(false);
+  const [circleSelection, setCircleSelection] = useState([]);
   const [user, setUser] = useState(null);
   const [personForm, setPersonForm] = useState(false);
   const [toast, setToast] = useState("");
@@ -989,6 +994,11 @@ export default function App() {
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
   function navigate(next) {
+    if (!user && next !== "Overview" && next !== "Dublin this week") {
+      setPendingPage(next);
+      setLogin(true);
+      return;
+    }
     setPage(next);
     setQuery("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1163,6 +1173,7 @@ export default function App() {
         onLoginSuccess={(u) => {
           setUser(u);
           setLogin(false);
+          setPage(pendingPage);
           setToast("Signed in. You can now publish your invitation.");
         }}
       />
@@ -1746,6 +1757,11 @@ export default function App() {
                     )}
                   </section>
                 )}
+                {page === "My people" && user && <>
+                  <button className="gp-button secondary" onClick={() => setPlanningSettings(true)}><Settings2 /> Planning settings</button>
+                  <AffinityMatchMatrix friends={friends} example={false} selectedFriends={circleSelection.filter(id => friends.some(f => f.id === id))} setSelectedFriends={setCircleSelection} onOpenPlanModal={idea => setForm({title: idea.name, location: idea.venue?.name || "", guests: friends.filter(f => circleSelection.includes(f.id)).map(f => f.name)})} />
+                  <SettingsPanel open={planningSettings} initialTab="profile" onClose={() => setPlanningSettings(false)} settings={{...defaultSettings, ...preferences, ...Object.fromEntries(["profile", "availability", "discovery", "invite", "organizer"].map(key => [key, {...defaultSettings[key], ...preferences[key]}])), friends}} setSettings={next => { const value = typeof next === "function" ? next({...defaultSettings, ...preferences, friends}) : next; setPreferences(value); setPeople(value.friends); }} onCreateOrganizer={() => { setPlanningSettings(false); setForm({kind: "Gathering", occurrences: preferences.organizer?.count || 3, seriesName: preferences.organizer?.seriesName || "Our regular catch-up", cadence: preferences.organizer?.cadence || "Once a month"}); }} currentUser={user} syncStatus={cloud.status} onLoginClick={() => setLogin(true)} />
+                </>}
                 {page === "My people" && (
                   <section>
                     <div className="gp-section-heading">

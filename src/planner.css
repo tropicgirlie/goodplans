@@ -1959,6 +1959,13 @@
 }
 .gp-app.home-tools {
   min-height: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.gp-app.home-tools .gp-toast,
+.gp-app.home-tools .gp-dialog,
+.gp-app.home-tools dialog {
+  pointer-events: auto;
 }
 .scrapbook-tools .gp-workspace {
   margin-left: 0;

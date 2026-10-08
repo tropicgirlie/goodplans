@@ -1152,6 +1152,12 @@ export default function App() {
       </button>
     );
   }
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("login") === "1") {
+      setLogin(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
   if (
     new URLSearchParams(window.location.search).get("newsletter") === "manage"
   )
@@ -1234,6 +1240,7 @@ export default function App() {
           }
         />
       )}
+      {(page !== "Overview" || form || active || personForm || toast) && (
       <div
         className={`gp-app scrapbook-tools ${page === "Overview" ? "home-tools" : ""}`}
       >
@@ -1946,6 +1953,7 @@ export default function App() {
           </div>
         )}
       </div>
+      )}
     </>
   );
 }

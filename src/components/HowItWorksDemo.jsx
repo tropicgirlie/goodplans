@@ -81,12 +81,21 @@ export default function HowItWorksDemo({
   };
 
   const goToInvite = (event) => {
-    event.preventDefault();
+    event?.preventDefault?.();
+    if (!friendNames.trim() || !activity.trim()) return;
     setStep("invite");
-    document
-      .querySelector("#how-invite")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  useEffect(() => {
+    if (step !== "invite" && step !== "details") return;
+    const id = step === "invite" ? "#how-invite" : "#how-details";
+    requestAnimationFrame(() => {
+      document.querySelector(id)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, [step]);
 
   return (
     <section className="how-demo" id="how">
@@ -166,14 +175,17 @@ export default function HowItWorksDemo({
                 </p>
               )}
             </div>
-            <form className="planner-card" onSubmit={goToInvite}>
+            <form
+              className="planner-card"
+              onSubmit={goToInvite}
+              noValidate
+            >
               <label>
                 Who are you making time for?
                 <input
                   value={friendNames}
                   onChange={(e) => setFriendNames(e.target.value)}
                   placeholder="Maya, Aoife"
-                  required
                 />
               </label>
               <label>
@@ -181,7 +193,6 @@ export default function HowItWorksDemo({
                 <input
                   value={activity}
                   onChange={(e) => setActivity(e.target.value)}
-                  required
                 />
               </label>
               <label>
@@ -221,7 +232,12 @@ export default function HowItWorksDemo({
                   placeholder="What to bring, the vibe, how to get there…"
                 />
               </label>
-              <button className="primary create" type="submit">
+              <button
+                className="primary create"
+                type="button"
+                data-demo-action="preview-invite"
+                onClick={goToInvite}
+              >
                 Preview invitation page <Send />
               </button>
             </form>

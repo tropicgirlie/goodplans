@@ -56,8 +56,9 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
         <p className="gp-eyebrow">GOOD PLANS · HOST SIGN-IN</p>
         <h1>A good host starts here.</h1>
         <p>
-          Sign in to publish private invitations and collect RSVPs. Your drafts
-          stay saved on this device.
+          Sign in to open the admin panel, pre-fill plans with your people, and
+          enable the features from the landing page — invitations, series,
+          Dublin picks and more.
         </p>
         <form
           className="gp-form"
@@ -140,7 +141,8 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
           )}
         </form>
         <p className="gp-field-note">
-          Publishing is available to approved hosts. You can keep planning
+          Approved hosts unlock the admin panel and can publish private
+          invitations. Visitors can still try the “See how it works” demo
           without signing in.
         </p>
       </section>

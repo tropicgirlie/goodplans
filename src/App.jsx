@@ -812,6 +812,7 @@ export default function App() {
   const [activeId, setActiveId] = useState(null);
   const [login, setLogin] = useState(false);
   const [user, setUser] = useState(null);
+  const [openAdmin, setOpenAdmin] = useState(false);
   const [personForm, setPersonForm] = useState(false);
   const [toast, setToast] = useState("");
   const [publishing, setPublishing] = useState(false);
@@ -1163,7 +1164,11 @@ export default function App() {
         onLoginSuccess={(u) => {
           setUser(u);
           setLogin(false);
-          setToast("Signed in. You can now publish your invitation.");
+          setOpenAdmin(true);
+          setPage("Overview");
+          setToast(
+            "Signed in. Your admin panel is open — enable landing features, then start with your people.",
+          );
         }}
       />
     );
@@ -1209,10 +1214,14 @@ export default function App() {
           onManage={navigate}
           onLogin={() => setLogin(true)}
           currentUser={user}
+          people={friends}
+          openAdminOnMount={openAdmin}
+          onAdminOpened={() => setOpenAdmin(false)}
           onLogout={async () => {
             try {
               await logout();
               setUser(null);
+              setOpenAdmin(false);
             } catch (error) {
               setToast(error.message);
             }

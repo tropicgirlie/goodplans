@@ -12,7 +12,51 @@ import {
   X,
 } from "lucide-react";
 
+const featureCatalog = [
+  [
+    "circleSuggestions",
+    "Good company suggestions",
+    "Landing: choose who’s coming and get a few good ideas.",
+  ],
+  [
+    "venueDiscovery",
+    "Nearby venue discovery",
+    "Landing: find a place that fits the activity and city.",
+  ],
+  [
+    "dublinWeek",
+    "Dublin this week",
+    "Landing: browse live local picks and add them to a plan.",
+  ],
+  [
+    "privateInvites",
+    "Private invitation pages",
+    "Landing: warm RSVP pages with private guest links.",
+  ],
+  [
+    "hostSeries",
+    "Host a monthly series",
+    "Landing: recurring gatherings with capacity and reminders.",
+  ],
+  [
+    "availabilityReminders",
+    "Availability & reminders",
+    "Landing: preferred days/windows and optional guest reminders.",
+  ],
+  [
+    "newsletterStudio",
+    "Newsletter studio",
+    "Organiser tools for weekly Dublin editions.",
+  ],
+  [
+    "accountSync",
+    "Account sync",
+    "Keep people, drafts and preferences across devices.",
+  ],
+];
+
 const tabs = [
+  ["features", "Features", Settings2],
   ["profile", "You", CircleUserRound],
   ["activities", "Activities", Plus],
   ["people", "People", UsersRound],
@@ -146,7 +190,7 @@ export default function SettingsPanel({
       className="settings-layer"
       role="dialog"
       aria-modal="true"
-      aria-label="Planning settings"
+      aria-label={currentUser ? "Host admin panel" : "Planning settings"}
     >
       <button
         className="settings-backdrop"
@@ -156,8 +200,10 @@ export default function SettingsPanel({
       <aside className="settings-panel">
         <header className="settings-header">
           <div>
-            <p className="eyebrow">make the plan yours</p>
-            <h2>Planning settings</h2>
+            <p className="eyebrow">
+              {currentUser ? "host admin" : "make the plan yours"}
+            </p>
+            <h2>{currentUser ? "Admin panel" : "Planning settings"}</h2>
           </div>
           <button onClick={onClose} aria-label="Close settings">
             <X />
@@ -165,7 +211,10 @@ export default function SettingsPanel({
         </header>
         <div className="settings-layout">
           <nav className="settings-tabs" aria-label="Settings sections">
-            {tabs.map(([id, label, Icon]) => (
+            {(currentUser
+              ? tabs
+              : tabs.filter(([id]) => id !== "features")
+            ).map(([id, label, Icon]) => (
               <button
                 key={id}
                 className={tab === id ? "active" : ""}
@@ -177,6 +226,42 @@ export default function SettingsPanel({
             ))}
           </nav>
           <div className="settings-body">
+            {tab === "features" && currentUser && (
+              <section className="setting-section">
+                <p className="setting-kicker">landing features</p>
+                <h3>Enable what the homepage promises.</h3>
+                <p className="setting-lede">
+                  Turn on the tools advertised on the landing page. Disabled
+                  features hide from your signed-in planning tools.
+                </p>
+                <div className="feature-toggles">
+                  {featureCatalog.map(([key, label, note]) => (
+                    <Toggle
+                      key={key}
+                      label={label}
+                      note={note}
+                      checked={settings.features?.[key] !== false}
+                      onChange={(value) => update("features", key, value)}
+                    />
+                  ))}
+                </div>
+                <div className="organizer-actions" style={{ marginTop: 24 }}>
+                  <button
+                    type="button"
+                    className="organizer-create"
+                    onClick={() => {
+                      onClose();
+                      window.location.hash = "";
+                      document
+                        .querySelector("#planner")
+                        ?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  >
+                    Start with your people
+                  </button>
+                </div>
+              </section>
+            )}
             {tab === "profile" && (
               <section className="setting-section">
                 <p className="setting-kicker">your starting point</p>

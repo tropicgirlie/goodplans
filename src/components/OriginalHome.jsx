@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
-  Music2,
-  Paintbrush,
+  Lock,
   Send,
   Settings2,
   Sparkles,
@@ -12,8 +11,7 @@ import {
 } from "lucide-react";
 import GoogleMapsExplorer from "./GoogleMapsExplorer";
 import SettingsPanel from "./SettingsPanel";
-import AffinityMatchMatrix from "./AffinityMatchMatrix";
-import { FRIENDS_DATA } from "../data/mockData";
+import HowItWorksDemo from "./HowItWorksDemo";
 import { importEventLink, readImportedIdea } from "../lib/goodPlansApi";
 import { localDate } from "../lib/plans";
 const ideas = [
@@ -119,6 +117,16 @@ const defaultSettings = {
     reminder: true,
     plusOne: false,
   },
+  features: {
+    circleSuggestions: true,
+    venueDiscovery: true,
+    dublinWeek: true,
+    privateInvites: true,
+    hostSeries: true,
+    availabilityReminders: true,
+    newsletterStudio: true,
+    accountSync: true,
+  },
   organizer: {
     seriesName: "Women in Tech Brunch",
     city: "Dublin",
@@ -162,6 +170,9 @@ export default function OriginalHome({
   onLogout,
   saved,
   onBookmark,
+  people = [],
+  openAdminOnMount = false,
+  onAdminOpened,
 }) {
   const settings = { ...defaultSettings, ...preferences };
   for (const key of [
@@ -169,38 +180,79 @@ export default function OriginalHome({
     "availability",
     "discovery",
     "invite",
+    "features",
     "organizer",
   ])
     settings[key] = { ...defaultSettings[key], ...preferences?.[key] };
+  if (Array.isArray(people) && people.length) {
+    settings.friends = people.map((person) => ({
+      id: person.id,
+      name: person.name,
+      likes: person.note || person.likes || "Still getting to know",
+      avoids: person.avoids || "No notes yet",
+      visibility: "Only me",
+    }));
+  }
   const setSettings = (updater) =>
     onPreferencesChange(
       typeof updater === "function" ? updater(settings) : updater,
     );
   const [showSettings, setShowSettings] = useState(false);
   const [settingsMode, setSettingsMode] = useState("profile");
-  const [friend, setFriend] = useState("Maya");
+  const [friend, setFriend] = useState("");
   const [activityId, setActivityId] = useState("gallery");
   const [moment, setMoment] = useState("A free Sunday afternoon");
   const [madePlan, setMadePlan] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [pickedDate, setPickedDate] = useState("");
-  const [selectedFriends, setSelectedFriends] = useState(["f1", "f2"]);
   const [importMessage, setImportMessage] = useState("");
   const city = settings.profile.city;
   const selectedActivity =
     settings.activities.find((a) => a.id === activityId) ||
     settings.activities[0];
+  const features = settings.features;
 
   const setShowLogin = onLogin;
   const handleLogout = onLogout;
-  const scrollToPlanner = () =>
+  const scrollToDemo = () =>
+    document.querySelector("#how")?.scrollIntoView({ behavior: "smooth" });
+  const scrollToPlanner = () => {
+    if (!currentUser) {
+      scrollToDemo();
+      return;
+    }
     document.querySelector("#planner")?.scrollIntoView({ behavior: "smooth" });
+  };
   const openSettings = (tab = "profile") => {
+    if (!currentUser) {
+      setShowLogin(true);
+      return;
+    }
     setSettingsMode(tab);
     setShowSettings(true);
   };
+  useEffect(() => {
+    if (!currentUser) return;
+    const names = (settings.friends || [])
+      .slice(0, 2)
+      .map((f) => f.name)
+      .join(", ");
+    if (names) setFriend(names);
+    if (settings.activities?.[0]) setActivityId(settings.activities[0].id);
+  }, [currentUser?.id, people?.length]);
+  useEffect(() => {
+    if (openAdminOnMount && currentUser) {
+      setSettingsMode("features");
+      setShowSettings(true);
+      onAdminOpened?.();
+    }
+  }, [openAdminOnMount, currentUser?.id]);
   const makePlan = (e) => {
     e.preventDefault();
+    if (!currentUser) {
+      setShowLogin(true);
+      return;
+    }
     setMadePlan(true);
   };
   const openPlan = () =>
@@ -284,20 +336,6 @@ export default function OriginalHome({
       throw error;
     }
   };
-  const handlePlanOutingForFriends = (recommended) => {
-    setFriend(
-      FRIENDS_DATA.filter((f) => selectedFriends.includes(f.id))
-        .map((f) => f.name)
-        .join(", "),
-    );
-    const match = settings.activities.find((a) =>
-      recommended?.name?.toLowerCase().includes(a.name.toLowerCase()),
-    );
-    if (match) setActivityId(match.id);
-    if (recommended?.venue) setSelectedVenue(recommended.venue);
-    setMadePlan(true);
-    scrollToPlanner();
-  };
   return (
     <main className="original-site">
       {syncRecovery}
@@ -341,14 +379,18 @@ export default function OriginalHome({
           <a href="#about">About</a>
           <a href="#how">How it works</a>
           <a href="#ideas">Ideas</a>
-          <button onClick={() => onManage("My plans")}>My plans</button>
-          <button onClick={() => onManage("Dublin this week")}>
-            Dublin this week
-          </button>
+          {currentUser && features.dublinWeek !== false && (
+            <button onClick={() => onManage("Dublin this week")}>
+              Dublin this week
+            </button>
+          )}
           {currentUser ? (
             <>
+              <button onClick={() => openSettings("features")}>
+                <Settings2 /> Admin
+              </button>
               <button onClick={() => onManage("Organiser portal")}>
-                <Settings2 /> Organizer Portal
+                Organizer Portal
               </button>
               <button
                 onClick={handleLogout}
@@ -359,16 +401,14 @@ export default function OriginalHome({
               </button>
             </>
           ) : (
-            <button
-              onClick={() => onManage("Organiser portal")}
-              className="flex items-center gap-1"
-            >
-              <UsersRound className="w-3.5 h-3.5" /> Organizer Portal
-            </button>
+            <button onClick={() => setShowLogin(true)}>Host sign-in</button>
           )}
         </div>
-        <button className="nav-button" onClick={scrollToPlanner}>
-          Start a plan <ArrowUpRight />
+        <button
+          className="nav-button"
+          onClick={currentUser ? scrollToPlanner : scrollToDemo}
+        >
+          {currentUser ? "Start a plan" : "See how it works"} <ArrowUpRight />
         </button>
       </nav>
       <section className="hero" id="top">
@@ -385,15 +425,25 @@ export default function OriginalHome({
             love.
           </p>
           <div className="hero-actions">
-            <button className="primary" onClick={scrollToPlanner}>
-              Plan something <ArrowUpRight />
-            </button>
             <button
-              className="text-action"
-              onClick={() => onManage("Organiser portal")}
+              className="primary"
+              onClick={currentUser ? scrollToPlanner : scrollToDemo}
             >
-              Organizer Portal <Settings2 />
+              {currentUser ? "Plan something" : "See how it works"}{" "}
+              <ArrowUpRight />
             </button>
+            {currentUser ? (
+              <button
+                className="text-action"
+                onClick={() => openSettings("features")}
+              >
+                Open admin panel <Settings2 />
+              </button>
+            ) : (
+              <button className="text-action" onClick={() => setShowLogin(true)}>
+                Host sign-in <Settings2 />
+              </button>
+            )}
           </div>
         </div>
         <div
@@ -462,159 +512,201 @@ export default function OriginalHome({
           </div>
         </div>
       </section>
-      <div
-        style={{
-          background: "var(--paper)",
-          borderTop: "1px solid var(--line)",
-          borderBottom: "1px solid var(--line)",
-        }}
-      >
-        <AffinityMatchMatrix
-          selectedFriends={selectedFriends}
-          setSelectedFriends={setSelectedFriends}
-          onOpenPlanModal={handlePlanOutingForFriends}
-        />
-      </div>
+      <HowItWorksDemo
+        currentUser={currentUser}
+        onSignIn={() => setShowLogin(true)}
+        onSavePlan={(draft) => onCreate(draft)}
+      />
       <section className="planner-section" id="planner">
         <div className="section-intro">
-          <p className="eyebrow">the clever bit</p>
+          <p className="eyebrow">your account</p>
           <h2>Start with your people.</h2>
           <p>
-            Bring the context you already know about your friends. Good Plans
-            pairs it with availability, activity preferences and nearby venues.
-            Nothing in your private notes is sent in an invite.
+            {currentUser
+              ? "Your friends, notes and preferences pre-fill the plan. Nothing in your private notes is sent in an invite."
+              : "Sign in to use your saved people and preferences. Until then, try the demo above to see how a plan becomes an invitation."}
           </p>
-          <button
-            className="section-settings"
-            onClick={() => openSettings("profile")}
-          >
-            <Settings2 /> Edit planning settings
-          </button>
-          <button
-            className="organizer-link"
-            onClick={() => openSettings("organizer")}
-          >
-            <UsersRound /> Hosting a monthly series? Set it up here.
-          </button>
-        </div>
-        <form className="planner-card" onSubmit={makePlan}>
-          <label>
-            Who are you making time for?
-            <input
-              value={friend}
-              onChange={(event) => setFriend(event.target.value)}
-              list="friends"
-              placeholder="Name or group"
-            />
-            <datalist id="friends">
-              {settings.friends.map((item) => (
-                <option key={item.id} value={item.name} />
-              ))}
-              {settings.circles.map((item) => (
-                <option key={item.id} value={item.name} />
-              ))}
-            </datalist>
-          </label>
-          <label>
-            What could you do?
-            <select
-              value={activityId}
-              onChange={(event) => setActivityId(event.target.value)}
-            >
-              {settings.activities.map((activity) => (
-                <option key={activity.id} value={activity.id}>
-                  {activity.name} · {activity.energy}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            What kind of moment?
-            <select
-              value={moment}
-              onChange={(event) => setMoment(event.target.value)}
-            >
-              <option>A free Sunday afternoon</option>
-              <option>A catch-up after work</option>
-              <option>A first meeting with new people</option>
-              <option>A weekend away</option>
-            </select>
-          </label>
-          <button className="primary create" type="submit">
-            <Sparkles /> Find a good idea
-          </button>
-          {madePlan && (
-            <div className="plan-result">
-              <span>
-                For {friend} in {city}
-              </span>
-              <b>{selectedActivity?.name || "Sunday soft launch"}</b>
+          {currentUser ? (
+            <>
+              <button
+                className="section-settings"
+                onClick={() => openSettings("people")}
+              >
+                <Settings2 /> Edit your people &amp; settings
+              </button>
+              {features.hostSeries !== false && (
+                <button
+                  className="organizer-link"
+                  onClick={() => openSettings("organizer")}
+                >
+                  <UsersRound /> Hosting a monthly series? Set it up here.
+                </button>
+              )}
+            </>
+          ) : (
+            <div className="planner-gate">
               <p>
-                {selectedVenue
-                  ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.`
-                  : `Start with ${selectedActivity?.query || "something that fits"} near you, then choose a venue.`}
+                <Lock size={16} /> Pre-filled planning uses your signed-in
+                profile.
               </p>
-              <div className="date-poll">
-                <label>
-                  When would you like to go?
-                  <input
-                    type="date"
-                    min={localDate()}
-                    value={pickedDate}
-                    onChange={(e) => setPickedDate(e.target.value)}
-                  />
-                </label>
-                <small>Leave blank if you’re still deciding.</small>
-              </div>
-              <button type="button" onClick={openPlan}>
-                Add details &amp; save this plan <Send />
+              <button className="primary" onClick={() => setShowLogin(true)}>
+                Sign in to start with your people <ArrowUpRight />
+              </button>
+              <button className="text-action" onClick={scrollToDemo}>
+                Or see how it works first
               </button>
             </div>
           )}
-        </form>
+        </div>
+        {currentUser ? (
+          <form className="planner-card" onSubmit={makePlan}>
+            <label>
+              Who are you making time for?
+              <input
+                value={friend}
+                onChange={(event) => setFriend(event.target.value)}
+                list="friends"
+                placeholder="Name or group"
+              />
+              <datalist id="friends">
+                {settings.friends.map((item) => (
+                  <option key={item.id} value={item.name} />
+                ))}
+                {settings.circles.map((item) => (
+                  <option key={item.id} value={item.name} />
+                ))}
+              </datalist>
+            </label>
+            <label>
+              What could you do?
+              <select
+                value={activityId}
+                onChange={(event) => setActivityId(event.target.value)}
+              >
+                {settings.activities.map((activity) => (
+                  <option key={activity.id} value={activity.id}>
+                    {activity.name} · {activity.energy}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              What kind of moment?
+              <select
+                value={moment}
+                onChange={(event) => setMoment(event.target.value)}
+              >
+                <option>A free Sunday afternoon</option>
+                <option>A catch-up after work</option>
+                <option>A first meeting with new people</option>
+                <option>A weekend away</option>
+              </select>
+            </label>
+            <button className="primary create" type="submit">
+              <Sparkles /> Find a good idea
+            </button>
+            {madePlan && (
+              <div className="plan-result">
+                <span>
+                  For {friend || "your people"} in {city}
+                </span>
+                <b>{selectedActivity?.name || "Sunday soft launch"}</b>
+                <p>
+                  {selectedVenue
+                    ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.`
+                    : `Start with ${selectedActivity?.query || "something that fits"} near you, then choose a venue.`}
+                </p>
+                <div className="date-poll">
+                  <label>
+                    When would you like to go?
+                    <input
+                      type="date"
+                      min={localDate()}
+                      value={pickedDate}
+                      onChange={(e) => setPickedDate(e.target.value)}
+                    />
+                  </label>
+                  <small>Leave blank if you’re still deciding.</small>
+                </div>
+                <button type="button" onClick={openPlan}>
+                  Add details &amp; save this plan <Send />
+                </button>
+              </div>
+            )}
+          </form>
+        ) : (
+          <div className="planner-card planner-locked" aria-hidden="true">
+            <p className="eyebrow">signed-in planning</p>
+            <h3>Your people · your preferences</h3>
+            <p>
+              After host sign-in, this card pre-fills from your admin panel:
+              friends, activities, availability and invite defaults.
+            </p>
+            <ul>
+              <li>Context notes that stay private</li>
+              <li>Suggestions that fit the group</li>
+              <li>A warm invitation page when you’re ready</li>
+            </ul>
+          </div>
+        )}
       </section>
-      <GoogleMapsExplorer
-        city={city}
-        activity={selectedActivity?.query}
-        onSelectVenue={(venue) => {
-          setSelectedVenue(venue);
-          setMadePlan(true);
-          document
-            .querySelector("#planner")
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }}
-      />
-      <div className="original-plan-tools">
-        <button
-          className="primary"
-          onClick={() => onCreate({ kind: "Single event" })}
-        >
-          <CalendarDays />
-          Create a single event
-        </button>
-        <button
-          className="primary"
-          onClick={() => onCreate({ kind: "Gathering" })}
-        >
-          <UsersRound />
-          Create a gathering
-        </button>
-        <button className="text-action" onClick={() => onManage("My plans")}>
-          Saved plans <ArrowUpRight />
-        </button>
-        <button className="text-action" onClick={() => onManage("My people")}>
-          My people <UsersRound />
-        </button>
-        <button
-          className="text-action"
-          onClick={() => onManage("Dublin this week")}
-        >
-          This week in Dublin <ArrowUpRight />
-        </button>
-        <button className="text-action" onClick={() => onManage("Saved ideas")}>
-          Saved ideas <ArrowUpRight />
-        </button>
-      </div>
+      {currentUser && features.venueDiscovery !== false && (
+        <GoogleMapsExplorer
+          city={city}
+          activity={selectedActivity?.query}
+          onSelectVenue={(venue) => {
+            setSelectedVenue(venue);
+            setMadePlan(true);
+            document
+              .querySelector("#planner")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
+      )}
+      {currentUser && (
+        <div className="original-plan-tools">
+          <button
+            className="primary"
+            onClick={() => onCreate({ kind: "Single event" })}
+          >
+            <CalendarDays />
+            Create a single event
+          </button>
+          <button
+            className="primary"
+            onClick={() => onCreate({ kind: "Gathering" })}
+          >
+            <UsersRound />
+            Create a gathering
+          </button>
+          <button className="text-action" onClick={() => onManage("My plans")}>
+            Saved plans <ArrowUpRight />
+          </button>
+          <button className="text-action" onClick={() => onManage("My people")}>
+            My people <UsersRound />
+          </button>
+          {features.dublinWeek !== false && (
+            <button
+              className="text-action"
+              onClick={() => onManage("Dublin this week")}
+            >
+              This week in Dublin <ArrowUpRight />
+            </button>
+          )}
+          <button
+            className="text-action"
+            onClick={() => onManage("Saved ideas")}
+          >
+            Saved ideas <ArrowUpRight />
+          </button>
+          <button
+            className="text-action"
+            onClick={() => openSettings("features")}
+          >
+            Admin panel <Settings2 />
+          </button>
+        </div>
+      )}
       <section className="ideas" id="ideas">
         <div className="ideas-head">
           <p className="eyebrow">start anywhere</p>
@@ -636,6 +728,10 @@ export default function OriginalHome({
               </button>
               <button
                 onClick={() => {
+                  if (!currentUser) {
+                    scrollToDemo();
+                    return;
+                  }
                   const activity = {
                     make: "make",
                     loud: "cinema",
@@ -646,13 +742,14 @@ export default function OriginalHome({
                   scrollToPlanner();
                 }}
               >
-                Make this a plan <ArrowUpRight />
+                {currentUser ? "Make this a plan" : "See how it works"}{" "}
+                <ArrowUpRight />
               </button>
             </article>
           ))}
         </div>
       </section>
-      <section className="event-promo" id="how">
+      <section className="event-promo" id="invite-promise">
         <div className="event-paper">
           <div className="event-mini-photo">
             <img
@@ -670,8 +767,18 @@ export default function OriginalHome({
             Every finished plan becomes a warm, simple page your friends can
             keep, read, and RSVP to.
           </p>
-          <button onClick={openPlan}>
-            See an event page <ArrowUpRight />
+          <button
+            onClick={
+              currentUser
+                ? openPlan
+                : () =>
+                    document
+                      .querySelector("#how-invite, #how")
+                      ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            {currentUser ? "Open my plan form" : "Preview in the demo"}{" "}
+            <ArrowUpRight />
           </button>
         </div>
         <div className="event-aside">
@@ -683,7 +790,9 @@ export default function OriginalHome({
           <b>Meet there</b>
         </div>
       </section>
-      <footer><a href="/?page=privacy">Privacy</a><a href="/?page=support">Help & data requests</a>
+      <footer>
+        <a href="/?page=privacy">Privacy</a>
+        <a href="/?page=support">Help & data requests</a>
         <a className="brand" href="#top">
           <img
             className="brand-mark"
@@ -697,10 +806,18 @@ export default function OriginalHome({
           </span>
         </a>
         <p>for busy women who want to see their people more.</p>
-        <button onClick={() => onManage("Organiser portal")}>
-          Organizer Portal
-        </button>
-        <button onClick={() => openSettings("organizer")}>Host a series</button>
+        {currentUser ? (
+          <>
+            <button onClick={() => onManage("Organiser portal")}>
+              Organizer Portal
+            </button>
+            <button onClick={() => openSettings("features")}>
+              Admin panel
+            </button>
+          </>
+        ) : (
+          <button onClick={() => setShowLogin(true)}>Host sign-in</button>
+        )}
         <span>made by luana.systems</span>
       </footer>
     </main>

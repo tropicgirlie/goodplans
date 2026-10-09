@@ -1,46 +1,34 @@
-# Launch checklist — reviewed 9 September 2026
+# Launch checklist — 9 October 2026
 
-## Verdict
+**Release target: an allowlisted, creator-led pilot. Not yet verified for public launch.**
 
-Not ready for public launch. The core implementation has passed local testing; a limited, organiser-led beta is the next release target after production activation and verification.
+[BACKLOG.md](./BACKLOG.md) is the current source for implementation and release work. [The audit](./AUDIT-2026-10-09.md) records the pre-fix findings and scope. Local completion does not establish production deployment or real email delivery.
 
-## Verified release blockers
+## Implementation
 
-- [x] Newsletter, discovery, circle refinement and launch operations are included in this release commit. Unrelated `dist/index.html` and `.claude/` changes are excluded.
-- [x] Backed up production D1 and applied remote migrations **0003–0007** successfully on 9 September 2026.
-- [ ] Configure a verified email sender, `RESEND_API_KEY` and `EMAIL_FROM`. Read-only `wrangler secret list` returned no secrets.
-- [ ] Configure `TICKETMASTER_API_KEY` if launching live Dublin discovery. Manual curated picks are an alternative for a smaller beta.
-- [ ] Verify the production Worker plan supports the collection/notification batch sizes, then build and deploy the new code.
-- [ ] Run the real-domain, real-mailbox smoke test: host sign-in → single event and series → invite → guest RSVP/plus-one/waitlist → edit/cancel notice; account sync in a second browser; newsletter confirm → approved test edition → add-to-plan → unsubscribe. Local mailbox tests do not establish real delivery.
+- [x] Local personal planning without login; explicit account-scoped sync and a confirmation step.
+- [x] Dashboard friends/notes/ideas, correct planner handoffs, consistent draft defaults and URL navigation.
+- [x] Host sign-in, single events, recurring series, private invitations, capacity/plus-ones, waitlist promotion, editing and cancellation.
+- [x] Discovery review queue, manual event additions, separately confirmed newsletter consent, weekly drafts and organiser approval before sending.
+- [x] Support/data-request pages, signed email callbacks and delivery suppression implementation.
+- [x] Local regression checks, isolated backend integration journeys and temporary production build.
 
-## Additional product/operations backlog before broad release
+## Configuration evidence
 
-- [x] Added privacy/data-use and support pages, including a persisted support inbox in the organiser portal.
-- [ ] Confirm the operator’s identity/contact, legal bases, retention periods and processor arrangements to finalise the privacy notice.
-- [x] Added self-service newsletter deletion and a verified, operator-assisted account/guest export and deletion request process. Full account erasure is not automated.
-- [x] Implemented signed Resend callbacks, replay deduplication, bounce/complaint suppression and organiser-visible delivery outcomes.
-- [ ] Register the production webhook and verify real delivery callbacks.
-- [x] Added scheduled-job status, Workers observability, CI checks and an operations/rollback runbook.
-- [ ] Assign a support/operations owner, configure external failure alerts and complete a restore drill with retained encrypted backups.
-- [x] Keep a creator-led beta scope: current host sign-in is email-allowlisted. This supports the creator hosting for friends; it does not provide public self-service organiser signup.
+- [x] RESEND_API_KEY and EMAIL_FROM exist; a real sign-in code was received earlier.
+- [x] Production health endpoint responded at audit time.
+- [ ] Configure an authorised live event source, or curate reviewed manual listings. The production discovery feed was empty and Ticketmaster key absent at audit time.
+- [ ] Register the production Resend webhook and configure its signing secret. RESEND_WEBHOOK_SECRET was absent at audit time.
+- [ ] Confirm the production migration set and deploy the reviewed build. This pass has not changed production.
 
-## Useful follow-ups, not blockers for a creator-led beta
+## Required live verification
 
-- Connect the example circle to saved real people. It is currently explicitly a sample demonstration; saved people and notes work separately.
-- Shared date voting.
-- Edit multiple future occurrences together; current editing is per occurrence and cancellation can cover the remaining series.
-- Two-way calendar sync; existing Google Calendar links and ICS exports work as add-to-calendar helpers.
-- More local event sources, beyond Ticketmaster and manually added picks.
-- Review daily discovery candidates in the organiser portal. Automated matching prioritises relevant themes but never establishes whether an event is safe, inclusive, accessible or currently available.
-- Audiences above 500 confirmed newsletter subscribers.
-- Generated custom artwork.
+- [ ] Real host → single event/series → private invite → guest RSVP/plus-one/waitlist → edit/cancel email → calendar export, including the phone guest UI.
+- [ ] Approved test newsletter → subscribe/confirm → delivery callback → add to plan → unsubscribe/deletion.
+- [ ] Two-browser sync, account changes on a shared browser, conflict resolution and backup recovery.
+- [ ] Operator/contact, retention/deletion procedure, support owner, failure alerts and restore drill confirmed.
+- [ ] Host allowlisting remains the advertised pilot scope. Public organiser signup is not implemented.
 
-## Existing evidence
+The scheduled collector queues candidates; approval remains mandatory before public listing or newsletter sending. Ticketmaster does not cover every independent class, retreat or community event. No listing guarantees safety, accessibility, availability or a booking.
 
-22 unit tests and two isolated Worker/D1 integration journeys pass. Production build and Worker dry-run packaging pass. The circle redesign and focused discovery review queue passed browser checks. These checks are local and are not a full security, deliverability or load audit.
-
-Daily discovery searches a 90-day window and queues candidates for organiser review. Approved events can populate a weekly draft. A host must approve each edition before email delivery; unattended sending is intentionally not enabled.
-
-## Latest validation
-
-21 unit tests and both expanded isolated D1 integration journeys pass, including signed/invalid/replayed webhooks, suppressed recipients, support access control and newsletter deletion. Production dependency audit reports zero vulnerabilities. Three development-only audit findings remain in the Sharp/Miniflare/Wrangler dependency chain. Production activation and mailbox smoke tests remain blocked on credentials; no new application deployment has been made. See OPERATIONS.md.
+After implementation checks, re-run a focused browser audit and complete these live checks before declaring the pilot ready.

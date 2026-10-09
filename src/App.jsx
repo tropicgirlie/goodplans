@@ -1,9 +1,10 @@
+import Artwork from "./components/Artwork";
 import ServicePages from "./components/ServicePages";
 import DublinDiscovery, {
   NewsletterPreferences,
 } from "./components/DublinDiscovery";
 import { discoveryDraft } from "./lib/discovery";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -52,6 +53,7 @@ import {
   calendarData,
   invitationText,
 } from "./lib/plans";
+import { pageFromUrl, pageUrl, mergeSettings, draftDefaults, personError, personRecord, syncConsentEnabled } from "./lib/planningModel";
 import "./planner.css";
 
 const inspirations = [
@@ -549,7 +551,7 @@ function PlanForm({ initial, people, onSave, onClose }) {
         )}
         <div className="gp-form-footer">
           <span>
-            <Bookmark size={14} /> Saved locally; synced when signed in. Invite
+            <Bookmark size={14} /> Saved on this device; account sync is optional. Invite
             when you’re ready.
           </span>
           <button className="gp-button" type="submit">
@@ -612,7 +614,7 @@ function PlanDetail({
   return (
     <Modal title={plan.title} onClose={onClose} wide>
       <div className="gp-detail">
-        <img className="gp-detail-cover" src={`/images/${plan.image}`} alt="" />
+        <Artwork className="gp-detail-cover" src={`/images/${plan.image}`} alt="" />
         <div className="gp-detail-badges">
           <span className="gp-tag">{plan.kind}</span>
           <span className="gp-tag sage">
@@ -806,7 +808,7 @@ export default function App() {
     stored("good-plans-settings", {}).friends || [],
   );
   const [preferences, setPreferences] = useSaved("good-plans-settings", {});
-  const [page, setPage] = useState("Overview");
+  const [page, setPage] = useState(() => pageFromUrl(window.location.search));
   const [filter, setFilter] = useState("Upcoming");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All ideas");
@@ -818,6 +820,8 @@ export default function App() {
   const [circleSelection, setCircleSelection] = useState([]);
   const [user, setUser] = useState(null);
   const [personForm, setPersonForm] = useState(false);
+  const [personFormError, setPersonFormError] = useState("");
+  useEffect(() => { setPersonFormError(""); }, [personForm]);
   const [toast, setToast] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState("");
@@ -828,8 +832,11 @@ export default function App() {
   const [month, setMonth] = useState(
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
+  const [syncConsents, setSyncConsents] = useSaved("good-plans-sync-consents-v1", {});
+  const [confirmSync, setConfirmSync] = useState(false);
+  const syncEnabled = syncConsentEnabled(syncConsents, user);
   const cloud = useCloudWorkspace(
-    user,
+    syncEnabled ? user : null,
     { plans, people, saved, preferences },
     (data) => {
       setPlans(data.plans || []);
@@ -839,6 +846,13 @@ export default function App() {
     },
   );
   const friends = Array.isArray(people) ? people : [];
+  const settings = mergeSettings(defaultSettings, preferences, friends);
+  const selectedCircle = useMemo(() => circleSelection.filter(id => friends.some(f => f.id === id)), [circleSelection, friends]);
+  useEffect(() => {
+    const back = () => { setPage(pageFromUrl(window.location.search)); setPlanningSettings(false); setForm(null); };
+    window.addEventListener("popstate", back);
+    return () => window.removeEventListener("popstate", back);
+  }, []);
   const active = plans.find((plan) => plan.id === activeId);
   useEffect(() => {
     getAuthStatus()
@@ -994,17 +1008,35 @@ export default function App() {
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
   function navigate(next) {
-    if (!user && next !== "Overview" && next !== "Dublin this week") {
+    if (!user && next === "Organiser portal") {
       setPendingPage(next);
       setLogin(true);
       return;
     }
+    window.history.pushState({}, "", pageUrl(next));
     setPage(next);
     setQuery("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  async function signOut() {
+    try {
+      await logout();
+      setUser(null);
+      setPlanningSettings(false);
+      setConfirmSync(false);
+      if (page === "Organiser portal") navigate("Overview");
+      setToast("Signed out. Your local plans are still on this device.");
+    } catch (error) { setToast(error.message); }
+  }
+  function updatePlanningSettings(next) {
+    const value = typeof next === "function" ? next(settings) : next;
+    const { friends: updatedFriends, ...updatedPreferences } = value;
+    setPreferences(updatedPreferences);
+    if (updatedFriends) setPeople(updatedFriends);
+  }
   function start(idea, kind = "Friends outing") {
     setForm({
+      ...draftDefaults(settings),
       kind,
       ...(idea
         ? {
@@ -1056,6 +1088,7 @@ export default function App() {
         endsAt: new Date(`${active.date}T${active.endTime}`).toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         venueName: active.location,
+        city: active.city || settings.profile.city,
         capacity: active.capacity,
         visibility: "invite",
         publish: true,
@@ -1120,7 +1153,7 @@ export default function App() {
         }}
       >
         <div className="gp-plan-image">
-          <img src={`/images/${plan.image}`} alt="" />
+          <Artwork src={`/images/${plan.image}`} alt="" />
           <span className="gp-tag">
             {plan.status === "cancelled"
               ? "Cancelled"
@@ -1173,6 +1206,7 @@ export default function App() {
         onLoginSuccess={(u) => {
           setUser(u);
           setLogin(false);
+          window.history.pushState({}, "", pageUrl(pendingPage));
           setPage(pendingPage);
           setToast("Signed in. You can now publish your invitation.");
         }}
@@ -1216,18 +1250,11 @@ export default function App() {
           preferences={preferences}
           onPreferencesChange={setPreferences}
           syncStatus={cloud.status}
-          onCreate={(draft) => setForm(draft)}
+          onCreate={(draft) => setForm({ ...draftDefaults(settings), ...draft })}
           onManage={navigate}
           onLogin={() => setLogin(true)}
           currentUser={user}
-          onLogout={async () => {
-            try {
-              await logout();
-              setUser(null);
-            } catch (error) {
-              setToast(error.message);
-            }
-          }}
+          onLogout={signOut}
           saved={saved}
           onBookmark={(id) =>
             setSaved((old) =>
@@ -1247,13 +1274,13 @@ export default function App() {
             <nav className="nav scrapbook-nav" aria-label="Planning tools">
               <a
                 className="brand"
-                href="#top"
+                href="/"
                 onClick={(e) => {
                   e.preventDefault();
                   navigate("Overview");
                 }}
               >
-                <img
+                <Artwork
                   className="brand-mark"
                   src="/images/good-plans-mark.png"
                   alt=""
@@ -1311,17 +1338,11 @@ export default function App() {
                     <SyncRecovery cloud={cloud} />
                   </div>
                 )}
-                {user && (
-                  <p className="gp-field-note" role="status">
-                    {cloud.status === "synced"
-                      ? "Saved to your account"
-                      : cloud.status === "syncing"
-                        ? "Saving to your account…"
-                        : cloud.status === "loading"
-                          ? "Loading your account…"
-                          : "Sync needs attention"}
-                  </p>
-                )}
+                <div className="gp-storage-status">
+                  <p role="status">{syncEnabled ? (cloud.status === "synced" ? "Saved to your account" : cloud.status === "syncing" ? "Saving to your account…" : cloud.status === "loading" ? "Loading your account…" : "Account sync needs attention") : "Saved on this device"}</p>
+                  {syncEnabled ? <button className="gp-text-button" onClick={() => setSyncConsents(old => ({ ...old, [user.id]: false }))}>Stop account sync</button> : <button className="gp-text-button" onClick={() => { if (user) setConfirmSync(true); else { setPendingPage(page); setLogin(true); } }}>{user ? "Enable account sync" : "Sign in for optional sync"}</button>}
+                  <details><summary>About storage</summary><p>Clearing browser data removes local plans and notes. Optional sync stores them in your account across devices. Stopping sync does not delete earlier account data.</p></details>
+                </div>
                 {page === "Organiser portal" && (
                   <HostPortal
                     user={user}
@@ -1395,7 +1416,7 @@ export default function App() {
                         </span>
                       </div>
                       <div className="gp-hero-art">
-                        <img
+                        <Artwork
                           src="/images/good-plans-hero-collage.png"
                           alt="A paper collage of friends exploring, making things, and spending time together"
                         />
@@ -1697,7 +1718,7 @@ export default function App() {
                           key={idea.id}
                         >
                           <div className="gp-idea-image">
-                            <img
+                            <Artwork
                               src={`/images/${idea.image}`}
                               alt=""
                               loading="lazy"
@@ -1757,10 +1778,10 @@ export default function App() {
                     )}
                   </section>
                 )}
-                {page === "My people" && user && <>
+                {page === "My people" && <>
                   <button className="gp-button secondary" onClick={() => setPlanningSettings(true)}><Settings2 /> Planning settings</button>
-                  <AffinityMatchMatrix friends={friends} example={false} selectedFriends={circleSelection.filter(id => friends.some(f => f.id === id))} setSelectedFriends={setCircleSelection} onOpenPlanModal={idea => setForm({title: idea.name, location: idea.venue?.name || "", guests: friends.filter(f => circleSelection.includes(f.id)).map(f => f.name)})} />
-                  <SettingsPanel open={planningSettings} initialTab="profile" onClose={() => setPlanningSettings(false)} settings={{...defaultSettings, ...preferences, ...Object.fromEntries(["profile", "availability", "discovery", "invite", "organizer"].map(key => [key, {...defaultSettings[key], ...preferences[key]}])), friends}} setSettings={next => { const value = typeof next === "function" ? next({...defaultSettings, ...preferences, friends}) : next; setPreferences(value); setPeople(value.friends); }} onCreateOrganizer={() => { setPlanningSettings(false); setForm({kind: "Gathering", occurrences: preferences.organizer?.count || 3, seriesName: preferences.organizer?.seriesName || "Our regular catch-up", cadence: preferences.organizer?.cadence || "Once a month"}); }} currentUser={user} syncStatus={cloud.status} onLoginClick={() => setLogin(true)} />
+                  {friends.length > 0 && <AffinityMatchMatrix friends={friends} example={false} city={settings.profile.city} preferences={settings} selectedFriends={selectedCircle} setSelectedFriends={setCircleSelection} onOpenPlanModal={idea => setForm({ ...draftDefaults(settings), title: idea.name, location: [idea.venue?.name, idea.venue?.address].filter(Boolean).join(", "), guests: friends.filter(f => selectedCircle.includes(f.id)).map(f => f.name) })} />}
+                  <SettingsPanel open={planningSettings} initialTab="profile" onClose={() => setPlanningSettings(false)} settings={settings} setSettings={updatePlanningSettings} onCreateOrganizer={() => { setPlanningSettings(false); setForm(draftDefaults(settings, true)); }} currentUser={user} syncStatus={cloud.status} onLogout={signOut} onLoginClick={() => { setPlanningSettings(false); setPendingPage(page); setLogin(true); }} />
                 </>}
                 {page === "My people" && (
                   <section>
@@ -1777,8 +1798,7 @@ export default function App() {
                       </button>
                     </div>
                     <p className="gp-field-note">
-                      Private notes stay on this device and are never added to
-                      invitations.
+                      Private notes are never added to invitations. {syncEnabled ? "Account sync is enabled for these notes." : "They are saved on this device."}
                     </p>
                     {friends.length ? (
                       <div className="gp-people-grid">
@@ -1799,7 +1819,7 @@ export default function App() {
                             </button>
                             <button
                               className="gp-text-button"
-                              onClick={() => setForm({ guests: [person.name] })}
+                              onClick={() => setForm({ ...draftDefaults(settings), guests: [person.name] })}
                             >
                               Plan a catch-up
                               <ArrowRight />
@@ -1833,9 +1853,9 @@ export default function App() {
                   </span>
                   <button
                     className="gp-text-button"
-                    onClick={() => setLogin(true)}
+                    onClick={() => { if (user) { navigate("My people"); setPlanningSettings(true); } else { setPendingPage(page); setLogin(true); } }}
                   >
-                    Host sign-in
+                    {user ? "Host account" : "Host sign-in"}
                     <ArrowUpRight />
                   </button>
                   <span>good plans · by luana.systems</span>
@@ -1846,7 +1866,7 @@ export default function App() {
         )}
         {form && (
           <PlanForm
-            initial={form}
+            initial={{ ...draftDefaults(settings), ...form }}
             people={friends}
             onSave={save}
             onClose={() => setForm(null)}
@@ -1873,6 +1893,13 @@ export default function App() {
             publishError={publishError}
           />
         )}
+        {confirmSync && user && <Modal title="Enable account sync?" onClose={() => setConfirmSync(false)}>
+          <p>Your plans, saved people, private notes and preferences will be stored in the account for <strong>{user.email}</strong>.</p>
+          <p>If this account already has a workspace, it may replace what you see on this device. A device backup is kept before replacement. Conflicting edits will ask you to choose a version.</p>
+          <p>Stopping sync stops future uploads, but does not delete previously saved account data.</p>
+          <button className="gp-button" onClick={() => { setSyncConsents(old => ({ ...old, [user.id]: true })); setConfirmSync(false); }}>Enable sync for this account</button>
+          <button className="gp-text-button" onClick={() => setConfirmSync(false)}>Keep planning on this device</button>
+        </Modal>}
         {personForm && (
           <Modal
             title="Someone worth making time for."
@@ -1884,22 +1911,9 @@ export default function App() {
                 e.preventDefault();
                 const data = new FormData(e.currentTarget);
                 const name = data.get("name").trim();
-                if (!name) return;
-                if (
-                  friends.some(
-                    (p) =>
-                      p.id !== personForm.id &&
-                      p.name.toLowerCase() === name.toLowerCase(),
-                  )
-                ) {
-                  setToast("That friend is already in your people.");
-                  return;
-                }
-                const person = {
-                  id: personForm.id || crypto.randomUUID(),
-                  name,
-                  note: data.get("note").trim(),
-                };
+                const message = personError(name, friends, personForm.id);
+                if (message) { setPersonFormError(message); return; }
+                const person = personRecord(personForm, { name, note: data.get("note"), likes: data.get("likes"), avoids: data.get("avoids") });
                 setPeople(
                   personForm.id
                     ? friends.map((p) => (p.id === person.id ? person : p))
@@ -1923,16 +1937,18 @@ export default function App() {
                 Little things to remember
                 <textarea
                   name="note"
-                  defaultValue={personForm.note || personForm.likes || ""}
+                  defaultValue={personForm.note || ""}
                   maxLength={500}
                   rows={3}
                   placeholder="Loves a coastal walk, prefers a quiet café…"
                 />
               </label>
+              <label>They tend to love<input name="likes" defaultValue={personForm.likes || ""} maxLength={300} placeholder="Pottery, live music, coastal walks…" /></label>
+              <label>They would skip<input name="avoids" defaultValue={personForm.avoids || ""} maxLength={300} placeholder="Loud venues, long walks…" /></label>
               <p className="gp-field-note">
-                Private to your account and this device. Never shared in
-                invitations.
+                Saved on this device; stored in your account only if you enable sync. Private notes are never included in invitations.
               </p>
+              {personFormError && <p role="alert" className="gp-error">{personFormError}</p>}
               <button className="gp-button" type="submit">
                 <Check />
                 {personForm.id ? "Save details" : "Add friend"}

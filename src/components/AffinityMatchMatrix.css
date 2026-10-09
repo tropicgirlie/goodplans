@@ -24,7 +24,7 @@
   font-family: "Bricolage Grotesque", sans-serif;
   font-size: clamp(36px, 4.4vw, 58px);
   font-weight: 600;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.035em;
   line-height: 1.04;
 }
 .circle-heading h2 em {
@@ -267,7 +267,7 @@
 .circle-footnote {
   font-size: 10px;
   line-height: 1.6;
-  color: #796f62;
+  color: #655d52;
   margin: 20px 0 0;
 }
 .circle-state {
@@ -394,3 +394,6 @@
   .gp-main .circle-edit { padding: 24px 0; }
   .circle-initial { width: 32px; height: 32px; }
 }
+
+.circle-context summary { min-height: 44px; }
+.circle-reason { display: block; font-size: 11px; line-height: 1.5; color: var(--olive); margin-top: 6px; }

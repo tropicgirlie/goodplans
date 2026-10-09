@@ -1,3 +1,4 @@
+import Artwork from "./Artwork";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
@@ -200,7 +201,7 @@ export default function OriginalHome({
   };
   const makePlan = (e) => {
     e.preventDefault();
-    onManage("My people");
+    openPlan();
   };
   const openPlan = () =>
     onCreate({
@@ -213,6 +214,7 @@ export default function OriginalHome({
       location: selectedVenue
         ? [selectedVenue.name, selectedVenue.address].filter(Boolean).join(", ")
         : "",
+      city,
       notes: moment,
       capacity: settings.invite.limit,
       plusOne: settings.invite.plusOne,
@@ -325,7 +327,7 @@ export default function OriginalHome({
       />
       <nav className="nav">
         <a className="brand" href="#top" aria-label="Good Plans home">
-          <img
+          <Artwork
             className="brand-mark"
             src="/images/good-plans-mark.png"
             alt=""
@@ -400,8 +402,10 @@ export default function OriginalHome({
           aria-label="A collage of friends making plans"
         >
           <div className="hero-picture">
-            <img
+            <Artwork
               src="/images/good-plans-hero-sticker.png"
+              loading="eager"
+              fetchPriority="high"
               alt="A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making"
             />
           </div>
@@ -419,7 +423,7 @@ export default function OriginalHome({
       </section>
       <section className="about" id="about">
         <div className="about-mark">
-          <img
+          <Artwork
             src="/images/good-plans-mark.png"
             alt="The Good Plans calendar and map-pin mark"
           />
@@ -471,7 +475,13 @@ export default function OriginalHome({
         <AffinityMatchMatrix
           selectedFriends={selectedFriends}
           setSelectedFriends={setSelectedFriends}
-          onOpenPlanModal={() => onManage("My people")}
+          onOpenPlanModal={recommended => onCreate({
+            title: recommended.name,
+            city,
+            location: [recommended.venue?.name, recommended.venue?.address].filter(Boolean).join(", "),
+            guests: FRIENDS_DATA.filter(f => selectedFriends.includes(f.id)).map(f => f.name),
+            notes: "Example draft: replace the sample guest names and confirm venue details before inviting anyone.",
+          })}
           onPersonalise={() => onManage("My people")}
         />
       </div>
@@ -480,7 +490,7 @@ export default function OriginalHome({
           <p className="eyebrow">the clever bit</p>
           <h2>Start with your people.</h2>
           <p>
-            Try this illustrative planner with a sample name. Sign in to add your own friends, save private notes and manage planning settings in your dashboard.
+            Try this illustrative planner with a sample name. Review an editable draft, or open your dashboard to save your own friends and private notes. No account needed; sign in when you want to send invitations.
           </p>
           <button
             className="section-settings"
@@ -539,7 +549,7 @@ export default function OriginalHome({
             </select>
           </label>
           <button className="primary create" type="submit">
-            <Sparkles /> Find a good idea
+            <Sparkles /> Review my draft
           </button>
           {madePlan && (
             <div className="plan-result">
@@ -653,7 +663,7 @@ export default function OriginalHome({
       <section className="event-promo" id="how">
         <div className="event-paper">
           <div className="event-mini-photo">
-            <img
+            <Artwork
               src="/images/good-plans-invite-collage.png"
               alt="A handmade collage of friends gathering around an invitation"
             />
@@ -683,7 +693,7 @@ export default function OriginalHome({
       </section>
       <footer><a href="/?page=privacy">Privacy</a><a href="/?page=support">Help & data requests</a>
         <a className="brand" href="#top">
-          <img
+          <Artwork
             className="brand-mark"
             src="/images/good-plans-mark.png"
             alt=""

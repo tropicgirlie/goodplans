@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:backend": "node --test worker/tests/core.test.mjs",
-    "test": "node --test src/lib/plans.test.js worker/tests/core.test.mjs worker/tests/hosting-core.test.mjs worker/tests/discovery-core.test.mjs",
+    "test": "node --test src/lib/plans.test.js src/lib/planningModel.test.js worker/tests/core.test.mjs worker/tests/hosting-core.test.mjs worker/tests/discovery-core.test.mjs",
     "db:local": "wrangler d1 migrations apply good-plans --local --config worker/wrangler.jsonc",
     "test:integration": "node scripts/test-hosting.mjs"
   },

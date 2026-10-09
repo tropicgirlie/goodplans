@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowUpRight, Check, ChevronDown } from "lucide-react";
 import VibeDoodle from "./VibeDoodle";
 import { findVenues } from "../lib/goodPlansApi";
 import { FRIENDS_DATA } from "../data/mockData";
+import { rankIdeas } from "../../shared/recommendations";
 import "./AffinityMatchMatrix.css";
 
 const activityNames = {
@@ -21,8 +22,10 @@ export default function AffinityMatchMatrix({
   friends = FRIENDS_DATA,
   example = true,
   onPersonalise,
+  city = "Dublin",
+  preferences = {},
 }) {
-  const [recommendations, setRecommendations] = useState([]);
+  const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -31,21 +34,18 @@ export default function AffinityMatchMatrix({
     selectedFriends.includes(f.id),
   );
 
+  const recommendations = useMemo(() => rankIdeas(catalog, activeFriends, preferences), [catalog, friends, selectedFriends, preferences]);
+  const selectionKey = selectedFriends.join("|");
+  useEffect(() => { setExpanded(false); }, [selectionKey, city]);
+
   useEffect(() => {
     let current = true;
-    setExpanded(false);
     setError("");
-    setRecommendations([]);
-    if (!selectedFriends.length) {
-      setLoading(false);
-      return;
-    }
+    setCatalog([]);
     setLoading(true);
-    findVenues({
-      friends: friends.filter((f) => selectedFriends.includes(f.id)),
-    })
+    findVenues({ city })
       .then((result) => {
-        if (current) setRecommendations(result.venues || []);
+        if (current) setCatalog(result.venues || []);
       })
       .catch(() => {
         if (current)
@@ -57,7 +57,7 @@ export default function AffinityMatchMatrix({
     return () => {
       current = false;
     };
-  }, [selectedFriends, friends, retry]);
+  }, [city, retry]);
 
   return (
     <section className="circle-edit" aria-labelledby="circle-title">
@@ -71,10 +71,10 @@ export default function AffinityMatchMatrix({
           </h2>
         </div>
         <p>
-          {example ? "Interactive example · These are fictional friends and illustrative ideas. Try changing the group, then sign in to add your own people." : "Choose your saved friends and explore ideas for time together. Suggestions are starting points; confirm details with the venue."}
+          {example ? "Interactive example · These are fictional friends and illustrative ideas. Try changing the group, then add your own people. No account needed." : "Choose your saved friends and explore ideas for time together. Suggestions are starting points; confirm details with the venue."}
         </p>
       </header>
-      {example && onPersonalise && <button className="circle-more" onClick={onPersonalise}>Add my own people <ArrowUpRight size={18} /></button>}
+      {example && onPersonalise && <button className="circle-more" onClick={onPersonalise}>Plan with my people <ArrowUpRight size={18} /></button>}
       <div className="circle-workspace">
         <div className="circle-people">
           <div className="circle-step">
@@ -126,12 +126,11 @@ export default function AffinityMatchMatrix({
               making a plan.
             </p>
             <p>
-              Personality types are example profile details, not a measure of
-              friendship compatibility.
+              Ideas use stated interests, not age or personality assumptions.
             </p>
             {activeFriends.map((f) => (
               <p key={f.id}>
-                <b>{f.name.split(" ")[0]}</b> · {f.mbti} · {f.archetype}
+                <b>{f.name.split(" ")[0]}</b> · {(f.interests || []).join(", ")}
               </p>
             ))}
           </details>}
@@ -146,7 +145,7 @@ export default function AffinityMatchMatrix({
               ? `Ideas for ${activeFriends.map((f) => f.name.split(" ")[0]).join(", ")}.`
               : "Start by choosing someone on the left."}
           </p>
-          {loading ? (
+          {!activeFriends.length ? <p className="circle-state">Select a friend to see ideas.</p> : loading ? (
             <p className="circle-state" role="status">
               Finding a few good ideas…
             </p>
@@ -163,7 +162,7 @@ export default function AffinityMatchMatrix({
           ) : !recommendations.length ? (
             <p className="circle-state">
               {activeFriends.length
-                ? "No ideas for this group just yet. Try a different combination."
+                ? "No starter venues for this city yet. You can still create your own plan."
                 : "Good plans start with your people. Select a friend to see ideas."}
             </p>
           ) : (
@@ -188,6 +187,7 @@ export default function AffinityMatchMatrix({
                         )}
                         <b>{activityNames[idea.iconName] || idea.name}</b>
                         <span>{idea.venue?.name || idea.vibe}</span>
+                        {idea.reason && <small className="circle-reason">{idea.reason}</small>}
                       </span>
                       <span className="circle-idea-action">
                         Make a plan <ArrowUpRight size={18} />
@@ -215,7 +215,7 @@ export default function AffinityMatchMatrix({
             </>
           )}
           <p className="circle-footnote">
-            {example ? "Illustrative suggestions, not a compatibility test." : "Your circle is private. Choose what you enjoy together."}
+            {example ? "Illustrative suggestions, not a compatibility test." : "Ideas are ordered using your saved interests and preferences on this device. Names and notes are not sent to the recommendation service."}
           </p>
         </div>
       </div>

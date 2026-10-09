@@ -2513,3 +2513,23 @@
 .service-page a { text-decoration: underline; text-underline-offset: 4px; }
 .service-page select { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d8d4cc; border-radius: 6px; background: #fffdfa; color: inherit; }
 .service-page button { min-height: 44px; }
+
+/* Storage is useful context, kept next to the optional control. */
+.gp-storage-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; font-size: 12px; color: var(--gp-muted); margin-bottom: 20px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.gp-storage-status p { margin: 0; }
+.gp-storage-status details { margin-left: auto; }
+.gp-storage-status summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.gp-storage-status details[open] { flex-basis: 100%; margin-left: 0; }
+.gp-storage-status details p { max-width: 65ch; padding-bottom: 12px; }
+.gp-app { --gp-muted: #665e50; }
+.gp-app h1, .gp-app h2, .gp-app h3 { letter-spacing: -.035em; }
+.gp-text-button, .gp-footer a { min-height: 44px; display: inline-flex; align-items: center; }
+.gp-footer a { padding-inline: 4px; }
+.gp-main .circle-heading { margin-bottom: 24px; }
+.gp-main .circle-heading h2 { font-size: clamp(32px, 4vw, 48px); }
+.gp-main .circle-heading > p { max-width: 42ch; }
+@media (max-width: 650px) {
+  .gp-storage-status { gap: 0 16px; }
+  .gp-storage-status details { margin-left: 0; }
+  .gp-main .circle-edit { padding-top: 24px; }
+}

@@ -1,40 +1,29 @@
-# Good Plans implementation review
+# Good Plans implementation review — 9 October 2026
 
-## Design
+The original cream, coral and purple scrapbook design is preserved. Current fixes follow the [audit backlog](./BACKLOG.md); the [launch checklist](./LAUNCH-CHECKLIST.md) distinguishes local implementation from production verification.
 
-The original cream, coral and purple scrapbook home layout, cut-paper artwork and sections are preserved. Planning tools, sign-in and the organiser portal follow the same visual identity.
+## Personal planning
 
-## Implemented hosting functionality
+Friends, notes, drafts and saved ideas work without an account and persist on the device. Names and private notes stay out of recommendation requests; a public venue shortlist is ordered on the device using stated interests and preferences. Recommendations do not infer interests or accessibility needs from age, personality, gender or relationship. Venue category labels describe the venue, and unknown live details are left for review.
 
-- Email-code host sign-in with allowlisting, hashed one-use codes, expiry, per-code attempt limits and request throttling. Development codes and mail are confined to development.
-- Persistent drafts for outings, single events and gatherings; personal notes, bookmarks, search, calendar view and correct timezone-aware calendar exports.
-- Account sync for drafts, people, saved ideas and preferences, with offline storage, revision checks, recovery choices and local backups.
-- Real recurring series with separate event records, weekly/monthly/six-weekly/quarterly cadence, month-end handling and daylight-saving-aware timestamps.
-- Organiser portal listing live events and series, editing individual occurrences, publishing drafts, cancelling one event or the remaining series, adding guests, fresh private links and explicit email invitation actions.
-- Guest responses persisted on the server, plus-ones counted as seats, serialized capacity checks, waitlists and promotion as places open. Cancelled invitations remain readable and refuse further RSVPs.
-- Delivery records for invitations, edits, cancellations, promotions and optional reminders. Failed deliveries remain visible and retryable; provider acceptance is required before a delivery is labelled sent.
-- Imported links open an editable review draft. Guest pages have unavailable/loading/cancelled states. Modals, labels, focus handling and phone layouts retain the earlier accessibility improvements.
+Homepage examples lead to editable drafts. Planning settings feed new invitation and series defaults. Friend editors share validation and preserve notes, interests and avoidances. Dashboard sections have stable URLs and browser Back/refresh support.
 
-## Verification
+Signing in alone does not enable sync. Consent is scoped to an account on a device, and activation explains server storage and possible workspace replacement. Previously enabled accounts may resume sync on later sign-in. Stopping sync does not erase earlier server data. Existing revision-conflict handling, ownership safeguards and local backups remain in place.
 
-Automated unit tests cover calendar export, validation, recurrence, daylight saving, seat calculations, allowed imports and email-provider behaviour. The isolated Worker/D1 integration journey checks authentication, replay rejection, series creation idempotency, private access, plus-ones, waitlist promotion, revision conflicts, invitation email handoff, workspace sync conflicts, cancellation and request-origin checks. It also exercises reminders and exhausted sign-in codes.
+## Hosting and newsletters
 
-Browser checks cover the original home, sign-in, Host a series → recurring draft → publish three monthly events, the organiser list, editing an occurrence and cancelling the rest of a series. Test email uses a local mailbox only.
+The backend implements one-use email-code host authentication with allowlisting, persistent single events and recurring series, private invitation access, guest responses, plus-one seat accounting, serialised capacity, waitlists/promotion, occurrence editing and cancellation. Invitations and updates have delivery records and retries; accepted-by-provider and delivered-to-recipient-server remain separate states.
 
-Build output is written to a temporary directory during verification, preserving the existing modified `dist/index.html`.
+The organiser portal supports review and manual additions for local classes, retreats and community events. Discovery supports broad partner/friend/family contexts without gender assumptions. Newsletter signup requires separate consent and confirmation; daily discovery candidates and weekly editions require organiser review before listing or sending. Subscriber preferences, unsubscribe and newsletter deletion exist.
 
-## Launch status
+## Interface and asset changes
 
-Implementation is available locally. Production email credentials are not configured; no deployment or remote migration has been performed during this work. Follow [backend activation instructions](../worker/README.md) and complete the live two-browser/real-mailbox smoke test before launch. Local tests cannot prove production DNS, email delivery or live bindings.
+Settings uses a native modal dialog with focus containment, Escape and focus restoration. Accessible action colours, larger touch targets, shorter storage disclosures and an immediate empty-circle action retain the existing visual identity. Fonts are served locally, fictional friends use initials, and Google Maps loads only on request. WebP artwork variants and a small favicon reduce asset size while preserving the originals.
 
-The affinity matrix is explicitly a sample demonstration. Shared date voting, two-way Google Calendar sync and generated custom artwork remain outside the implemented hosting flow. Starter venue suggestions and inspiration are not live availability or booking promises.
+## Evidence and boundaries
 
-## Dublin discovery and newsletter addition
+30 unit tests and two isolated backend integration journeys pass after the initial implementation fixes. A temporary production build succeeds without replacing the user-modified dist/index.html. Browser verification covers the critical UI handoffs and settings interactions; further evidence is logged in BACKLOG.md.
 
-Added a scrapbook-styled **Dublin this week** page with category/search filters and **Add to my plans**. The existing home layout remains intact, with navigation links to discovery. Newsletter links open prefilled drafts with the original ticket URL, device-local date/time, venue and price; unknown duration is labelled for review.
+Production sending credentials are configured and a sign-in email was received earlier. Production discovery was empty at audit time; Ticketmaster and signed callback activation remain outstanding. This fix pass has not deployed or sent a newsletter. Real-domain guest, newsletter, account-sync and operations checks remain release requirements.
 
-The organiser's newsletter studio supports automatic daily Ticketmaster discovery across a 90-day window, focused searches for creative classes, dance, women-centred gatherings, caregiving, retreats, festivals and seasonal events, a private approval queue, manual local picks, one draft per Dublin calendar week, up to eight selected events, subject/introduction editing, saved preview approval and delivery counts/retry. Signup uses explicit consent and email confirmation, optional interests and private preferences/unsubscribe links. No discovered event is public and no edition is sent without organiser approval.
-
-Discovery also supports outing context. Choosing **My partner** keeps suggestions broad across live music, comedy, culture, sport, outdoors, workshops, wellbeing, festivals and food experiences rather than reducing a couple's plans to dinner. The context is relationship-based and does not infer interests from either person's gender.
-
-Verification includes 25 unit tests and two isolated integration journeys, plus browser checks of the candidate review UI, partner-planning controls, local listing creation, edition preparation, the email-link-to-draft handoff, subscription confirmation/unsubscribe and a phone-width discovery layout without horizontal overflow. Test data stays in local development; test emails go to the local mailbox. Production requires migration 0008, Ticketmaster and Resend secrets, a verified sender and live smoke testing. No live newsletter has been sent.
+Shared date voting, bulk editing future series occurrences, two-way calendar sync and additional authorised event feeds remain later product work. Starter venues are inspiration rather than live availability or booking promises.

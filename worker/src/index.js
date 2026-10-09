@@ -1,3 +1,4 @@
+import { activityCategories, categoryLabels } from "../../shared/recommendations.js";
 import { operations, trackJob } from './operations.js';
 import { newsletter, scheduledNewsletter } from './newsletter.js';
 import { hosting } from './hosting.js';
@@ -420,99 +421,18 @@ async function confirmImport(request, env, sourceId) {
 
 async function recommendations(request, env) {
   const input = await body(request);
-  const friends = input.friends || [];
-  const city = input.city || 'Dublin';
-
-  const parseAge = (ageStr) => {
-    const match = String(ageStr || '').match(/\d+/);
-    return match ? parseInt(match[0], 10) : 30;
-  };
-
-  const ages = friends.map((f) => parseAge(f.ageGroup || f.age));
-  const avgAge = ages.length ? ages.reduce((a, b) => a + b, 0) / ages.length : 30;
-  const maxAge = ages.length ? Math.max(...ages) : 30;
-  const minAge = ages.length ? Math.min(...ages) : 30;
-  const ageDelta = maxAge - minAge;
-
-  const introverts = friends.filter((f) => /^[I]/i.test(f.mbti || '')).length;
-  const introvertRatio = friends.length ? introverts / friends.length : 0.5;
-
-  const cozyBattery = friends.filter((f) => f.socialBatteryLevel === 'cozy' || f.socialBatteryLevel === 'balanced').length;
-  const cozyRatio = friends.length ? cozyBattery / friends.length : 0.5;
-
-  const allCurated = await env.DB.prepare('SELECT * FROM venues WHERE city = ?').bind(city).all();
-  const venues = allCurated.results || [];
-
-  const scoredVenues = venues.map((v) => {
-    let score = 50; // base score
-    const ageAppeal = JSON.parse(v.age_cohort_appeal || '[]');
-    const vibeTags = JSON.parse(v.mbti_vibe_tags || '[]');
-
-    // 1. Sensory match (noise)
-    if (cozyRatio > 0.5 || introvertRatio > 0.5) {
-      if (v.sensory_noise === 'low') score += 25;
-      else if (v.sensory_noise === 'medium') score += 10;
-      else score -= 15;
-    } else {
-      if (v.sensory_noise === 'high') score += 20;
-      else if (v.sensory_noise === 'medium') score += 15;
-      else score += 5;
-    }
-
-    // 2. Accessibility / Age
-    const hasOlderMembers = maxAge > 50 || ageDelta > 20;
-    if (hasOlderMembers && !v.mobility_accessible) {
-      score -= 25;
-    }
-
-    // 3. Age appeal overlap
-    let ageCohort = '30s';
-    if (avgAge < 30) ageCohort = '20s';
-    else if (avgAge >= 50) ageCohort = '50s';
-    else if (avgAge >= 40) ageCohort = '40s';
-    else if (avgAge >= 60) ageCohort = '60s';
-
-    if (ageAppeal.includes(ageCohort)) {
-      score += 15;
-    }
-
-    // 4. MBTI vibes
-    if (introvertRatio > 0.5 && vibeTags.includes('introvert-friendly')) {
-      score += 15;
-    }
-    if (introvertRatio <= 0.5 && vibeTags.includes('social')) {
-      score += 15;
-    }
-
-    // Clamp score
-    score = Math.max(10, Math.min(100, score));
-    return { ...v, score };
-  });
-
-  // Sort and format into activities categories
-  const sorted = scoredVenues.sort((a, b) => b.score - a.score);
-
-  const categoryMap = {
-    'coffee-stroll': { name: 'Coffee & Strolls', iconName: 'coffee-stroll', label: 'Coffee & Strolls' },
-    'board-games': { name: 'Matcha & Board Game Duo', iconName: 'board-games', label: 'Board Games' },
-    'pottery-workshop': { name: 'Pottery & Wine Workshop', iconName: 'pottery-workshop', label: 'Workshops' },
-    'outdoor-walk': { name: 'Howth Cliff Walk Coastal Hike', iconName: 'outdoor-walk', label: 'Walks' },
-    'dinner-out': { name: 'Early Tapas & Natural Wine', iconName: 'dinner-out', label: 'Dining' },
-    'retreat': { name: 'Wicklow Mountain Spa Retreat', iconName: 'retreat', label: 'Retreats' },
-  };
-
-  const activities = sorted.map((v) => {
-    const cat = categoryMap[v.category] || { name: v.name, iconName: 'coffee-stroll', label: v.category };
-    return {
-      name: `${cat.name} at ${v.name.split(' ')[0]}`,
-      iconName: v.category,
-      score: v.score,
-      vibe: `${v.name}, ${v.address} · suitable for ${friends.length ? friends.map((f) => f.name.split(' ')[0]).join(' & ') : 'your group'}`,
-      venue: { name: v.name, address: v.address }
-    };
-  });
-
-  return response({ source: 'curated_harmony', venues: activities });
+  const city = typeof input.city === 'string' && input.city.trim() ? input.city.trim().slice(0, 100) : 'Dublin';
+  const categories = activityCategories(input.activity);
+  const allCurated = await env.DB.prepare('SELECT * FROM venues WHERE lower(city) = lower(?) ORDER BY name').bind(city).all();
+  const venues = (allCurated.results || []).filter(v => !input.activity || categories.includes(v.category));
+  const activities = venues.map(v => ({
+    id: v.id, name: categoryLabels[v.category] || v.name, category: v.category,
+    iconName: v.category, kind: categoryLabels[v.category] || v.category,
+    noise: v.sensory_noise, mobilityAccessible: Boolean(v.mobility_accessible),
+    venue: { name: v.name, address: v.address },
+    explanation: 'Starter suggestion; check availability and access with the venue',
+  }));
+  return response({ source: 'curated_starter', venues: activities });
 }
 
 export default {

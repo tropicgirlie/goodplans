@@ -4,7 +4,7 @@ export const FRIENDS_DATA = [
   {
     id: 'f1',
     name: 'Maya Lin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    avatar: null,
     mbti: 'ENFP',
     archetype: 'The Creative Connector',
     lifestyle: 'Maternity Leave / New Mom',
@@ -17,7 +17,7 @@ export const FRIENDS_DATA = [
   {
     id: 'f2',
     name: 'Aoife Murphy',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+    avatar: null,
     mbti: 'INFJ',
     archetype: 'The Deep Listener',
     lifestyle: 'Working Professional (Office Days Wed)',
@@ -30,7 +30,7 @@ export const FRIENDS_DATA = [
   {
     id: 'f3',
     name: 'Chloe Walsh',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
+    avatar: null,
     mbti: 'INTJ',
     archetype: 'The Thoughtful Planner',
     lifestyle: 'Hybrid Freelance / Consultant',
@@ -43,7 +43,7 @@ export const FRIENDS_DATA = [
   {
     id: 'f4',
     name: 'Saoirse O’Connor',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',
+    avatar: null,
     mbti: 'ESFP',
     archetype: 'The Social Spark',
     lifestyle: 'Working Professional (Office Days Wed)',
@@ -56,7 +56,7 @@ export const FRIENDS_DATA = [
   {
     id: 'f5',
     name: 'Emma Byrne',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+    avatar: null,
     mbti: 'ENFJ',
     archetype: 'The Warm Host',
     lifestyle: 'Maternity Leave / Part-Time',

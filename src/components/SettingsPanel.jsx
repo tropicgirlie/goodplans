@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   Check,
@@ -11,6 +11,8 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
+
+import { personError, personRecord } from "../lib/planningModel";
 
 const tabs = [
   ["profile", "You", CircleUserRound],
@@ -56,6 +58,8 @@ export default function SettingsPanel({
   onLogout,
   onLoginClick,
 }) {
+  const dialogRef = useRef(null);
+  const [friendError, setFriendError] = useState("");
   const [tab, setTab] = useState(initialTab);
   const [activityName, setActivityName] = useState("");
   const [activityQuery, setActivityQuery] = useState("");
@@ -67,6 +71,17 @@ export default function SettingsPanel({
   useEffect(() => {
     if (open) setTab(initialTab);
   }, [open, initialTab]);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement;
+    const dialog = dialogRef.current;
+    dialog.showModal();
+    dialog.querySelector(".settings-header button")?.focus();
+    return () => {
+      dialog.close();
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [open]);
   if (!open) return null;
 
   const update = (section, field, value) =>
@@ -101,20 +116,10 @@ export default function SettingsPanel({
   };
   const addFriend = (event) => {
     event.preventDefault();
-    if (!friendName.trim()) return;
-    setSettings((current) => ({
-      ...current,
-      friends: [
-        ...current.friends,
-        {
-          id: `friend-${Date.now()}`,
-          name: friendName.trim(),
-          likes: friendLikes.trim() || "Still getting to know",
-          avoids: friendAvoids.trim() || "No notes yet",
-          visibility: "Only me",
-        },
-      ],
-    }));
+    const message = personError(friendName, settings.friends);
+    if (message) { setFriendError(message); return; }
+    setFriendError("");
+    setSettings(current => ({ ...current, friends: [...current.friends, personRecord(null, { name: friendName, likes: friendLikes, avoids: friendAvoids })] }));
     setFriendName("");
     setFriendLikes("");
     setFriendAvoids("");
@@ -142,17 +147,13 @@ export default function SettingsPanel({
       }).format(organizerDate);
 
   return (
-    <div
+    <dialog
+      ref={dialogRef}
       className="settings-layer"
-      role="dialog"
-      aria-modal="true"
       aria-label="Planning settings"
+      onCancel={event => { event.preventDefault(); onClose(); }}
+      onClick={event => { if (event.target === dialogRef.current) onClose(); }}
     >
-      <button
-        className="settings-backdrop"
-        onClick={onClose}
-        aria-label="Close settings"
-      />
       <aside className="settings-panel">
         <header className="settings-header">
           <div>
@@ -242,8 +243,7 @@ export default function SettingsPanel({
                           marginTop: "3px",
                         }}
                       >
-                        Sign in to backup settings and access organizer features
-                        in the cloud.
+                        Sign in to send invitations. Account sync is optional and can be enabled in your dashboard.
                       </small>
                       <button
                         onClick={onLoginClick}
@@ -309,6 +309,7 @@ export default function SettingsPanel({
                     </select>
                   </label>
                 </div>
+                <p className="setting-copy">City and social pace help order starter ideas. Budget and travel distance are planning notes; confirm prices, travel and opening hours with the venue.</p>
                 <Toggle
                   label="Open to meeting new people"
                   note="Used only when you make a mixed-group plan."
@@ -322,7 +323,7 @@ export default function SettingsPanel({
                 <p className="setting-kicker">your activity palette</p>
                 <h3>Things worth making time for.</h3>
                 <p className="setting-copy">
-                  These give the planner language for searching your city. Add
+                  Keep a palette of activities to use when choosing your next plan. Add
                   the specific things your people actually enjoy.
                 </p>
                 <div className="activity-list">
@@ -354,7 +355,7 @@ export default function SettingsPanel({
                     />
                   </label>
                   <label>
-                    How should Maps search it?
+                    Keywords for the shortlist
                     <input
                       value={activityQuery}
                       onChange={(e) => setActivityQuery(e.target.value)}
@@ -372,8 +373,7 @@ export default function SettingsPanel({
                 <p className="setting-kicker">friends and circles</p>
                 <h3>Keep the useful context.</h3>
                 <p className="setting-copy">
-                  Private notes help you make better suggestions. They are not
-                  shown on an invite.
+                  Interests help order your ideas on this device. Notes and preferences are never included in invitations.
                 </p>
                 <div className="people-list">
                   {settings.friends.map((friend) => (
@@ -381,8 +381,9 @@ export default function SettingsPanel({
                       <span>{friend.name.slice(0, 1)}</span>
                       <div>
                         <b>{friend.name}</b>
-                        <small>Likes: {friend.likes}</small>
-                        <small>Avoids: {friend.avoids}</small>
+                        <small>{friend.note || "No private notes yet"}</small>
+                        {friend.likes && <small>Likes: {friend.likes}</small>}
+                        {friend.avoids && <small>Avoids: {friend.avoids}</small>}
                       </div>
                       <button
                         onClick={() => remove("friends", friend.id)}
@@ -397,6 +398,8 @@ export default function SettingsPanel({
                   <label>
                     Name
                     <input
+                      maxLength={80}
+                      required
                       value={friendName}
                       onChange={(e) => setFriendName(e.target.value)}
                       placeholder="Friend's name"
@@ -405,6 +408,7 @@ export default function SettingsPanel({
                   <label>
                     They tend to love
                     <input
+                      maxLength={300}
                       value={friendLikes}
                       onChange={(e) => setFriendLikes(e.target.value)}
                       placeholder="live music, a long walk"
@@ -413,6 +417,7 @@ export default function SettingsPanel({
                   <label>
                     They would skip
                     <input
+                      maxLength={300}
                       value={friendAvoids}
                       onChange={(e) => setFriendAvoids(e.target.value)}
                       placeholder="busy queues, late nights"
@@ -422,9 +427,10 @@ export default function SettingsPanel({
                     <Plus /> Add person
                   </button>
                 </form>
+                {friendError && <p role="alert">{friendError}</p>}
                 <div className="circle-row">
                   <b>Your circles</b>
-                  {settings.circles.map((circle) => (
+                  {(settings.circles || []).map((circle) => (
                     <span key={circle.id}>
                       {circle.name} · {circle.members} people
                     </span>
@@ -486,7 +492,7 @@ export default function SettingsPanel({
             {tab === "discovery" && (
               <section className="setting-section">
                 <p className="setting-kicker">city discovery</p>
-                <h3>Tell Maps what a good fit means.</h3>
+                <h3>A few preferences for your shortlist.</h3>
                 <div className="setting-grid">
                   <label>
                     Venue vibe
@@ -503,14 +509,14 @@ export default function SettingsPanel({
                     </select>
                   </label>
                   <label>
-                    Venue timing
+                    Preferred time
                     <select
                       value={settings.discovery.timing}
                       onChange={(e) =>
                         update("discovery", "timing", e.target.value)
                       }
                     >
-                      <option>Open now</option>
+                      <option value="Open now">Open now — confirm with venue</option>
                       <option>Weekend</option>
                       <option>After work</option>
                       <option>Any time</option>
@@ -582,13 +588,13 @@ export default function SettingsPanel({
             {tab === "organizer" && (
               <section className="setting-section organizer-section">
                 <p className="setting-kicker">your organiser space</p>
-                <h3>Women in Tech Brunch</h3>
+                <h3>Your next regular gathering.</h3>
                 <p className="setting-copy">
-                  A reusable monthly event template, kept separate from your
+                  A reusable event template, kept separate from your
                   personal plans and private friend notes.
                 </p>
                 <div className="organizer-status">
-                  <span>Next brunch</span>
+                  <span>Next gathering</span>
                   <b>{organizerDateLabel}</b>
                   <small>{settings.organizer.visibility} · draft</small>
                 </div>
@@ -619,11 +625,13 @@ export default function SettingsPanel({
                         update("organizer", "cadence", e.target.value)
                       }
                     >
+                      <option value="Weekly">Every week</option>
                       <option>Once a month</option>
                       <option>Every six weeks</option>
                       <option>Once a quarter</option>
                     </select>
                   </label>
+                  <label>Number of events<input type="number" min="2" max="12" value={settings.organizer.count || 3} onChange={e => update("organizer", "count", Number(e.target.value))} /></label>
                   <label>
                     Guest capacity
                     <input
@@ -637,7 +645,7 @@ export default function SettingsPanel({
                     />
                   </label>
                   <label>
-                    Next brunch date
+                    First event date
                     <input
                       type="date"
                       value={settings.organizer.nextDate}
@@ -659,7 +667,7 @@ export default function SettingsPanel({
                   </label>
                 </div>
                 <label className="wide-setting">
-                  What makes this brunch worth coming to?
+                  What makes this gathering worth coming to?
                   <input
                     value={settings.organizer.note}
                     onChange={(e) =>
@@ -752,13 +760,13 @@ export default function SettingsPanel({
                 >
                   Sign in as Host
                 </button>{" "}
-                to sync across devices.
+                to send invitations. Enable account sync separately in your dashboard.
               </span>
             )}
           </div>
           <button onClick={onClose}>Done</button>
         </footer>
       </aside>
-    </div>
+    </dialog>
   );
 }

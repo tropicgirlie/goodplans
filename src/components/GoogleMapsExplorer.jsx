@@ -7,11 +7,12 @@ import {
   Star,
   Ticket,
 } from "lucide-react";
+import { activityCategories } from "../../shared/recommendations";
 import { findVenues } from "../lib/goodPlansApi";
 
 const venues = [
   {
-    id: "fumbally",
+    id: "fumbally", category: "dinner-out",
     name: "The Fumbally",
     address: "Fumbally Lane, Dublin 8",
     kind: "Long-table lunch",
@@ -19,7 +20,7 @@ const venues = [
     color: "coral",
   },
   {
-    id: "lighthouse",
+    id: "lighthouse", category: "cinema",
     name: "Light House Cinema",
     address: "Market Square, Smithfield, Dublin 7",
     kind: "Small-screen evening",
@@ -27,7 +28,7 @@ const venues = [
     color: "blue",
   },
   {
-    id: "hightlanes",
+    id: "hightlanes", category: "gallery",
     name: "Hugh Lane Gallery",
     address: "Parnell Square North, Dublin 1",
     kind: "Gallery late",
@@ -35,7 +36,7 @@ const venues = [
     color: "olive",
   },
   {
-    id: "howth",
+    id: "howth", category: "outdoor-walk",
     name: "Howth Harbour",
     address: "Howth, Co. Dublin",
     kind: "A day out of town",
@@ -52,13 +53,20 @@ export default function GoogleMapsExplorer({
   const [selectedVenue, setSelectedVenue] = useState(venues[0]);
   const [shortlist, setShortlist] = useState(venues);
   const [source, setSource] = useState("demo");
+  const [loadedMap, setLoadedMap] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+    setLoading(true); setError(""); setLoadedMap(null);
+    setShortlist([]); setSelectedVenue(null);
+    const fallback = city.toLowerCase() === "dublin" ? venues.filter(venue => !activity || activityCategories(activity).includes(venue.category)) : [];
+
     findVenues({ city, activity, limit: 4 })
       .then((result) => {
-        if (!active || !result.venues?.length) return;
-        const prepared = result.venues
+        if (!active) return;
+        const prepared = (result.venues?.length ? result.venues : fallback)
           .slice(0, 4)
           .map((venue, index) => ({
             ...venue,
@@ -66,20 +74,22 @@ export default function GoogleMapsExplorer({
             id: venue.id || `venue-${index}`,
             color:
               venue.color || ["coral", "blue", "olive", "orange"][index % 4],
-            kind: venue.kind || activity || "A good local option",
+            kind: venue.kind || "A good local option",
             fit: venue.explanation || venue.fit || "A considered local fit",
           }));
         setShortlist(prepared);
-        setSelectedVenue(prepared[0]);
-        setSource(result.source || "live");
+        setSelectedVenue(prepared[0] || null);
+        setSource(result.venues?.length ? result.source : "demo");
       })
       .catch(() => {
         if (active) {
-          setShortlist(venues);
-          setSelectedVenue(venues[0]);
+          setShortlist(fallback);
+          setSelectedVenue(fallback[0] || null);
+          setError("We couldn’t refresh venue ideas. Any options shown are an illustrative shortlist.");
           setSource("demo");
         }
-      });
+      })
+      .finally(() => { if (active) setLoading(false); });
     return () => {
       active = false;
     };
@@ -105,13 +115,16 @@ export default function GoogleMapsExplorer({
             : "starter shortlist"}
         </span>
       </div>
-      <div className="maps-board">
+      {loading && <p role="status">Finding a starter shortlist…</p>}
+      {error && <p role="alert">{error}</p>}
+      {!loading && !shortlist.length && <p>No starter venues match this activity in {city} yet. You can choose your own venue in a draft.</p>}
+      {selectedVenue && <div className="maps-board">
         <div className="venue-list">
           {shortlist.map((venue, index) => (
             <button
               key={venue.id}
               className={`venue-row ${selectedVenue.id === venue.id ? "active" : ""}`}
-              onClick={() => setSelectedVenue(venue)}
+              onClick={() => { setSelectedVenue(venue); setLoadedMap(null); }}
             >
               <span className={`venue-number ${venue.color}`}>
                 0{index + 1}
@@ -127,12 +140,12 @@ export default function GoogleMapsExplorer({
           ))}
         </div>
         <div className="map-stage">
-          <iframe
+          {loadedMap === selectedVenue.id ? <iframe
             title={`Google Map for ${selectedVenue.name}`}
             src={`https://maps.google.com/maps?q=${encodeURIComponent([selectedVenue.name, selectedVenue.address].filter(Boolean).join(", "))}&z=14&output=embed`}
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+            referrerPolicy="no-referrer"
+          /> : <div className="map-placeholder"><MapPin aria-hidden="true" /><p>See {selectedVenue.name} on the map.</p><p className="gp-field-note">Loading this map connects to Google, which receives your IP address and browser information.</p><button className="primary" onClick={() => setLoadedMap(selectedVenue.id)}>Load Google map</button></div>}
           <div className="map-place-card">
             <div className={`place-pin ${selectedVenue.color}`}>
               <MapPin />
@@ -152,7 +165,7 @@ export default function GoogleMapsExplorer({
         </div>
         <div className="map-footer">
           <span>
-            <Ticket /> Suggestions matched to the pace of your group.
+            <Ticket /> Starter suggestions · confirm details with the venue.
           </span>
           <a
             href={
@@ -165,7 +178,7 @@ export default function GoogleMapsExplorer({
             Open in Google Maps <ExternalLink />
           </a>
         </div>
-      </div>
+      </div>}
     </section>
   );
 }

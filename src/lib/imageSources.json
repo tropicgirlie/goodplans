@@ -1,0 +1,134 @@
+{
+  "affinita_app_logo.jpg": {
+    "src": "/images/affinita_app_logo.webp",
+    "width": 1024,
+    "height": 1024,
+    "srcSet": "/images/affinita_app_logo-320.webp 320w, /images/affinita_app_logo-768.webp 768w, /images/affinita_app_logo.webp 1024w"
+  },
+  "affinita_editorial_hero.jpg": {
+    "src": "/images/affinita_editorial_hero.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/affinita_editorial_hero-320.webp 320w, /images/affinita_editorial_hero-768.webp 768w, /images/affinita_editorial_hero.webp 1200w"
+  },
+  "girl_club_moodboard.png": {
+    "src": "/images/girl_club_moodboard.webp",
+    "width": 734,
+    "height": 374,
+    "srcSet": "/images/girl_club_moodboard-320.webp 320w, /images/girl_club_moodboard.webp 734w"
+  },
+  "good-plans-after-hours-collage.png": {
+    "src": "/images/good-plans-after-hours-collage.webp",
+    "width": 1024,
+    "height": 1536,
+    "srcSet": "/images/good-plans-after-hours-collage-320.webp 320w, /images/good-plans-after-hours-collage-768.webp 768w, /images/good-plans-after-hours-collage.webp 1024w"
+  },
+  "good-plans-gathering-collage.png": {
+    "src": "/images/good-plans-gathering-collage.webp",
+    "width": 1003,
+    "height": 1568,
+    "srcSet": "/images/good-plans-gathering-collage-320.webp 320w, /images/good-plans-gathering-collage-768.webp 768w, /images/good-plans-gathering-collage.webp 1003w"
+  },
+  "good-plans-hero-collage.png": {
+    "src": "/images/good-plans-hero-collage.webp",
+    "width": 1003,
+    "height": 1568,
+    "srcSet": "/images/good-plans-hero-collage-320.webp 320w, /images/good-plans-hero-collage-768.webp 768w, /images/good-plans-hero-collage.webp 1003w"
+  },
+  "good-plans-hero-sticker.png": {
+    "src": "/images/good-plans-hero-sticker.webp",
+    "width": 1024,
+    "height": 1536,
+    "srcSet": "/images/good-plans-hero-sticker-320.webp 320w, /images/good-plans-hero-sticker-768.webp 768w, /images/good-plans-hero-sticker.webp 1024w"
+  },
+  "good-plans-invite-collage.png": {
+    "src": "/images/good-plans-invite-collage.webp",
+    "width": 1024,
+    "height": 1536,
+    "srcSet": "/images/good-plans-invite-collage-320.webp 320w, /images/good-plans-invite-collage-768.webp 768w, /images/good-plans-invite-collage.webp 1024w"
+  },
+  "good-plans-mark.png": {
+    "src": "/images/good-plans-mark.webp",
+    "width": 192,
+    "height": 192,
+    "srcSet": "/images/good-plans-mark.webp 192w"
+  },
+  "good-plans-women-tech-brunch.png": {
+    "src": "/images/good-plans-women-tech-brunch.webp",
+    "width": 1024,
+    "height": 1536,
+    "srcSet": "/images/good-plans-women-tech-brunch-320.webp 320w, /images/good-plans-women-tech-brunch-768.webp 768w, /images/good-plans-women-tech-brunch.webp 1024w"
+  },
+  "mature_concert.jpg": {
+    "src": "/images/mature_concert.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/mature_concert-320.webp 320w, /images/mature_concert-768.webp 768w, /images/mature_concert.webp 1200w"
+  },
+  "mature_dinner.jpg": {
+    "src": "/images/mature_dinner.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/mature_dinner-320.webp 320w, /images/mature_dinner-768.webp 768w, /images/mature_dinner.webp 1200w"
+  },
+  "mature_hero.jpg": {
+    "src": "/images/mature_hero.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/mature_hero-320.webp 320w, /images/mature_hero-768.webp 768w, /images/mature_hero.webp 1200w"
+  },
+  "mature_spa.jpg": {
+    "src": "/images/mature_spa.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/mature_spa-320.webp 320w, /images/mature_spa-768.webp 768w, /images/mature_spa.webp 1200w"
+  },
+  "nature_waterfall_moodboard.png": {
+    "src": "/images/nature_waterfall_moodboard.webp",
+    "width": 1024,
+    "height": 96,
+    "srcSet": "/images/nature_waterfall_moodboard-320.webp 320w, /images/nature_waterfall_moodboard-768.webp 768w, /images/nature_waterfall_moodboard.webp 1024w"
+  },
+  "pop_art_editorial_hero.jpg": {
+    "src": "/images/pop_art_editorial_hero.webp",
+    "width": 1024,
+    "height": 974,
+    "srcSet": "/images/pop_art_editorial_hero-320.webp 320w, /images/pop_art_editorial_hero-768.webp 768w, /images/pop_art_editorial_hero.webp 1024w"
+  },
+  "scrapbook_afternoon_tea.jpg": {
+    "src": "/images/scrapbook_afternoon_tea.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_afternoon_tea-320.webp 320w, /images/scrapbook_afternoon_tea-768.webp 768w, /images/scrapbook_afternoon_tea.webp 1200w"
+  },
+  "scrapbook_coffee_walk.jpg": {
+    "src": "/images/scrapbook_coffee_walk.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_coffee_walk-320.webp 320w, /images/scrapbook_coffee_walk-768.webp 768w, /images/scrapbook_coffee_walk.webp 1200w"
+  },
+  "scrapbook_pizza_games.jpg": {
+    "src": "/images/scrapbook_pizza_games.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_pizza_games-320.webp 320w, /images/scrapbook_pizza_games-768.webp 768w, /images/scrapbook_pizza_games.webp 1200w"
+  },
+  "scrapbook_pottery.jpg": {
+    "src": "/images/scrapbook_pottery.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_pottery-320.webp 320w, /images/scrapbook_pottery-768.webp 768w, /images/scrapbook_pottery.webp 1200w"
+  },
+  "scrapbook_spa_sauna.jpg": {
+    "src": "/images/scrapbook_spa_sauna.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_spa_sauna-320.webp 320w, /images/scrapbook_spa_sauna-768.webp 768w, /images/scrapbook_spa_sauna.webp 1200w"
+  },
+  "scrapbook_sunset_hike.jpg": {
+    "src": "/images/scrapbook_sunset_hike.webp",
+    "width": 1200,
+    "height": 896,
+    "srcSet": "/images/scrapbook_sunset_hike-320.webp 320w, /images/scrapbook_sunset_hike-768.webp 768w, /images/scrapbook_sunset_hike.webp 1200w"
+  }
+}

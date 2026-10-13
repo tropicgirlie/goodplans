@@ -1,3 +1,10 @@
+import MaterialSelect from "./MaterialSelect";
+import LocationPicker from "./LocationPicker";
+import { launchSettings, regionDiscoveryLabel } from "../lib/region";
+import { BRAZIL_FRIENDS } from "../../shared/brazil";
+import { SPAIN_FRIENDS } from "../../shared/spain";
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
+import { ui, localeHref } from "../i18n/core";
 import Artwork from "./Artwork";
 import { useEffect, useState } from "react";
 import {
@@ -16,7 +23,8 @@ import SettingsPanel from "./SettingsPanel";
 import AffinityMatchMatrix from "./AffinityMatchMatrix";
 import { FRIENDS_DATA } from "../data/mockData";
 import { importEventLink, readImportedIdea } from "../lib/goodPlansApi";
-import { localDate } from "../lib/plans";
+import { localDate, wallDateTime } from "../lib/plans";
+import { draftDefaults } from "../lib/planningModel";
 const ideas = [
   {
     mark: "make",
@@ -164,22 +172,15 @@ export default function OriginalHome({
   saved,
   onBookmark,
 }) {
-  const settings = { ...defaultSettings, ...preferences };
-  for (const key of [
-    "profile",
-    "availability",
-    "discovery",
-    "invite",
-    "organizer",
-  ])
-    settings[key] = { ...defaultSettings[key], ...preferences?.[key] };
+  const settings = launchSettings(defaultSettings, preferences);
+  const activityCopy = (activity, field = "name") => ["gallery", "cinema", "make", "walk"].includes(activity?.id) ? ui(activity[field]) : activity?.[field];
   const setSettings = (updater) =>
     onPreferencesChange(
       typeof updater === "function" ? updater(settings) : updater,
     );
   const [showSettings, setShowSettings] = useState(false);
   const [settingsMode, setSettingsMode] = useState("profile");
-  const [friend, setFriend] = useState("Maya");
+  const [friend, setFriend] = useState(settings.profile.country === "BR" ? "Ana" : settings.profile.country === "ES" ? "Lucía" : "Maya");
   const [activityId, setActivityId] = useState("gallery");
   const [moment, setMoment] = useState("A free Sunday afternoon");
   const [madePlan, setMadePlan] = useState(false);
@@ -188,6 +189,7 @@ export default function OriginalHome({
   const [selectedFriends, setSelectedFriends] = useState(["f1", "f2"]);
   const [importMessage, setImportMessage] = useState("");
   const city = settings.profile.city;
+  const exampleFriends = settings.profile.country === "BR" ? BRAZIL_FRIENDS : settings.profile.country === "ES" ? SPAIN_FRIENDS : FRIENDS_DATA;
   const selectedActivity =
     settings.activities.find((a) => a.id === activityId) ||
     settings.activities[0];
@@ -205,7 +207,7 @@ export default function OriginalHome({
   };
   const openPlan = () =>
     onCreate({
-      title: selectedActivity?.name || "A good day together",
+      title: activityCopy(selectedActivity) || ui("A good day together"),
       date: pickedDate,
       guests: friend
         .split(",")
@@ -215,7 +217,7 @@ export default function OriginalHome({
         ? [selectedVenue.name, selectedVenue.address].filter(Boolean).join(", ")
         : "",
       city,
-      notes: moment,
+      notes: ui(moment),
       capacity: settings.invite.limit,
       plusOne: settings.invite.plusOne,
       showGuests: settings.invite.showGuests,
@@ -225,6 +227,7 @@ export default function OriginalHome({
   const createOrganizerEvent = () => {
     setShowSettings(false);
     onCreate({
+      ...draftDefaults(settings, true),
       kind: "Gathering",
       seriesName: settings.organizer.seriesName,
       cadence: settings.organizer.cadence,
@@ -237,6 +240,7 @@ export default function OriginalHome({
       notes: settings.organizer.note,
       capacity: settings.organizer.capacity,
       location: settings.organizer.city,
+      city: settings.organizer.city,
       image: "good-plans-women-tech-brunch.png",
     });
   };
@@ -256,18 +260,24 @@ export default function OriginalHome({
           const draft = JSON.parse(source.draft_json || "{}");
           const start = draft.startsAt ? new Date(draft.startsAt) : null;
           const valid = start && !Number.isNaN(+start);
-          const time = (d) =>
-            `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+          const timezone = draft.timezone || settings.profile.timezone;
+          const sourceEnd = draft.endsAt ? new Date(draft.endsAt) : null;
+          const end = valid ? sourceEnd && !Number.isNaN(+sourceEnd) && sourceEnd > start ? sourceEnd : new Date(+start + 7200000) : null;
+          const time = (d) => wallDateTime(d,timezone).split('T')[1];
           setShowSettings(false);
           onCreate({
             title: draft.title || "",
-            date: valid ? localDate(start) : "",
+            date: valid ? localDate(start,timezone) : "",
+            timezone,
+            startsAt: valid ? start.toISOString() : undefined,
+            endsAt: valid ? end.toISOString() : undefined,
             time: valid ? time(start) : "14:00",
-            endTime: valid ? time(new Date(+start + 7200000)) : "16:00",
+            endTime: valid ? time(end) : "16:00",
+            endDate: valid && localDate(end,timezone) !== localDate(start,timezone) ? localDate(end,timezone) : "",
             location: [draft.venueName, draft.venueAddress]
               .filter(Boolean)
               .join(", "),
-            notes: [draft.description, `Source: ${url}`]
+            notes: [draft.description, ui(`Source: ${url}`)]
               .filter(Boolean)
               .join("\n\n"),
             kind: "Single event",
@@ -287,7 +297,7 @@ export default function OriginalHome({
   };
   const handlePlanOutingForFriends = (recommended) => {
     setFriend(
-      FRIENDS_DATA.filter((f) => selectedFriends.includes(f.id))
+      exampleFriends.filter((f) => selectedFriends.includes(f.id))
         .map((f) => f.name)
         .join(", "),
     );
@@ -301,10 +311,10 @@ export default function OriginalHome({
   };
   return (
     <main className="original-site">
-      {syncRecovery}
+      {ui(syncRecovery)}
       {syncError && (
         <p className="invite-error" role="alert">
-          {syncError}
+          {ui(syncError)}
         </p>
       )}
       <SettingsPanel
@@ -326,7 +336,7 @@ export default function OriginalHome({
         }}
       />
       <nav className="nav">
-        <a className="brand" href="#top" aria-label="Good Plans home">
+        <a className="brand" href="#top" aria-label={ui("Good Plans home")}>
           <Artwork
             className="brand-mark"
             src="/images/good-plans-mark.png"
@@ -339,24 +349,20 @@ export default function OriginalHome({
           </span>
         </a>
         <div className="nav-links">
-          <a href="#about">About</a>
-          <a href="#how">How it works</a>
-          <a href="#ideas">Ideas</a>
-          <button onClick={() => onManage("My plans")}>My plans</button>
-          <button onClick={() => onManage("Dublin this week")}>
-            Dublin this week
-          </button>
+          <a href="#about">{ui("About")}</a>
+          <a href="#how">{ui("How it works")}</a>
+          <a href="#ideas">{ui("Ideas")}</a>
+          <button onClick={() => onManage("My plans")}>{ui("My plans")}</button>
+          <button onClick={() => onManage("Dublin this week")}>{ui(regionDiscoveryLabel(settings.profile))}</button>
           {currentUser ? (
             <>
               <button onClick={() => onManage("Organiser portal")}>
-                <Settings2 /> Organizer Portal
-              </button>
+                <Settings2 />{ui(" My events")}</button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1"
               >
-                <LogOut className="w-3.5 h-3.5" /> Logout (
-                {currentUser.display_name})
+                <LogOut className="w-3.5 h-3.5" />{ui(" Logout (")}{currentUser.display_name})
               </button>
             </>
           ) : (
@@ -364,104 +370,81 @@ export default function OriginalHome({
               onClick={() => onManage("Organiser portal")}
               className="flex items-center gap-1"
             >
-              <UsersRound className="w-3.5 h-3.5" /> Organizer Portal
-            </button>
+              <UsersRound className="w-3.5 h-3.5" />{ui(" My events")}</button>
           )}
         </div>
-        <button className="nav-button" onClick={scrollToPlanner}>
-          Start a plan <ArrowUpRight />
+        <LanguageSwitcher />
+        <button className="nav-button" onClick={scrollToPlanner}>{ui("Start a plan ")}<ArrowUpRight />
         </button>
       </nav>
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">for busy lives and better friendships</p>
-          <h1>
-            Make time.
-            <br />
-            <em>Make it good.</em>
+          <p className="eyebrow">{ui("for busy lives and better friendships")}</p>
+          <h1>{ui("Make time.")}<br />
+            <em>{ui("Make it good.")}</em>
           </h1>
-          <p className="hero-lede">
-            Your friends are not another task on the list. Good Plans helps you
-            turn “we should catch up” into a break that works for the people you
-            love.
-          </p>
+          <p className="hero-lede">{ui("Your friends are not another task on the list. Good Plans helps you turn “we should catch up” into a break that works for the people you love.")}</p>
           <div className="hero-actions">
-            <button className="primary" onClick={scrollToPlanner}>
-              Plan something <ArrowUpRight />
+            <button className="primary" onClick={scrollToPlanner}>{ui("Plan something ")}<ArrowUpRight />
             </button>
             <button
               className="text-action"
               onClick={() => onManage("Organiser portal")}
-            >
-              Organizer Portal <Settings2 />
+            >{ui("My events ")}<Settings2 />
             </button>
           </div>
         </div>
         <div
           className="hero-collage"
-          aria-label="A collage of friends making plans"
+          aria-label={ui("A collage of friends making plans")}
         >
           <div className="hero-picture">
             <Artwork
               src="/images/good-plans-hero-sticker.png"
               loading="eager"
               fetchPriority="high"
-              alt="A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making"
+              alt={ui("A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making")}
             />
           </div>
         </div>
       </section>
-      <section className="ticker" aria-label="Things to plan">
-        <span>the gig</span>
+      <section className="ticker" aria-label={ui("Things to plan")}>
+        <span>{ui("the gig")}</span>
         <i>✳</i>
-        <span>the gallery late</span>
+        <span>{ui("the gallery late")}</span>
         <i>✳</i>
-        <span>the one person you never see enough</span>
+        <span>{ui("the one person you never see enough")}</span>
         <i>✳</i>
-        <span>the group escape</span>
+        <span>{ui("the group escape")}</span>
         <i>✳</i>
       </section>
       <section className="about" id="about">
         <div className="about-mark">
           <Artwork
             src="/images/good-plans-mark.png"
-            alt="The Good Plans calendar and map-pin mark"
+            alt={ui("The Good Plans calendar and map-pin mark")}
           />
         </div>
         <div className="about-copy">
-          <p className="eyebrow">why good plans exists</p>
-          <h2>Friendship needs a place in the diary.</h2>
-          <p>
-            Life gets full. Work, motherhood and other care, travel, family and
-            the never-ending group chat can make seeing each other feel
-            strangely hard. Good Plans gives the people you care about a little
-            more thought, so a real break can actually happen.
-          </p>
+          <p className="eyebrow">{ui("why good plans exists")}</p>
+          <h2>{ui("Friendship needs a place in the diary.")}</h2>
+          <p>{ui("Life gets full. Work, motherhood and other care, travel, family and the never-ending group chat can make seeing each other feel strangely hard. Good Plans gives the people you care about a little more thought, so a real break can actually happen.")}</p>
         </div>
         <div className="about-promises">
           <div>
             <span>01</span>
-            <b>Context, not guesswork</b>
-            <p>
-              Keep the small details that make a plan feel right: energy,
-              tastes, travel and what to avoid.
-            </p>
+            <b>{ui("Context, not guesswork")}</b>
+            <p>{ui("Keep the small details that make a plan feel right: energy, tastes, travel and what to avoid.")}</p>
           </div>
           <div>
             <span>02</span>
-            <b>A plan for the actual people</b>
-            <p>
-              Build around a one-to-one, familiar friends, or a new mixed group
-              with different comfort levels.
-            </p>
+            <b>{ui("A plan for the actual people")}</b>
+            <p>{ui("Build around a one-to-one, familiar friends, or a new mixed group with different comfort levels.")}</p>
           </div>
           <div>
             <span>03</span>
-            <b>Less arranging, more showing up</b>
-            <p>
-              Find a place, agree a time, then send an invite people want to
-              open.
-            </p>
+            <b>{ui("Less arranging, more showing up")}</b>
+            <p>{ui("Find a place, agree a time, then send an invite people want to open.")}</p>
           </div>
         </div>
       </section>
@@ -472,47 +455,45 @@ export default function OriginalHome({
           borderBottom: "1px solid var(--line)",
         }}
       >
+        <div className="gp-home-location"><LocationPicker settings={settings} onChange={setSettings}/></div>
         <AffinityMatchMatrix
+          friends={exampleFriends}
+          city={city}
+          preferences={settings}
           selectedFriends={selectedFriends}
           setSelectedFriends={setSelectedFriends}
           onOpenPlanModal={recommended => onCreate({
-            title: recommended.name,
+            title: ui(recommended.name),
             city,
             location: [recommended.venue?.name, recommended.venue?.address].filter(Boolean).join(", "),
-            guests: FRIENDS_DATA.filter(f => selectedFriends.includes(f.id)).map(f => f.name),
-            notes: "Example draft: replace the sample guest names and confirm venue details before inviting anyone.",
+            guests: exampleFriends.filter(f => selectedFriends.includes(f.id)).map(f => f.name),
+            notes: ui("Example draft: replace the sample guest names and confirm venue details before inviting anyone."),
           })}
           onPersonalise={() => onManage("My people")}
         />
       </div>
       <section className="planner-section" id="planner">
         <div className="section-intro">
-          <p className="eyebrow">the clever bit</p>
-          <h2>Start with your people.</h2>
-          <p>
-            Try this illustrative planner with a sample name. Review an editable draft, or open your dashboard to save your own friends and private notes. No account needed; sign in when you want to send invitations.
-          </p>
+          <p className="eyebrow">{ui("the clever bit")}</p>
+          <h2>{ui("Start with your people.")}</h2>
+          <p>{ui("Try this illustrative planner with a sample name. Review an editable draft, or open your dashboard to save your own friends and private notes. No account needed; sign in when you want to send invitations.")}</p>
           <button
             className="section-settings"
             onClick={() => openSettings("profile")}
           >
-            <Settings2 /> Open my people & planning settings
-          </button>
+            <Settings2 />{ui(" Open my people & planning settings")}</button>
           <button
             className="organizer-link"
             onClick={() => openSettings("organizer")}
           >
-            <UsersRound /> Hosting a monthly series? Set it up here.
-          </button>
+            <UsersRound />{ui(" Hosting a monthly series? Set it up here.")}</button>
         </div>
         <form className="planner-card" onSubmit={makePlan}>
-          <label>
-            Who are you making time for?
-            <input
+          <label>{ui("Who are you making time for?")}<input
               value={friend}
               onChange={(event) => setFriend(event.target.value)}
               list="friends"
-              placeholder="Example: Maya or Sunday friends"
+              placeholder={settings.profile.country === "BR" ? ui("Example: Ana or Sunday friends") : ui("Example: Maya or Sunday friends")}
             />
             <datalist id="friends">
               {settings.friends.map((item) => (
@@ -523,59 +504,50 @@ export default function OriginalHome({
               ))}
             </datalist>
           </label>
-          <label>
-            What could you do?
-            <select
+          <label>{ui("What could you do?")}<MaterialSelect aria-label={ui("What could you do?")}
               value={activityId}
               onChange={(event) => setActivityId(event.target.value)}
             >
               {settings.activities.map((activity) => (
                 <option key={activity.id} value={activity.id}>
-                  {activity.name} · {activity.energy}
+                  {activityCopy(activity)} · {ui(activity.energy)}
                 </option>
               ))}
-            </select>
+            </MaterialSelect>
           </label>
-          <label>
-            What kind of moment?
-            <select
+          <label>{ui("What kind of moment?")}<MaterialSelect aria-label={ui("What kind of moment?")}
               value={moment}
               onChange={(event) => setMoment(event.target.value)}
             >
-              <option>A free Sunday afternoon</option>
-              <option>A catch-up after work</option>
-              <option>A first meeting with new people</option>
-              <option>A weekend away</option>
-            </select>
+              <option value={"A free Sunday afternoon"}>{ui("A free Sunday afternoon")}</option>
+              <option value={"A catch-up after work"}>{ui("A catch-up after work")}</option>
+              <option value={"A first meeting with new people"}>{ui("A first meeting with new people")}</option>
+              <option value={"A weekend away"}>{ui("A weekend away")}</option>
+            </MaterialSelect>
           </label>
           <button className="primary create" type="submit">
-            <Sparkles /> Review my draft
-          </button>
+            <Sparkles />{ui(" Review my draft")}</button>
           {madePlan && (
             <div className="plan-result">
-              <span>
-                For {friend} in {city}
+              <span>{ui("For ")}{friend}{ui(" in ")}{city}
               </span>
-              <b>{selectedActivity?.name || "Sunday soft launch"}</b>
+              <b>{activityCopy(selectedActivity) || ui("Sunday soft launch")}</b>
               <p>
-                {selectedVenue
+                {ui(selectedVenue
                   ? `${selectedVenue.name} is the first stop. ${selectedVenue.fit}.`
-                  : `Start with ${selectedActivity?.query || "something that fits"} near you, then choose a venue.`}
+                  : `Start with ${selectedActivity?.query || "something that fits"} near you, then choose a venue.`)}
               </p>
               <div className="date-poll">
-                <label>
-                  When would you like to go?
-                  <input
+                <label>{ui("When would you like to go?")}<input
                     type="date"
-                    min={localDate()}
+                    min={localDate(new Date(),settings.profile.timezone)}
                     value={pickedDate}
                     onChange={(e) => setPickedDate(e.target.value)}
                   />
                 </label>
-                <small>Leave blank if you’re still deciding.</small>
+                <small>{ui("Leave blank if you’re still deciding.")}</small>
               </div>
-              <button type="button" onClick={openPlan}>
-                Add details &amp; save this plan <Send />
+              <button type="button" onClick={openPlan}>{ui("Add details & save this plan ")}<Send />
               </button>
             </div>
           )}
@@ -583,7 +555,9 @@ export default function OriginalHome({
       </section>
       <GoogleMapsExplorer
         city={city}
+        country={settings.profile.country}
         activity={selectedActivity?.query}
+        activityLabel={activityCopy(selectedActivity, "query")}
         onSelectVenue={(venue) => {
           setSelectedVenue(venue);
           setMadePlan(true);
@@ -597,50 +571,42 @@ export default function OriginalHome({
           className="primary"
           onClick={() => onCreate({ kind: "Single event" })}
         >
-          <CalendarDays />
-          Create a single event
-        </button>
+          <CalendarDays />{ui("Create a single event")}</button>
         <button
           className="primary"
           onClick={() => onCreate({ kind: "Gathering" })}
         >
-          <UsersRound />
-          Create a gathering
+          <UsersRound />{ui("Create a gathering")}</button>
+        <button className="text-action" onClick={() => onManage("My plans")}>{ui("Saved plans ")}<ArrowUpRight />
         </button>
-        <button className="text-action" onClick={() => onManage("My plans")}>
-          Saved plans <ArrowUpRight />
-        </button>
-        <button className="text-action" onClick={() => onManage("My people")}>
-          My people <UsersRound />
+        <button className="text-action" onClick={() => onManage("My people")}>{ui("My people ")}<UsersRound />
         </button>
         <button
           className="text-action"
           onClick={() => onManage("Dublin this week")}
-        >
-          This week in Dublin <ArrowUpRight />
+        >{ui(regionDiscoveryLabel(settings.profile))}<ArrowUpRight />
         </button>
-        <button className="text-action" onClick={() => onManage("Saved ideas")}>
-          Saved ideas <ArrowUpRight />
+        <button className="text-action" onClick={() => onManage("Saved ideas")}>{ui("Saved ideas ")}<ArrowUpRight />
         </button>
       </div>
       <section className="ideas" id="ideas">
         <div className="ideas-head">
-          <p className="eyebrow">start anywhere</p>
-          <h2>The plan is the excuse.</h2>
-          <p>Good Plans thinks about the details. You get to show up.</p>
+          <p className="eyebrow">{ui("start anywhere")}</p>
+          <h2>{ui("The plan is the excuse.")}</h2>
+          <p>{ui("Good Plans thinks about the details. You get to show up.")}</p>
         </div>
         <div className="idea-grid">
           {ideas.map(({ mark, title, note, color }) => (
             <article className={`idea-card ${color}`} key={title}>
               <Doodle type={mark} />
-              <h3>{title}</h3>
-              <p>{note}</p>
+              <h3>{ui(title)}</h3>
+              <p>{ui(note)}</p>
               <button
                 type="button"
                 aria-pressed={saved.includes(mark)}
                 onClick={() => onBookmark(mark)}
               >
-                {saved.includes(mark) ? "Saved ✓" : "Save idea"}
+                {ui(saved.includes(mark) ? "Saved ✓" : "Save idea")}
               </button>
               <button
                 onClick={() => {
@@ -653,8 +619,7 @@ export default function OriginalHome({
                   setActivityId(activity);
                   scrollToPlanner();
                 }}
-              >
-                Make this a plan <ArrowUpRight />
+              >{ui("Make this a plan ")}<ArrowUpRight />
               </button>
             </article>
           ))}
@@ -665,33 +630,25 @@ export default function OriginalHome({
           <div className="event-mini-photo">
             <Artwork
               src="/images/good-plans-invite-collage.png"
-              alt="A handmade collage of friends gathering around an invitation"
+              alt={ui("A handmade collage of friends gathering around an invitation")}
             />
           </div>
-          <p className="eyebrow">when it comes together</p>
-          <h2>
-            Send an invite
-            <br />
-            worth opening.
-          </h2>
-          <p>
-            Every finished plan becomes a warm, simple page your friends can
-            keep, read, and RSVP to.
-          </p>
-          <button onClick={openPlan}>
-            See an event page <ArrowUpRight />
+          <p className="eyebrow">{ui("when it comes together")}</p>
+          <h2>{ui("Send an invite")}<br />{ui("worth opening.")}</h2>
+          <p>{ui("Every finished plan becomes a warm, simple page your friends can keep, read, and RSVP to.")}</p>
+          <button onClick={openPlan}>{ui("See an event page ")}<ArrowUpRight />
           </button>
         </div>
         <div className="event-aside">
           <span>01</span>
-          <b>Make a plan</b>
+          <b>{ui("Make a plan")}</b>
           <span>02</span>
-          <b>Share the feeling</b>
+          <b>{ui("Share the feeling")}</b>
           <span>03</span>
-          <b>Meet there</b>
+          <b>{ui("Meet there")}</b>
         </div>
       </section>
-      <footer><a href="/?page=privacy">Privacy</a><a href="/?page=support">Help & data requests</a>
+      <footer><a href={localeHref("/?page=privacy")}>{ui("Privacy")}</a><a href={localeHref("/?page=support")}>{ui("Help & data requests")}</a>
         <a className="brand" href="#top">
           <Artwork
             className="brand-mark"
@@ -704,12 +661,10 @@ export default function OriginalHome({
             <i>plans</i>
           </span>
         </a>
-        <p>for busy women who want to see their people more.</p>
-        <button onClick={() => onManage("Organiser portal")}>
-          Organizer Portal
-        </button>
-        <button onClick={() => openSettings("organizer")}>Host a series</button>
-        <span>made by luana.systems</span>
+        <p>{ui("for busy women who want to see their people more.")}</p>
+        <button onClick={() => onManage("Organiser portal")}>{ui("My events")}</button>
+        <button onClick={() => openSettings("organizer")}>{ui("Host a series")}</button>
+        <span>{ui("made by luana.systems")}</span>
       </footer>
     </main>
   );

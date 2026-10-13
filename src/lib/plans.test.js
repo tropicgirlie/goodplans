@@ -5,6 +5,8 @@ import {
   validatePlan,
   prettyDate,
   invitationText,
+  planInstants,
+  planOnDate,
 } from "./plans.js";
 import { discoveryDraft, fitsPlanningContext } from "./discovery.js";
 const plan = {
@@ -94,4 +96,36 @@ test("partner planning includes broad shared activities and records the context"
     true,
   );
   assert.match(discoveryDraft(music, "partner").notes, /my partner/);
+});
+
+test("overnight plans span Dublin DST and preserve imported start/end instants", () => {
+  const oldTZ = process.env.TZ;
+  process.env.TZ = "Europe/Dublin";
+  try {
+    const overnight = { ...plan, date: "2026-10-24", time: "23:00", endDate: "2026-10-25", endTime: "03:00" };
+    assert.equal(validatePlan(overnight), "");
+    const instants = planInstants(overnight);
+    assert.equal((instants.end - instants.start) / 3600000, 5);
+    const exported = calendarData(overnight);
+    assert.match(exported.ics, /DTSTART:20261024T220000Z/);
+    assert.match(exported.ics, /DTEND:20261025T030000Z/);
+    assert.match(invitationText(overnight), /25 Oct/);
+    assert.ok(validatePlan({ ...overnight, endDate: "2026-10-23" }));
+    const imported = discoveryDraft({ id: "overnight", title: "Retreat", starts_at: "2026-10-24T22:00:00Z", ends_at: "2026-10-25T03:00:00Z", url: "https://example.com/retreat" });
+    assert.equal(imported.endDate, "2026-10-25");
+    assert.equal(imported.endTime, "03:00");
+    assert.match(calendarData({ ...imported, id: "retreat" }).ics, /DTEND:20261025T030000Z/);
+    const repeatedHour = { ...plan, date: "2026-10-25", time: "01:30", endTime: "03:00", startsAt: "2026-10-25T01:30:00Z" };
+    assert.equal(planInstants(repeatedHour).start.toISOString(), "2026-10-25T01:30:00.000Z", "preserve the second repeated hour from a source timestamp");
+  } finally { if (oldTZ === undefined) delete process.env.TZ; else process.env.TZ = oldTZ; }
+});
+
+test("the diary includes every day of a retreat and excludes midnight end and cancellation", () => {
+  const retreat = { ...plan, date: "2026-10-24", endDate: "2026-10-26" };
+  assert.equal(planOnDate(retreat, "2026-10-24"), true);
+  assert.equal(planOnDate(retreat, "2026-10-25"), true);
+  assert.equal(planOnDate(retreat, "2026-10-26"), true);
+  assert.equal(planOnDate(retreat, "2026-10-27"), false);
+  assert.equal(planOnDate({ ...retreat, endTime: "00:00" }, "2026-10-26"), false);
+  assert.equal(planOnDate({ ...retreat, status: "cancelled" }, "2026-10-25"), false);
 });

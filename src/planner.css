@@ -544,8 +544,11 @@
   flex-wrap: wrap;
   gap: 14px;
 }
+.gp-plans-section { min-width: 0; }
 .gp-tabs {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   gap: 19px;
   border-bottom: 1px solid var(--gp-line);
   margin-bottom: 18px;
@@ -1049,8 +1052,8 @@
   width: min(690px, calc(100vw - 32px));
 }
 .gp-dialog::backdrop {
-  background: #1a302e80;
-  backdrop-filter: blur(5px);
+  background: rgb(255 240 202 / 80%);
+  backdrop-filter: none;
 }
 .gp-dialog-content {
   padding: 29px;
@@ -1083,6 +1086,7 @@
   font-weight: 600;
 }
 .gp-form input:not([type="checkbox"]),
+.gp-form select,
 .gp-form textarea {
   display: block;
   width: 100%;
@@ -1101,11 +1105,12 @@
 }
 .gp-form input::placeholder,
 .gp-form textarea::placeholder {
-  color: #8a9184;
+  color: var(--gp-muted, #665e50);
+  opacity: 1;
 }
 .gp-optional {
-  font-size: 10px;
-  color: #878e7b;
+  font-size: 12px;
+  color: var(--gp-muted, #665e50);
   font-weight: 400;
   margin-left: 4px;
 }
@@ -1150,7 +1155,7 @@
   border-radius: 7px;
   background: transparent;
   padding: 11px 9px;
-  color: #6d7866;
+  color: var(--gp-muted, #665e50);
   font-size: 11px;
   flex: 1;
 }
@@ -2006,6 +2011,7 @@
   color: var(--ink);
 }
 .scrapbook-tools .gp-form input:not([type="checkbox"]),
+.scrapbook-tools .gp-form select,
 .scrapbook-tools .gp-form textarea {
   border: 1.5px solid var(--ink);
   border-radius: 0;
@@ -2052,13 +2058,13 @@
   gap: 23px;
   margin-left: auto;
 }
-.scrapbook-links button {
+.scrapbook-links a {
   background: none;
   border: 0;
   padding: 10px 0;
   font-size: 13px;
 }
-.scrapbook-links button.active {
+.scrapbook-links a.active {
   color: var(--hot);
   text-decoration: underline;
   text-underline-offset: 7px;
@@ -2101,7 +2107,7 @@
     gap: 12px;
     margin: 0;
   }
-  .scrapbook-links button {
+  .scrapbook-links a {
     font-size: 12px;
   }
   .scrapbook-tools .gp-main {
@@ -2532,4 +2538,137 @@
   .gp-storage-status { gap: 0 16px; }
   .gp-storage-status details { margin-left: 0; }
   .gp-main .circle-edit { padding-top: 24px; }
+}
+
+.gp-form .gp-hosting-disclosure {
+  border-top: 1px solid #d3c7ad;
+  padding-top: 18px;
+}
+.gp-hosting-disclosure > summary,
+.gp-date-options > summary { cursor: pointer; min-height: 44px; color: var(--gp-ink, #29291f); }
+.gp-hosting-disclosure > summary span { display: block; margin: 6px 0 16px; font-size: 12px; font-weight: 400; color: var(--gp-muted, #665e50); }
+.gp-hosting-disclosure[open] { display: grid; gap: 18px; }
+.gp-date-options label { margin-bottom: 12px; }
+.scrapbook-links a { color: inherit; text-decoration: none; }
+.gp-invitation-identity { padding: 12px 0; color: var(--gp-ink, #29291f); }
+.gp-dialog:has(.gp-form-footer) { scroll-padding-bottom: 130px; }
+.gp-dialog .gp-form-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--paper, #fffdf8);
+  padding: 16px 0 20px;
+}
+.gp-form-footer > span { font-size: 12px; }
+@media (max-width: 700px) {
+  .gp-dialog .gp-form-footer { gap: 10px; }
+}
+
+/* Compact planning tools: small panels, comfortable controls. */
+.gp-dialog,
+.gp-dialog.wide { width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); }
+.gp-dialog.expanded { width: min(720px, calc(100vw - 24px)); }
+.gp-dialog-content { padding: 20px; }
+.gp-dialog header { align-items: center; gap: 12px; margin-bottom: 16px; }
+.gp-dialog h2 { font-size: clamp(21px, 2vw, 25px); line-height: 1.12; }
+.gp-dialog-controls { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+.gp-dialog-controls .gp-icon { width: 44px; height: 44px; min-height: 44px; display: grid; place-items: center; }
+.gp-dialog-controls .gp-icon svg { width: 18px; height: 18px; }
+.compact-plan .gp-form { gap: 10px; }
+.compact-plan .gp-type-picker { gap: 6px; }
+.compact-plan .gp-type-picker button { padding: 8px 5px; font-size: 12px; min-height: 44px; }
+.compact-plan .gp-form input:not([type="checkbox"]),
+.compact-plan .gp-form textarea { min-width: 0; max-width: 100%; margin-top: 5px; padding: 8px 10px; }
+.compact-plan .gp-form-grid { gap: 10px; }
+.compact-plan .gp-form-grid > label { min-width: 0; }
+.compact-plan .gp-schedule[open] { display: grid; gap: 10px; }
+.compact-plan .gp-plan-extras { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; border-top: 1px solid var(--line); }
+.compact-plan .gp-plan-extras > details[open] { grid-column: 1 / -1; }
+.compact-plan .gp-plan-extras .gp-hosting-disclosure { border-top: 0; }
+.compact-plan .gp-field-note { margin: 0; font-size: 12px; line-height: 1.4; }
+.compact-plan .gp-form fieldset { margin: 0; }
+.compact-plan .gp-friend-picker { margin-top: 5px; }
+.compact-plan .gp-friend-picker label { min-height: 44px; }
+.compact-plan summary { min-height: 44px; cursor: pointer; display: flex; align-items: center; font-size: 12px; font-weight: 600; }
+.compact-plan summary::before { content: "+"; display: inline-block; width: 18px; color: var(--hot); }
+.compact-plan details[open] > summary::before { content: "−"; }
+.compact-plan summary::-webkit-details-marker { display: none; }
+.compact-plan .gp-extra-guests > summary { font-weight: 400; }
+.compact-plan .gp-hosting-disclosure { padding-top: 0; }
+.compact-plan .gp-hosting-disclosure[open] { gap: 12px; }
+.compact-plan .gp-plan-notes textarea { min-height: 72px; }
+.compact-plan .gp-guest-input { margin-top: 0; }
+.compact-plan .gp-form-footer { padding: 12px 0 0; gap: 12px; }
+.compact-plan .gp-form-footer > span { max-width: 230px; line-height: 1.4; }
+.compact-plan .gp-form-footer .gp-button { min-height: 44px; padding: 10px 14px; white-space: nowrap; }
+.scrapbook-tools .gp-dialog { box-shadow: 5px 5px 0 var(--pink); }
+.scrapbook-tools .gp-detail-cover,
+.gp-detail-cover { height: 120px; }
+.gp-detail-badges { margin: 12px 0; flex-wrap: wrap; }
+.gp-detail-meta { gap: 10px; padding-bottom: 12px; }
+.gp-detail-notes { margin: 12px 0; line-height: 1.5; }
+.gp-detail-actions { margin-top: 14px; }
+.scrapbook-tools .gp-main { padding-top: 28px; }
+.scrapbook-tools .gp-heading h1 { font-size: clamp(28px, 3.5vw, 44px); line-height: 1.06; }
+.gp-main .circle-edit { padding-block: 28px; }
+.gp-main .circle-heading { margin-bottom: 18px; gap: 24px; }
+.gp-main .circle-heading h2 { font-size: clamp(26px, 3vw, 34px); }
+.gp-main .circle-heading > p { font-size: 13px; line-height: 1.5; }
+.gp-main .circle-people,
+.gp-main .circle-ideas { padding: 20px; }
+.gp-main .circle-people { background: #fff3d6; }
+.gp-main .circle-workspace { box-shadow: 3px 3px 0 var(--pink); }
+.gp-main .circle-idea { padding-block: 14px; }
+.gp-main .circle-doodle { width: 44px; height: 44px; background: var(--cream); }
+.gp-main .circle-idea-copy > b { font-size: 18px; }
+@media (max-width: 600px) {
+  .gp-dialog,
+  .gp-dialog.wide,
+  .gp-dialog.expanded { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); }
+  .gp-dialog-content { padding: 16px; }
+  .compact-plan .gp-form-grid { grid-template-columns: 1fr 1fr; }
+  .compact-plan .gp-form-grid > label:first-child { grid-column: 1 / -1; }
+  .compact-plan .gp-form-grid.two > label:first-child { grid-column: auto; }
+  .compact-plan .gp-form input:not([type="checkbox"]),
+  .compact-plan .gp-form textarea { font-size: 16px; }
+  .compact-plan .gp-form-footer { flex-direction: column; align-items: stretch; }
+  .compact-plan .gp-form-footer > span { max-width: none; }
+  .gp-main .circle-people,
+  .gp-main .circle-ideas { padding: 16px; }
+}
+
+.host-primary-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin: 16px 0 10px;
+}
+.host-primary-actions > .gp-button { margin: 0; }
+.host-newsletter-note {
+  max-width: 62ch;
+  margin: 0 0 24px;
+  color: var(--gp-muted);
+  line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .host-primary-actions { align-items: stretch; }
+  .host-primary-actions > .gp-button { flex: 1 1 220px; justify-content: center; }
+}
+.gp-dialog-content > header { flex-wrap: wrap; gap: 8px; }
+.gp-dialog-controls { margin-left: auto; }
+.gp-dialog-controls .gp-language { max-width: 104px; }
+/* Native date/time controls must not set the minimum width of the editor. */
+.gp-form > label,
+.gp-form-grid > label,
+.newsletter-manual .gp-form { min-width: 0; }
+.gp-form-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gp-form input,
+.gp-form select,
+.gp-form textarea { max-width: 100%; }
+@media (max-width: 600px) {
+  .gp-form-grid.two { grid-template-columns: minmax(0, 1fr); }
+  .gp-form-grid.two > label:first-child { grid-column: auto; }
+  .compact-plan .gp-form-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gp-form input:not([type=checkbox]), .gp-form select, .gp-form textarea { font-size: 16px; }
 }

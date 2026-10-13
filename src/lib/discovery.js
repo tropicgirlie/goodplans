@@ -1,4 +1,5 @@
-import { localDate } from "./plans.js";
+import { ui } from "../i18n/core.js";
+import { localDate, wallDateTime } from "./plans.js";
 export const DUBLIN_INTERESTS = [
   "Creative classes",
   "Dance & movement",
@@ -18,18 +19,22 @@ export const DUBLIN_INTERESTS = [
 export function discoveryDraft(event, planningContext = "all") {
   const start = new Date(event.starts_at),
     end = event.ends_at ? new Date(event.ends_at) : new Date(+start + 7200000);
-  const time = (d) =>
-    `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const timezone = event.timezone || "Europe/Dublin";
+  const time = d => wallDateTime(d,timezone).split("T")[1];
   return {
     title: event.title,
     kind: "Friends outing",
-    date: localDate(start),
+    date: localDate(start,timezone),
+    timezone,
+    endDate: localDate(start,timezone) === localDate(end,timezone) ? "" : localDate(end,timezone),
     time: time(start),
-    endTime: localDate(start) === localDate(end) ? time(end) : "",
+    endTime: time(end),
+    startsAt: start.toISOString(),
+    endsAt: end.toISOString(),
     location: event.venue,
     cost: event.price,
     discoveryId: event.id,
-    notes: `${planningContext === "partner" ? "Planning with: my partner.\n\n" : ""}Details & tickets: ${event.url}\n\n${event.ends_at ? "" : "End time is a suggested two-hour planning window; check the event details.\n"}Adding this plan does not reserve tickets. Check the source for availability and changes.`,
+    notes: [planningContext === "partner" ? ui("Planning with: my partner.") : "", ui(`Details & tickets: ${event.url}`), event.ends_at ? "" : ui("End time is a suggested two-hour planning window; check the event details."), ui("Adding this plan does not reserve tickets. Check the source for availability and changes.")].filter(Boolean).join("\n\n"),
     image: "good-plans-gathering-collage.png",
   };
 }

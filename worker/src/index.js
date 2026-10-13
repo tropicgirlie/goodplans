@@ -67,13 +67,16 @@ async function requireHost(request, env) {
   return user;
 }
 
-async function guestIdentity(request, env) {
-  const session = parseCookies(request.headers.get('cookie') || '').good_plans_guest;
+async function guestIdentity(request, env, invitationId = new URL(request.url).searchParams.get('invitation')) {
+  if (invitationId && !/^[a-zA-Z0-9_-]{1,100}$/.test(invitationId)) return null;
+  const cookies = parseCookies(request.headers.get('cookie') || '');
+  const session = (invitationId && cookies[`good_plans_guest_${invitationId}`]) || cookies.good_plans_guest;
   if (!session) return null;
   const hash = await sha256(session);
-  return env.DB.prepare(`SELECT gs.id AS session_id, i.id AS invitation_id, i.event_id, i.guest_name, i.guest_email
+  const guest = await env.DB.prepare(`SELECT gs.id AS session_id, i.id AS invitation_id, i.event_id, i.guest_name, i.guest_email
     FROM guest_sessions gs JOIN invitations i ON i.id = gs.invitation_id
     WHERE gs.session_hash = ? AND gs.expires_at > ? AND (i.expires_at IS NULL OR i.expires_at > ?)`).bind(hash, now(), now()).first();
+  return invitationId && guest?.invitation_id !== invitationId ? null : guest;
 }
 
 async function eventForSlug(env, slug) {
@@ -358,13 +361,17 @@ async function exchangeInvite(request, env) {
   const rawSession = randomToken();
   await env.DB.prepare(`INSERT INTO guest_sessions (id, invitation_id, session_hash, expires_at) VALUES (?, ?, ?, ?)`)
     .bind(id('session'), invitation.id, await sha256(rawSession), new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString()).run();
-  return response({ eventSlug: invitation.slug }, { headers: { 'set-cookie': cookie('good_plans_guest', rawSession, 60 * 60 * 24 * 30, env.ENVIRONMENT === 'production') } });
+  const result = response({ eventSlug: invitation.slug, invitationId: invitation.id }, { headers: { 'set-cookie': cookie('good_plans_guest', rawSession, 60 * 60 * 24 * 30, env.ENVIRONMENT === 'production') } });
+  // Each private invitation retains its own HttpOnly session, including in other tabs.
+  result.headers.append('set-cookie', cookie(`good_plans_guest_${invitation.id}`, rawSession, 60 * 60 * 24 * 30, env.ENVIRONMENT === 'production'));
+  return result;
 }
 
 async function submitRsvp(request, env, eventId) {
-  const guest = await guestIdentity(request, env);
-  if (!guest || guest.event_id !== eventId) return response({ error: 'Open this event from your invite link to respond.' }, { status: 403 });
   const input = await body(request);
+  if (!input.invitationId) return response({ error: 'Reopen your private invitation before responding.' }, { status: 409 });
+  const guest = await guestIdentity(request, env, input.invitationId);
+  if (!guest || guest.event_id !== eventId) return response({ error: 'Open this event from your invite link to respond.' }, { status: 403 });
   const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
   return room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status, partySize: input.partySize ?? 1 }) });
 }
@@ -505,10 +512,12 @@ export default {
       if (eventMatch && request.method === 'GET') {
         const event = await eventForSlug(env, decodeURIComponent(eventMatch[1]));
         if (!event || !(await canReadEvent(request, env, event))) return response({ error: 'Event not found.' }, { status: 404 });
-        const guest=await guestIdentity(request,env);
+        const identity=await guestIdentity(request,env);
+        const guest=identity?.event_id===event.id?identity:null;
+        if (url.searchParams.has('invitation') && !guest) return response({ error: 'This invitation session has changed or expired. Reopen your own private invitation link.' }, { status: 409 });
         const rsvp=guest?await env.DB.prepare('SELECT status,party_size FROM rsvps WHERE invitation_id=?').bind(guest.invitation_id).first():null;
         const guests=event.show_guests?(await env.DB.prepare("SELECT i.guest_name,r.party_size FROM invitations i JOIN rsvps r ON r.invitation_id=i.id WHERE i.event_id=? AND r.status='accepted'").bind(event.id).all()).results:[];
-        return response({ event: publicEvent(event, originOf(request)), rsvp,guests, counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
+        return response({ event: publicEvent(event, originOf(request)), guest: guest ? { invitationId: guest.invitation_id, name: guest.guest_name } : null, rsvp,guests, counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
       }
       const updateMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)$/);
       if (updateMatch && request.method === 'PATCH') return await updateEvent(request, env, decodeURIComponent(updateMatch[1]));

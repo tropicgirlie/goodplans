@@ -8,6 +8,16 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (/node_modules\/(?:@material\/web|@lit\/|lit(?:-html|-element)?\/)/.test(id)) return 'material';
+          if (/src\/i18n\/(?:es|pt-BR)\.js$/.test(id)) return 'translations';
+        }
+      }
+    }
+  },
   server: {
     port: 3000,
     host: '127.0.0.1',

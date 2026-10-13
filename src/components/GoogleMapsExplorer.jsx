@@ -1,3 +1,4 @@
+import { ui } from "../i18n/core";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
@@ -47,7 +48,9 @@ const venues = [
 
 export default function GoogleMapsExplorer({
   city = "Dublin",
+  country,
   activity,
+  activityLabel = activity,
   onSelectVenue,
 }) {
   const [selectedVenue, setSelectedVenue] = useState(venues[0]);
@@ -63,7 +66,7 @@ export default function GoogleMapsExplorer({
     setShortlist([]); setSelectedVenue(null);
     const fallback = city.toLowerCase() === "dublin" ? venues.filter(venue => !activity || activityCategories(activity).includes(venue.category)) : [];
 
-    findVenues({ city, activity, limit: 4 })
+    findVenues({ city, country, activity, limit: 4 })
       .then((result) => {
         if (!active) return;
         const prepared = (result.venues?.length ? result.venues : fallback)
@@ -93,31 +96,24 @@ export default function GoogleMapsExplorer({
     return () => {
       active = false;
     };
-  }, [city, activity]);
+  }, [city, country, activity]);
 
   return (
     <section className="maps-section" id="map">
       <div className="maps-intro">
-        <p className="eyebrow">where could this happen?</p>
-        <h2>
-          Let the city
-          <br />
-          join the plan.
-        </h2>
-        <p>
-          Start with your activity palette, then keep a small shortlist that
-          makes sense for the day you actually have.
-        </p>
+        <p className="eyebrow">{ui("where could this happen?")}</p>
+        <h2>{ui("Let the city")}<br />{ui("join the plan.")}</h2>
+        <p>{ui("Start with your activity palette, then keep a small shortlist that makes sense for the day you actually have.")}</p>
         <span className="maps-note">
-          <MapPin /> {city} ideas {activity ? `for ${activity}` : ""} ·{" "}
-          {source === "google_places"
+          <MapPin /> {city}{ui(" ideas ")}{ui(activity ? `for ${activityLabel}` : "")} ·{" "}
+          {ui(source === "google_places"
             ? "live venue search"
-            : "starter shortlist"}
+            : "starter shortlist")}
         </span>
       </div>
-      {loading && <p role="status">Finding a starter shortlist…</p>}
-      {error && <p role="alert">{error}</p>}
-      {!loading && !shortlist.length && <p>No starter venues match this activity in {city} yet. You can choose your own venue in a draft.</p>}
+      {loading && <p role="status">{ui("Finding a starter shortlist…")}</p>}
+      {error && <p role="alert">{ui(error)}</p>}
+      {!loading && !shortlist.length && <p>{ui("No starter venues match this activity in ")}{city}{ui(" yet. You can choose your own venue in a draft.")}</p>}
       {selectedVenue && <div className="maps-board">
         <div className="venue-list">
           {shortlist.map((venue, index) => (
@@ -127,11 +123,11 @@ export default function GoogleMapsExplorer({
               onClick={() => { setSelectedVenue(venue); setLoadedMap(null); }}
             >
               <span className={`venue-number ${venue.color}`}>
-                0{index + 1}
+                0{ui(index + 1)}
               </span>
               <span className="venue-copy">
                 <b>{venue.name}</b>
-                <small>{venue.kind}</small>
+                <small>{ui(venue.kind)}</small>
               </span>
               <span className="venue-arrow">
                 <ArrowUpRight />
@@ -141,32 +137,30 @@ export default function GoogleMapsExplorer({
         </div>
         <div className="map-stage">
           {loadedMap === selectedVenue.id ? <iframe
-            title={`Google Map for ${selectedVenue.name}`}
+            title={ui(`Google Map for ${selectedVenue.name}`)}
             src={`https://maps.google.com/maps?q=${encodeURIComponent([selectedVenue.name, selectedVenue.address].filter(Boolean).join(", "))}&z=14&output=embed`}
             loading="lazy"
             referrerPolicy="no-referrer"
-          /> : <div className="map-placeholder"><MapPin aria-hidden="true" /><p>See {selectedVenue.name} on the map.</p><p className="gp-field-note">Loading this map connects to Google, which receives your IP address and browser information.</p><button className="primary" onClick={() => setLoadedMap(selectedVenue.id)}>Load Google map</button></div>}
+          /> : <div className="map-placeholder"><MapPin aria-hidden="true" /><p>{ui("See ")}{selectedVenue.name}{ui(" on the map.")}</p><p className="gp-field-note">{ui("Loading this map connects to Google, which receives your IP address and browser information.")}</p><button className="primary" onClick={() => setLoadedMap(selectedVenue.id)}>{ui("Load Google map")}</button></div>}
           <div className="map-place-card">
             <div className={`place-pin ${selectedVenue.color}`}>
               <MapPin />
             </div>
             <div>
-              <span>{selectedVenue.kind}</span>
+              <span>{ui(selectedVenue.kind)}</span>
               <h3>{selectedVenue.name}</h3>
               <p>{selectedVenue.address}</p>
               <b>
-                <Star /> {selectedVenue.fit}
+                <Star /> {ui(selectedVenue.fit)}
               </b>
             </div>
             <button onClick={() => onSelectVenue?.(selectedVenue)}>
-              <CalendarDays /> Add to the plan
-            </button>
+              <CalendarDays />{ui(" Add to the plan")}</button>
           </div>
         </div>
         <div className="map-footer">
           <span>
-            <Ticket /> Starter suggestions · confirm details with the venue.
-          </span>
+            <Ticket />{ui(" Starter suggestions · confirm details with the venue.")}</span>
           <a
             href={
               selectedVenue.mapsUrl ||
@@ -174,8 +168,7 @@ export default function GoogleMapsExplorer({
             }
             target="_blank"
             rel="noreferrer"
-          >
-            Open in Google Maps <ExternalLink />
+          >{ui("Open in Google Maps ")}<ExternalLink />
           </a>
         </div>
       </div>}

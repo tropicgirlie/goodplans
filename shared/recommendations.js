@@ -1,12 +1,12 @@
 const categoryTerms = {
-  "coffee-stroll": /coffee|tea|café|cafe|stroll/i,
-  "board-games": /board.?game|competition/i,
-  "pottery-workshop": /pottery|clay|workshop|making|creative/i,
-  "outdoor-walk": /walk|hike|coastal|outdoor|fresh air|day trip/i,
-  "dinner-out": /dinner|food|tapas|wine|restaurant/i,
-  retreat: /retreat|spa|wellness|wellbeing/i,
-  gallery: /gallery|exhibition|art museum/i,
-  cinema: /cinema|film|movie/i,
+  "coffee-stroll": /coffee|tea|café|cafe|stroll|\bté\b|paseo|\bch[aá](?=\s|[,.;]|$)|passeio/i,
+  "board-games": /board.?game|competition|juegos? de mesa|competici[oó]n|jogos? de tabuleiro|competi[cç][aã]o/i,
+  "pottery-workshop": /pottery|clay|workshop|making|creative|cer[aá]mica|arcilla|taller|creativ|acuarela|aquarela|argila|oficina/i,
+  "outdoor-walk": /walk|hike|coastal|outdoor|fresh air|day trip|paseo|senderismo|costero|aire libre|excursi[oó]n|caminhada|trilha|ar livre|passeio|beira.mar|excurs[aã]o/i,
+  "dinner-out": /dinner|food|tapas|wine|restaurant|cena|comida|vino|jantar|vinho|restaurante/i,
+  retreat: /retreat|spa|wellness|wellbeing|retiro|bienestar|bem.estar/i,
+  gallery: /gallery|exhibition|art museum|galer[ií]a|exposici[oó]n|museo|galeria|exposi[cç][aã]o|museu/i,
+  cinema: /cinema|film|movie|cine|pel[ií]cula/i,
 };
 export const categoryLabels = {
   "coffee-stroll": "Coffee & a stroll", "board-games": "Board games",
@@ -27,7 +27,7 @@ export function rankIdeas(ideas, friends = [], preferences = {}) {
       const likes = [friend.likes, ...(friend.interests || [])].filter(Boolean).join(" ");
       if (activityCategories(likes).includes(category)) { score += 2; reasons.add("Matches a saved interest"); }
       if (activityCategories(friend.avoids).includes(category)) score -= 3;
-      const quiet = /quiet|low.key/i.test([friend.note, likes].join(" ")) || /loud|noisy|crowd/i.test(friend.avoids || "");
+      const quiet = /quiet|low.key|tranquil|sil[eê]ncio|silencios|sosseg/i.test([friend.note, likes].join(" ")) || /loud|noisy|crowd|ruidos|multitud|barulh|multid[aã]o/i.test(friend.avoids || "");
       if (quiet && idea.noise === "low") { score += 1; reasons.add("A quieter option"); }
       if (quiet && idea.noise === "high") score -= 2;
     }

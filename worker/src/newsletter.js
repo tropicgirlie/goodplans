@@ -466,6 +466,7 @@ export async function newsletter(
       candidates: await candidateRows(env),
       searches: discoverySearches.map(({ query, label }) => ({ query, label })),
       collectionReady: Boolean(env.TICKETMASTER_API_KEY),
+      scheduledCollection: await env.DB.prepare("SELECT * FROM discovery_runs WHERE key LIKE 'daily-%' ORDER BY started_at DESC LIMIT 1").first(),
       emailReady: emailReady(env),
     });
   }

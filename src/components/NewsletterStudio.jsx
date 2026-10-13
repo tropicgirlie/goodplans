@@ -1,3 +1,6 @@
+import MaterialSelect from "./MaterialSelect";
+import { prettyDate } from "../lib/plans";
+import { ui, dateLocale } from "../i18n/core";
 import { useEffect, useState } from "react";
 import {
   newsletterDashboard,
@@ -6,11 +9,10 @@ import {
 } from "../lib/goodPlansApi";
 import { DUBLIN_INTERESTS } from "../lib/discovery";
 import { EventPick } from "./DublinDiscovery";
-export default function NewsletterStudio() {
+export default function NewsletterStudio({ selected, onSelect: setSelected }) {
   const [data, setData] = useState(null),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [selected, setSelected] = useState(null);
+    [busy, setBusy] = useState(false);
   async function load() {
     setData(await newsletterDashboard());
   }
@@ -31,43 +33,37 @@ export default function NewsletterStudio() {
   }
   return (
     <section className="newsletter-studio">
-      <span className="gp-eyebrow">GOOD PLANS DUBLIN</span>
-      <h1>Your weekly edit.</h1>
-      <p>
-        The background finder checks Dublin every day. Review new candidates,
-        prepare your weekly edit, then approve the email for confirmed
-        subscribers.
-      </p>
+      <span className="gp-eyebrow">{ui("GOOD PLANS DUBLIN")}</span>
+      <h1>{ui("Dublin events email")}</h1>
+      <p>{ui("Choose Dublin events and write a weekly email. Only people who confirmed their signup receive it, after you approve it.")}</p>
       {error && (
         <p role="alert" className="gp-error">
-          {error}
+          {ui(error)}
         </p>
       )}
       {!data ? (
-        <p>Loading newsletter studio…</p>
+        <p role="status">{ui(error ? "Dublin email could not load. Reopen it to try again." : "Loading Dublin email…")}</p>
       ) : (
         <>
           <div className="gp-publish">
-            <b>{data.subscribers} confirmed subscribers</b>
+            <b>{ui(data.subscribers)}{ui(" people signed up")}</b>
             <p>
-              {data.collectionReady
-                ? "Daily Ticketmaster discovery is connected."
-                : "Automatic collection needs TICKETMASTER_API_KEY. You can add local events below."}
+              {ui(data.collectionReady
+                ? "Dublin event search is connected and checks for new events daily."
+                : "Automatic event search is not ready yet. You can still add Dublin events below.")}
             </p>
+            {data.collectionReady && <p role="status">{ui(data.scheduledCollection
+              ? `Last daily check: ${new Date(data.scheduledCollection.started_at).toLocaleString(dateLocale())} · ${data.scheduledCollection.status}${data.scheduledCollection.error ? ` · ${data.scheduledCollection.error}` : ""}`
+              : "No event search has run yet. Choose Find Dublin events to try it.")}</p>}
             {!data.emailReady && (
-              <p>
-                Email delivery needs RESEND_API_KEY and EMAIL_FROM before signup
-                and sending are available.
-              </p>
+              <p>{ui("Email signups and sending are not ready yet. Set up the email service to use this feature.")}</p>
             )}
             <div className="gp-detail-actions">
               <button
                 className="gp-button secondary"
-                disabled={busy}
+                disabled={busy || !data.collectionReady}
                 onClick={() => action(() => newsletterAction("collect"))}
-              >
-                Collect Dublin events
-              </button>
+              >{ui("Find Dublin events")}</button>
               <button
                 className="gp-button"
                 disabled={busy}
@@ -77,62 +73,49 @@ export default function NewsletterStudio() {
                     setSelected(r.issue.id);
                   })
                 }
-              >
-                Prepare this week’s draft
-              </button>
+              >{ui("Start this week’s email")}</button>
               <button
                 className="gp-text-button"
                 disabled={busy}
                 onClick={() => action(load)}
-              >
-                Refresh
-              </button>
+              >{ui("Refresh")}</button>
             </div>
           </div>
           <section className="discovery-review">
             <div className="gp-section-heading">
               <div>
-                <span className="gp-eyebrow">REVIEW QUEUE</span>
-                <h2>{data.candidates?.length || 0} new event candidates</h2>
+                <span className="gp-eyebrow">{ui("EVENTS TO CHECK")}</span>
+                <h2>{ui(data.candidates?.length || 0)}{ui(" events to review")}</h2>
               </div>
             </div>
-            <p>
-              Approve accurate, useful listings before they appear publicly.
-              Women-centred means the source explicitly mentions women; other
-              matches describe the activity or audience without guessing.
-              “Good for two” covers broad partner-friendly ideas and does not
-              assume what either person enjoys.
-            </p>
+            <p>{ui("Approve accurate, useful listings before they appear publicly. Women-centred means the source explicitly mentions women; other matches describe the activity or audience without guessing. “Good for two” covers broad partner-friendly ideas and does not assume what either person enjoys.")}</p>
             {(data.candidates || []).length ? (
               <div className="discovery-candidate-grid">
                 {data.candidates.map((event) => (
                   <article className="discovery-candidate" key={event.id}>
                     <div className="discovery-candidate-score">
-                      {event.discovery_score} fit
-                    </div>
-                    <span className="gp-tag">{event.category}</span>
+                      {ui(event.discovery_score)}{ui(" fit")}</div>
+                    <span className="gp-tag">{ui(event.category)}</span>
                     <h3>{event.title}</h3>
                     <p>
-                      {new Date(event.starts_at).toLocaleString("en-IE", {
+                      {ui(new Date(event.starts_at).toLocaleString(dateLocale(), {
                         timeZone: "Europe/Dublin",
                         weekday: "short",
                         day: "numeric",
                         month: "short",
                         hour: "2-digit",
                         minute: "2-digit",
-                      })}
+                      }))}
                     </p>
                     <p>{event.venue}</p>
-                    <p>{event.match_reason}</p>
+                    <p>{ui(event.match_reason)}</p>
                     <div className="gp-detail-actions">
                       <a
                         className="gp-text-button"
                         href={event.url}
                         target="_blank"
                         rel="noreferrer"
-                      >
-                        Check source
-                      </a>
+                      >{ui("Check source")}</a>
                       <button
                         className="gp-button"
                         disabled={busy}
@@ -144,9 +127,7 @@ export default function NewsletterStudio() {
                             }),
                           )
                         }
-                      >
-                        Approve
-                      </button>
+                      >{ui("Approve")}</button>
                       <button
                         className="gp-button secondary"
                         disabled={busy}
@@ -158,33 +139,28 @@ export default function NewsletterStudio() {
                             }),
                           )
                         }
-                      >
-                        Skip
-                      </button>
+                      >{ui("Skip")}</button>
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <p>No new candidates. The next background check runs today.</p>
+              <p>{ui(data.collectionReady ? "No new candidates to review. Collection history below shows the latest completed checks." : "No new candidates. Add a verified local event below while automatic discovery is disconnected.")}</p>
             )}
             <details>
-              <summary>What the finder looks for</summary>
+              <summary>{ui("What the finder looks for")}</summary>
               <div className="discovery-search-list">
                 {(data.searches || []).map((search) => (
                   <span className="gp-tag" key={search.label}>
-                    {search.label}
+                    {ui(search.label)}
                   </span>
                 ))}
               </div>
             </details>
           </section>
-          <details className="newsletter-manual">
-            <summary>Add a local event</summary>
-            <p>
-              Include free activities, workshops and community gatherings. Use
-              verified details from the original listing.
-            </p>
+          <details className="newsletter-manual" open={!data.collectionReady}>
+            <summary>{ui("Add a local event")}</summary>
+            <p>{ui("Include free activities, workshops and community gatherings. Use verified details from the original listing.")}</p>
             <form
               className="gp-form"
               onSubmit={(e) => {
@@ -207,66 +183,49 @@ export default function NewsletterStudio() {
                 });
               }}
             >
-              <label>
-                Event title
-                <input name="title" required maxLength={160} />
+              <label>{ui("Event title")}<input name="title" required maxLength={160} />
               </label>
               <div className="gp-form-grid two">
-                <label>
-                  Starts at
-                  <input name="start" type="datetime-local" required />
+                <label>{ui("Starts at")}<input name="start" type="datetime-local" required />
                 </label>
-                <label>
-                  Ends at (optional)
-                  <input name="end" type="datetime-local" />
+                <label>{ui("Ends at (optional)")}<input name="end" type="datetime-local" />
                 </label>
               </div>
-              <p className="gp-field-note">
-                Enter times in{" "}
-                {Intl.DateTimeFormat().resolvedOptions().timeZone}.
+              <p className="gp-field-note">{ui("Enter times in")}{" "}
+                {ui(Intl.DateTimeFormat().resolvedOptions().timeZone)}.
               </p>
-              <label>
-                Dublin venue
-                <input name="venue" required maxLength={240} />
+              <label>{ui("Dublin venue")}<input name="venue" required maxLength={240} />
               </label>
-              <label>
-                Category
-                <select name="category">
+              <label>{ui("Category")}<MaterialSelect aria-label={ui("Category")} name="category">
                   {DUBLIN_INTERESTS.map((c) => (
-                    <option key={c}>{c}</option>
+                    <option key={c} value={c}>{ui(c)}</option>
                   ))}
-                </select>
+                </MaterialSelect>
               </label>
-              <label>
-                Price
-                <input
+              <label>{ui("Price")}<input
                   name="price"
-                  placeholder="Free, €15, or check booking page"
+                  placeholder={ui("Free, €15, or check booking page")}
                   maxLength={100}
                 />
               </label>
-              <label>
-                Original event or booking URL
-                <input name="url" type="url" required placeholder="https://…" />
+              <label>{ui("Original event or booking URL")}<input name="url" type="url" required placeholder={ui("https://…")} />
               </label>
-              <button className="gp-button" disabled={busy}>
-                Add to Dublin picks
-              </button>
+              <button className="gp-button" disabled={busy}>{ui("Add to Dublin picks")}</button>
             </form>
           </details>
-          <h2>Newsletter editions</h2>
+          <h2>{ui("Weekly emails")}</h2>
           <div className="host-event-list">
             {data.issues.map((issue) => (
               <button key={issue.id} onClick={() => setSelected(issue.id)}>
-                <b>Week of {issue.week}</b>
+                <b>{ui("Week of ")}{prettyDate(issue.week, { year: "numeric" })}</b>
                 <span>
-                  {issue.subject} · {issue.status}
+                  {issue.subject} · {ui(issue.status)}
                 </span>
               </button>
             ))}
           </div>
           {!data.issues.length && (
-            <p>Collect or add events, then prepare your first draft.</p>
+            <p>{ui("Collect or add events, then prepare your first draft.")}</p>
           )}
           {data.issues
             .filter((i) => i.id === selected)
@@ -284,25 +243,25 @@ export default function NewsletterStudio() {
               />
             ))}
           <details>
-            <summary>Collection history</summary>
+            <summary>{ui("Collection history")}</summary>
             {data.runs.length ? (
               data.runs.map((run) => (
                 <p key={run.key}>
-                  {new Date(run.started_at).toLocaleString()} · {run.status} ·{" "}
-                  {run.count} events{" "}
-                  {run.error && <span className="gp-error">{run.error}</span>}
+                  {ui(new Date(run.started_at).toLocaleString(dateLocale()))} · {ui(run.status)} ·{" "}
+                  {ui(run.count)}{ui(" events")}{" "}
+                  {run.error && <span className="gp-error">{ui(run.error)}</span>}
                 </p>
               ))
             ) : (
-              <p>No collections yet.</p>
+              <p>{ui("No collections yet.")}</p>
             )}
           </details>
           <details>
-            <summary>Manage visible picks ({data.events.length})</summary>
+            <summary>{ui("Manage visible picks (")}{ui(data.events.length)})</summary>
             {data.events.map((e) => (
               <div className="newsletter-list-row" key={e.id}>
                 <span>
-                  {e.title} · {new Date(e.starts_at).toLocaleDateString()}
+                  {e.title} · {ui(new Date(e.starts_at).toLocaleDateString(dateLocale()))}
                 </span>
                 <button
                   className="gp-text-button"
@@ -310,9 +269,7 @@ export default function NewsletterStudio() {
                   onClick={() =>
                     action(() => newsletterAction("hide", { id: e.id }))
                   }
-                >
-                  Remove from picks
-                </button>
+                >{ui("Remove from picks")}</button>
               </div>
             ))}
           </details>
@@ -338,7 +295,7 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
       JSON.stringify(ids) !== JSON.stringify(original.map((e) => e.id));
   return (
     <section className="newsletter-preview">
-      <h2>{draft ? "Review your draft" : "Sent / queued edition"}</h2>
+      <h2>{ui(draft ? "Review your draft" : "Sent / queued edition")}</h2>
       {draft && (
         <form
           className="gp-form"
@@ -354,18 +311,14 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
             );
           }}
         >
-          <label>
-            Email subject
-            <input
+          <label>{ui("Email subject")}<input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               maxLength={120}
               required
             />
           </label>
-          <label>
-            Introduction
-            <textarea
+          <label>{ui("Introduction")}<textarea
               value={intro}
               onChange={(e) => setIntro(e.target.value)}
               maxLength={1500}
@@ -373,7 +326,7 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
             />
           </label>
           <fieldset className="newsletter-selection">
-            <legend>Choose up to 8 events · {ids.length} selected</legend>
+            <legend>{ui("Choose up to 8 events · ")}{ui(ids.length)}{ui(" selected")}</legend>
             {events.map((e) => (
               <label key={e.id}>
                 <input
@@ -391,7 +344,7 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
                 <span>
                   {e.title}
                   <small>
-                    {new Date(e.starts_at).toLocaleDateString()} · {e.category}{" "}
+                    {ui(new Date(e.starts_at).toLocaleDateString(dateLocale()))} · {ui(e.category)}{" "}
                     · {e.price}
                   </small>
                 </span>
@@ -401,13 +354,11 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
           <button
             className="gp-button secondary"
             disabled={busy || !ids.length}
-          >
-            Save preview
-          </button>
+          >{ui("Save preview")}</button>
         </form>
       )}
       <div className="newsletter-paper">
-        <span className="gp-eyebrow">SAVED EMAIL PREVIEW</span>
+        <span className="gp-eyebrow">{ui("SAVED EMAIL PREVIEW")}</span>
         <h2>{issue.subject}</h2>
         <p className="newsletter-intro">{issue.intro}</p>
         <div className="dublin-grid">
@@ -416,33 +367,23 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
               <a
                 href={`/?discover=${encodeURIComponent(e.id)}`}
                 className="gp-text-button"
-              >
-                Add to my plans →
-              </a>
+              >{ui("Add to my plans →")}</a>
             </EventPick>
           ))}
         </div>
-        <p className="gp-field-note">
-          The email includes these events and each subscriber’s
-          preferences/unsubscribe link. Only subscribers whose interests match
-          this edition receive it.
-        </p>
+        <p className="gp-field-note">{ui("The email includes these events and each subscriber’s preferences/unsubscribe link. Only subscribers whose interests match this edition receive it.")}</p>
       </div>
       {draft ? (
         <div className="gp-publish">
           {dirty && (
-            <p role="status">
-              Save your changes to update the preview before sending.
-            </p>
+            <p role="status">{ui("Save your changes to update the preview before sending.")}</p>
           )}
           <label className="dublin-consent">
             <input
               type="checkbox"
               checked={confirm}
               onChange={(e) => setConfirm(e.target.checked)}
-            />
-            I’ve checked the saved preview and want to send this edition.
-          </label>
+            />{ui("I’ve checked the saved preview and want to send this edition.")}</label>
           <button
             className="gp-button"
             disabled={busy || dirty || !confirm || !emailReady}
@@ -453,23 +394,18 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
                 }),
               )
             }
-          >
-            Approve & send to subscribers
-          </button>
+          >{ui("Approve & send to subscribers")}</button>
         </div>
       ) : (
         <div className="gp-publish">
-          <h3>Delivery progress</h3>
+          <h3>{ui("Delivery progress")}</h3>
           {deliveries.map((d) => (
             <p key={`${d.status}-${d.error || ""}`}>
-              {d.count} {d.status}
-              {d.error && <span className="gp-error"> · {d.error}</span>}
+              {ui(d.count)} {ui(d.status)}
+              {d.error && <span className="gp-error"> · {ui(d.error)}</span>}
             </p>
           ))}
-          <p>
-            Sent means accepted by the email provider. Queued messages are
-            processed every 15 minutes.
-          </p>
+          <p>{ui("Sent means accepted by the email provider. Queued messages are processed every 15 minutes.")}</p>
           {deliveries.some((d) => d.status === "failed") && (
             <button
               className="gp-button secondary"
@@ -477,9 +413,7 @@ function IssueEditor({ issue, events, busy, action, emailReady, deliveries }) {
               onClick={() =>
                 action(() => newsletterAction(`issues/${issue.id}/retry`))
               }
-            >
-              Retry failed newsletter emails
-            </button>
+            >{ui("Retry failed newsletter emails")}</button>
           )}
         </div>
       )}

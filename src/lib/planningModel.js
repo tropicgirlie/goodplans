@@ -1,11 +1,43 @@
+import { getLocale } from "../i18n/core.js";
+import { regionalCity } from "../../shared/regions.js";
 export const WORKSPACE_PAGES = ["Overview", "My plans", "My people", "Saved ideas", "Organiser portal", "Dublin this week"];
 const routes = { plans: "My plans", people: "My people", saved: "Saved ideas", host: "Organiser portal", dublin: "Dublin this week" };
 export function pageFromUrl(search) {
   return routes[new URLSearchParams(search).get("view")] || "Overview";
 }
-export function pageUrl(page) {
+export function pageUrl(page, context = {}) {
   const route = Object.keys(routes).find(key => routes[key] === page);
-  return route ? `/?view=${route}` : "/";
+  const params = new URLSearchParams(route ? { view: route } : {});
+  for (const key of ["plan", "event", "tool", "issue"]) if (context[key]) params.set(key, context[key]);
+  if (getLocale() !== "en") params.set("lang", getLocale());
+  return params.size ? `/?${params}` : "/";
+}
+export function routeContext(search) {
+  const params = new URLSearchParams(search);
+  return Object.fromEntries(["plan", "event", "tool", "issue"].map(key => [key, params.get(key) || null]));
+}
+const nameKey = name => String(name || "").trim().toLocaleLowerCase();
+export function guestRecords(plan, people = []) {
+  const seen = new Set();
+  const previous = plan.guestEntries || [];
+  return (plan.guests || []).flatMap(value => {
+    const name = String(value || "").trim(), key = nameKey(name);
+    if (!key || seen.has(key)) return [];
+    seen.add(key);
+    const existing = previous.find(g => nameKey(g.name) === key);
+    const person = people.find(p => p.id === existing?.personId) || people.find(p => nameKey(p.name) === key);
+    const legacyEmail = Object.entries(plan.guestEmails || {}).find(([n]) => nameKey(n) === key)?.[1];
+    return [{ id: existing?.id || crypto.randomUUID(), personId: person?.id || existing?.personId || null,
+      name: person?.name || name, email: existing?.email ?? legacyEmail ?? "" }];
+  });
+}
+export function renameDraftGuests(plans, oldPeople, newPeople) {
+  return plans.map(plan => {
+    if (plan.remoteId) return plan; // Published names belong to the invitation history.
+    const guestEntries = guestRecords(plan, oldPeople).map(guest => ({ ...guest,
+      name: newPeople.find(p => p.id === guest.personId)?.name || guest.name }));
+    return { ...plan, guestEntries, guests: guestEntries.map(g => g.name) };
+  });
 }
 export function mergeSettings(defaults, preferences = {}, friends) {
   const result = { ...defaults, ...preferences };
@@ -23,6 +55,9 @@ export function draftDefaults(settings, series = false) {
     reminder: invite.reminder,
     showGuests: invite.showGuests,
     city: series ? organizer.city : settings.profile.city,
+    country: settings.profile.country, currency: settings.profile.currency,
+    timezone: series && organizer.city !== settings.profile.city && settings.profile.country !== 'IE'
+      ? regionalCity(settings.profile.country,organizer.city)?.timezone || settings.profile.timezone : settings.profile.timezone,
     ...(series ? {
       kind: "Gathering", title: organizer.seriesName, seriesName: organizer.seriesName,
       cadence: organizer.cadence, occurrences: organizer.count || 3,

@@ -1,3 +1,4 @@
+import MaterialSelect from "./MaterialSelect";
 import React, { useState } from 'react';
 import { X, Calendar, MapPin, Sparkles, Heart, Users, CheckCircle2 } from 'lucide-react';
 import { FRIENDS_DATA, CATEGORIES_LIST } from '../data/mockData';
@@ -146,32 +147,30 @@ export default function PlanOutingModal({ isOpen, onClose, onCreateOuting, selec
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
                   Category
                 </label>
-                <select
+                <MaterialSelect aria-label="Category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0] text-[#2C221E]"
                 >
                   {CATEGORIES_LIST.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.label}
                     </option>
                   ))}
-                </select>
+                </MaterialSelect>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#9E8E87] mb-1.5">
                   Connection Tier
                 </label>
-                <select
+                <MaterialSelect aria-label="Connection tier"
                   value={formData.connectionType}
                   onChange={(e) => setFormData({ ...formData, connectionType: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E0D4C5] focus:border-[#C85A65] outline-none text-sm font-medium bg-[#FAF6F0] text-[#2C221E]"
                 >
                   <option value="Core Squad">Core Squad (Close Friends)</option>
                   <option value="Mixed Circle">Mixed Circle (Friends + Intros)</option>
                   <option value="1:1 Outing">1:1 Outing (Duo Catchup)</option>
-                </select>
+                </MaterialSelect>
               </div>
             </div>
 

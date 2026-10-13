@@ -1,3 +1,5 @@
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
+import { ui } from "../i18n/core";
 import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { requestOtp, verifyOtp } from "../lib/goodPlansApi";
@@ -48,30 +50,24 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
 
   return (
     <main className="gp-app gp-auth">
+      <div className="gp-auth-language"><LanguageSwitcher /></div>
       <button className="gp-text-button" onClick={onBack}>
-        <ArrowLeft />
-        Back to planner
-      </button>
+        <ArrowLeft />{ui("Back to planner")}</button>
       <section className="gp-auth-card">
-        <p className="gp-eyebrow">GOOD PLANS · HOST SIGN-IN</p>
-        <h1>A good host starts here.</h1>
-        <p>
-          Sign in to publish private invitations and collect RSVPs. Your drafts
-          stay saved on this device.
-        </p>
+        <p className="gp-eyebrow">{ui("GOOD PLANS · HOST SIGN-IN")}</p>
+        <h1>{ui("A good host starts here.")}</h1>
+        <p>{ui("Sign in to publish private invitations and collect RSVPs. Your drafts stay saved on this device.")}</p>
         <form
           className="gp-form"
           onSubmit={step === "email" ? handleRequestOtp : handleVerifyOtp}
         >
           {step === "email" ? (
-            <label>
-              Email address
-              <input
+            <label>{ui("Email address")}<input
                 autoFocus
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="you@example.com"
+                placeholder={ui("you@example.com")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
@@ -79,12 +75,9 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
             </label>
           ) : (
             <>
-              <p className="gp-field-note">
-                Enter the code sent to <b>{email}</b>.
+              <p className="gp-field-note">{ui("Enter the code sent to ")}<b>{ui(email)}</b>.
               </p>
-              <label>
-                Verification code
-                <input
+              <label>{ui("Verification code")}<input
                   autoFocus
                   type="text"
                   inputMode="numeric"
@@ -92,7 +85,7 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
                   pattern="[0-9]{6}"
                   required
                   maxLength={6}
-                  placeholder="123456"
+                  placeholder={ui("123456")}
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                   disabled={loading}
@@ -101,13 +94,12 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
             </>
           )}
           {devCode && (
-            <p className="gp-feedback">
-              Local development code: <b>{devCode}</b>
+            <p className="gp-feedback">{ui("Local development code: ")}<b>{ui(devCode)}</b>
             </p>
           )}
           {error && (
             <p className="gp-error" role="alert">
-              {error}
+              {ui(error)}
             </p>
           )}
           <button
@@ -117,11 +109,11 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
               loading || (step === "email" ? !email : code.length !== 6)
             }
           >
-            {loading
+            {ui(loading
               ? "Please wait…"
               : step === "email"
                 ? "Send sign-in code"
-                : "Verify and sign in"}
+                : "Verify and sign in")}
             <Check />
           </button>
           {step === "code" && (
@@ -134,15 +126,10 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
                 setDevCode("");
                 setError("");
               }}
-            >
-              Use another email or request a new code
-            </button>
+            >{ui("Use another email or request a new code")}</button>
           )}
         </form>
-        <p className="gp-field-note">
-          Publishing is available to approved hosts. You can keep planning
-          without signing in.
-        </p>
+        <p className="gp-field-note">{ui("Publishing is available to approved hosts. You can keep planning without signing in.")}</p>
       </section>
     </main>
   );

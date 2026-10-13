@@ -224,7 +224,20 @@ export async function hosting(
     )
       .bind(host.id)
       .all();
-    return response({ events: results });
+    const guests = (await env.DB.prepare(
+      "SELECT i.id,i.event_id,i.guest_name,i.guest_email,r.status,r.party_size FROM invitations i JOIN events e ON e.id=i.event_id LEFT JOIN rsvps r ON r.invitation_id=i.id WHERE e.host_user_id=? ORDER BY i.created_at",
+    ).bind(host.id).all()).results;
+    const byEvent = new Map();
+    for (const guest of guests) {
+      if (!byEvent.has(guest.event_id)) byEvent.set(guest.event_id, []);
+      byEvent.get(guest.event_id).push(guest);
+    }
+    return response({ events: results.map(event => {
+      const guests = byEvent.get(event.id) || [];
+      const counts = { accepted: 0, maybe: 0, declined: 0, waitlisted: 0 };
+      for (const guest of guests) if (guest.status in counts) counts[guest.status]++;
+      return { ...event, guests, counts };
+    }) });
   }
   if (path === "/api/host/events" && method === "POST") {
     const input = await body(request);

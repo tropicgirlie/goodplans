@@ -1,3 +1,4 @@
+import MaterialSelect from "./MaterialSelect";
 import React, { useState } from 'react';
 import { Settings, Users, Database, Sparkles, Plus, Trash2, Edit3, CheckCircle2, RotateCcw, HelpCircle, Heart } from 'lucide-react';
 
@@ -197,15 +198,14 @@ export default function SettingsView({
                 <label className="block text-[11px] font-bold uppercase text-[#9E8E87] mb-1">
                   MBTI Type
                 </label>
-                <select
+                <MaterialSelect aria-label="MBTI type"
                   value={newFriend.mbti}
                   onChange={(e) => setNewFriend({ ...newFriend, mbti: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E0D4C5] outline-none text-xs font-medium bg-white"
                 >
                   {['ENFP', 'INFJ', 'INTJ', 'ESFP', 'ENFJ', 'INFP', 'ENTP', 'ISFJ'].map(m => (
                     <option key={m} value={m}>{m}</option>
                   ))}
-                </select>
+                </MaterialSelect>
               </div>
 
               <div>
@@ -225,15 +225,14 @@ export default function SettingsView({
                 <label className="block text-[11px] font-bold uppercase text-[#9E8E87] mb-1">
                   Social Battery Level
                 </label>
-                <select
+                <MaterialSelect aria-label="Social battery level"
                   value={newFriend.socialBatteryLevel}
                   onChange={(e) => setNewFriend({ ...newFriend, socialBatteryLevel: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E0D4C5] outline-none text-xs font-medium bg-white"
                 >
                   <option value="high">High Energy (100%)</option>
                   <option value="balanced">Balanced (60%)</option>
                   <option value="cozy">Cozy Low-Key (30%)</option>
-                </select>
+                </MaterialSelect>
               </div>
             </div>
 

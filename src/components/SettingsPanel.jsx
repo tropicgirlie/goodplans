@@ -1,3 +1,6 @@
+import MaterialSelect from "./MaterialSelect";
+import LocationPicker from "./LocationPicker";
+import { ui, dateLocale } from "../i18n/core";
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
@@ -30,8 +33,8 @@ function Toggle({ checked, onChange, label, note }) {
   return (
     <label className="setting-toggle">
       <span>
-        <b>{label}</b>
-        {note && <small>{note}</small>}
+        <b>{ui(label)}</b>
+        {note && <small>{ui(note)}</small>}
       </span>
       <input
         type="checkbox"
@@ -140,7 +143,7 @@ export default function SettingsPanel({
   const organizerDate = new Date(settings.organizer.nextDate);
   const organizerDateLabel = Number.isNaN(organizerDate.getTime())
     ? settings.organizer.nextDate
-    : new Intl.DateTimeFormat("en-IE", {
+    : new Intl.DateTimeFormat(dateLocale(), {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -150,29 +153,29 @@ export default function SettingsPanel({
     <dialog
       ref={dialogRef}
       className="settings-layer"
-      aria-label="Planning settings"
+      aria-label={ui("Planning settings")}
       onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={event => { if (event.target === dialogRef.current) onClose(); }}
     >
       <aside className="settings-panel">
         <header className="settings-header">
           <div>
-            <p className="eyebrow">make the plan yours</p>
-            <h2>Planning settings</h2>
+            <p className="eyebrow">{ui("make the plan yours")}</p>
+            <h2>{ui("Planning settings")}</h2>
           </div>
-          <button onClick={onClose} aria-label="Close settings">
+          <button onClick={onClose} aria-label={ui("Close settings")}>
             <X />
           </button>
         </header>
         <div className="settings-layout">
-          <nav className="settings-tabs" aria-label="Settings sections">
+          <nav className="settings-tabs" aria-label={ui("Settings sections")}>
             {tabs.map(([id, label, Icon]) => (
               <button
                 key={id}
                 className={tab === id ? "active" : ""}
                 onClick={() => setTab(id)}
               >
-                <Icon /> {label}
+                <Icon /> {ui(label)}
                 <ChevronRight />
               </button>
             ))}
@@ -180,13 +183,13 @@ export default function SettingsPanel({
           <div className="settings-body">
             {tab === "profile" && (
               <section className="setting-section">
-                <p className="setting-kicker">your starting point</p>
-                <h3>Where, when, and at what pace?</h3>
+                <p className="setting-kicker">{ui("your starting point")}</p>
+                <h3>{ui("Where, when, and at what pace?")}</h3>
                 <div
                   className="organizer-status"
                   style={{ margin: "18px 0 24px" }}
                 >
-                  <span>Account Identity</span>
+                  <span>{ui("Account Identity")}</span>
                   {currentUser ? (
                     <div>
                       <b
@@ -195,8 +198,7 @@ export default function SettingsPanel({
                           display: "block",
                           lineHeight: 1.1,
                         }}
-                      >
-                        Logged in as {currentUser.display_name}
+                      >{ui("Logged in as ")}{currentUser.display_name}
                       </b>
                       <small
                         style={{
@@ -221,9 +223,7 @@ export default function SettingsPanel({
                           marginTop: "8px",
                           cursor: "pointer",
                         }}
-                      >
-                        Log out of host account
-                      </button>
+                      >{ui("Log out of host account")}</button>
                     </div>
                   ) : (
                     <div>
@@ -233,18 +233,14 @@ export default function SettingsPanel({
                           display: "block",
                           lineHeight: 1.1,
                         }}
-                      >
-                        Saved locally on this device
-                      </b>
+                      >{ui("Saved locally on this device")}</b>
                       <small
                         style={{
                           display: "block",
                           color: "#625b47",
                           marginTop: "3px",
                         }}
-                      >
-                        Sign in to send invitations. Account sync is optional and can be enabled in your dashboard.
-                      </small>
+                      >{ui("Sign in to send invitations. Account sync is optional and can be enabled in your dashboard.")}</small>
                       <button
                         onClick={onLoginClick}
                         style={{
@@ -259,60 +255,44 @@ export default function SettingsPanel({
                           marginTop: "8px",
                           cursor: "pointer",
                         }}
-                      >
-                        Sign in as Host
-                      </button>
+                      >{ui("Sign in as Host")}</button>
                     </div>
                   )}
                 </div>
                 <div className="setting-grid">
-                  <label>
-                    Default city
-                    <input
-                      value={settings.profile.city}
-                      onChange={(e) => updateProfile("city", e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    Travel radius
-                    <select
+                  <LocationPicker settings={settings} onChange={setSettings} timezones/>
+                  <label>{ui("Travel radius")}<MaterialSelect aria-label={ui("Travel radius")}
                       value={settings.profile.radius}
                       onChange={(e) => updateProfile("radius", e.target.value)}
                     >
-                      <option>5 km</option>
-                      <option>15 km</option>
-                      <option>25 km</option>
-                      <option>Happy to travel</option>
-                    </select>
+                      <option value={"5 km"}>{ui("5 km")}</option>
+                      <option value={"15 km"}>{ui("15 km")}</option>
+                      <option value={"25 km"}>{ui("25 km")}</option>
+                      <option value={"Happy to travel"}>{ui("Happy to travel")}</option>
+                    </MaterialSelect>
                   </label>
-                  <label>
-                    Budget comfort
-                    <select
+                  <label>{ui("Budget comfort")}<MaterialSelect aria-label={ui("Budget comfort")}
                       value={settings.profile.budget}
                       onChange={(e) => updateProfile("budget", e.target.value)}
                     >
-                      <option>Keep it free</option>
-                      <option>€</option>
-                      <option>€€</option>
-                      <option>€€€</option>
-                    </select>
+                      <option value={"Keep it free"}>{ui("Keep it free")}</option>
+                      {(settings.profile.country === "BR" ? ["R$", "R$ R$", "R$ R$ R$"] : ["€", "€€", "€€€"]).map(budget=><option value={budget} key={budget}>{budget}</option>)}
+                    </MaterialSelect>
                   </label>
-                  <label>
-                    Usual social pace
-                    <select
+                  <label>{ui("Usual social pace")}<MaterialSelect aria-label={ui("Usual social pace")}
                       value={settings.profile.pace}
                       onChange={(e) => updateProfile("pace", e.target.value)}
                     >
-                      <option>Low key</option>
-                      <option>Easy going</option>
-                      <option>Up for anything</option>
-                    </select>
+                      <option value={"Low key"}>{ui("Low key")}</option>
+                      <option value={"Easy going"}>{ui("Easy going")}</option>
+                      <option value={"Up for anything"}>{ui("Up for anything")}</option>
+                    </MaterialSelect>
                   </label>
                 </div>
-                <p className="setting-copy">City and social pace help order starter ideas. Budget and travel distance are planning notes; confirm prices, travel and opening hours with the venue.</p>
+                <p className="setting-copy">{ui("City and social pace help order starter ideas. Budget and travel distance are planning notes; confirm prices, travel and opening hours with the venue.")}</p>
                 <Toggle
-                  label="Open to meeting new people"
-                  note="Used only when you make a mixed-group plan."
+                  label={ui("Open to meeting new people")}
+                  note={ui("Used only when you make a mixed-group plan.")}
                   checked={settings.profile.openToNew}
                   onChange={(value) => updateProfile("openToNew", value)}
                 />
@@ -320,25 +300,21 @@ export default function SettingsPanel({
             )}
             {tab === "activities" && (
               <section className="setting-section">
-                <p className="setting-kicker">your activity palette</p>
-                <h3>Things worth making time for.</h3>
-                <p className="setting-copy">
-                  Keep a palette of activities to use when choosing your next plan. Add
-                  the specific things your people actually enjoy.
-                </p>
+                <p className="setting-kicker">{ui("your activity palette")}</p>
+                <h3>{ui("Things worth making time for.")}</h3>
+                <p className="setting-copy">{ui("Keep a palette of activities to use when choosing your next plan. Add the specific things your people actually enjoy.")}</p>
                 <div className="activity-list">
                   {settings.activities.map((activity) => (
                     <div className="saved-item" key={activity.id}>
                       <span className="saved-mark">✳</span>
                       <div>
-                        <b>{activity.name}</b>
-                        <small>
-                          Search: {activity.query} · {activity.energy}
+                        <b>{["gallery", "cinema", "make", "walk"].includes(activity.id) ? ui(activity.name) : activity.name}</b>
+                        <small>{ui("Search: ")}{["gallery", "cinema", "make", "walk"].includes(activity.id) ? ui(activity.query) : activity.query} · {ui(activity.energy)}
                         </small>
                       </div>
                       <button
                         onClick={() => remove("activities", activity.id)}
-                        aria-label={`Remove ${activity.name}`}
+                        aria-label={ui(`Remove ${["gallery", "cinema", "make", "walk"].includes(activity.id) ? ui(activity.name) : activity.name}`)}
                       >
                         ×
                       </button>
@@ -346,48 +322,41 @@ export default function SettingsPanel({
                   ))}
                 </div>
                 <form className="compact-form" onSubmit={addActivity}>
-                  <label>
-                    Activity name
-                    <input
+                  <label>{ui("Activity name")}<input
                       value={activityName}
                       onChange={(e) => setActivityName(e.target.value)}
-                      placeholder="e.g. gallery late"
+                      placeholder={ui("e.g. gallery late")}
                     />
                   </label>
-                  <label>
-                    Keywords for the shortlist
-                    <input
+                  <label>{ui("Keywords for the shortlist")}<input
                       value={activityQuery}
                       onChange={(e) => setActivityQuery(e.target.value)}
-                      placeholder="e.g. contemporary art gallery"
+                      placeholder={ui("e.g. contemporary art gallery")}
                     />
                   </label>
                   <button type="submit">
-                    <Plus /> Add activity
-                  </button>
+                    <Plus />{ui(" Add activity")}</button>
                 </form>
               </section>
             )}
             {tab === "people" && (
               <section className="setting-section">
-                <p className="setting-kicker">friends and circles</p>
-                <h3>Keep the useful context.</h3>
-                <p className="setting-copy">
-                  Interests help order your ideas on this device. Notes and preferences are never included in invitations.
-                </p>
+                <p className="setting-kicker">{ui("friends and circles")}</p>
+                <h3>{ui("Keep the useful context.")}</h3>
+                <p className="setting-copy">{ui("Interests help order your ideas on this device. Notes and preferences are never included in invitations.")}</p>
                 <div className="people-list">
                   {settings.friends.map((friend) => (
                     <div className="person-item" key={friend.id}>
                       <span>{friend.name.slice(0, 1)}</span>
                       <div>
                         <b>{friend.name}</b>
-                        <small>{friend.note || "No private notes yet"}</small>
-                        {friend.likes && <small>Likes: {friend.likes}</small>}
-                        {friend.avoids && <small>Avoids: {friend.avoids}</small>}
+                        <small>{friend.note || ui("No private notes yet")}</small>
+                        {friend.likes && <small>{ui("Likes: ")}{friend.likes}</small>}
+                        {friend.avoids && <small>{ui("Avoids: ")}{friend.avoids}</small>}
                       </div>
                       <button
                         onClick={() => remove("friends", friend.id)}
-                        aria-label={`Remove ${friend.name}`}
+                        aria-label={ui(`Remove ${friend.name}`)}
                       >
                         ×
                       </button>
@@ -395,57 +364,46 @@ export default function SettingsPanel({
                   ))}
                 </div>
                 <form className="compact-form friend-form" onSubmit={addFriend}>
-                  <label>
-                    Name
-                    <input
+                  <label>{ui("Name")}<input
                       maxLength={80}
                       required
                       value={friendName}
                       onChange={(e) => setFriendName(e.target.value)}
-                      placeholder="Friend's name"
+                      placeholder={ui("Friend's name")}
                     />
                   </label>
-                  <label>
-                    They tend to love
-                    <input
+                  <label>{ui("They tend to love")}<input
                       maxLength={300}
                       value={friendLikes}
                       onChange={(e) => setFriendLikes(e.target.value)}
-                      placeholder="live music, a long walk"
+                      placeholder={ui("live music, a long walk")}
                     />
                   </label>
-                  <label>
-                    They would skip
-                    <input
+                  <label>{ui("They would skip")}<input
                       maxLength={300}
                       value={friendAvoids}
                       onChange={(e) => setFriendAvoids(e.target.value)}
-                      placeholder="busy queues, late nights"
+                      placeholder={ui("busy queues, late nights")}
                     />
                   </label>
                   <button type="submit">
-                    <Plus /> Add person
-                  </button>
+                    <Plus />{ui(" Add person")}</button>
                 </form>
-                {friendError && <p role="alert">{friendError}</p>}
+                {friendError && <p role="alert">{ui(friendError)}</p>}
                 <div className="circle-row">
-                  <b>Your circles</b>
+                  <b>{ui("Your circles")}</b>
                   {(settings.circles || []).map((circle) => (
                     <span key={circle.id}>
-                      {circle.name} · {circle.members} people
-                    </span>
+                      {circle.name} · {ui(circle.members)}{ui(" people")}</span>
                   ))}
                 </div>
               </section>
             )}
             {tab === "availability" && (
               <section className="setting-section">
-                <p className="setting-kicker">availability and voting</p>
-                <h3>Give a little, not your whole calendar.</h3>
-                <p className="setting-copy">
-                  Choose the days that are usually possible. Choose the exact
-                  event dates in your plan.
-                </p>
+                <p className="setting-kicker">{ui("availability and voting")}</p>
+                <h3>{ui("Give a little, not your whole calendar.")}</h3>
+                <p className="setting-copy">{ui("Choose the days that are usually possible. Choose the exact event dates in your plan.")}</p>
                 <div className="day-picker">
                   {days.map((day) => (
                     <button
@@ -465,73 +423,64 @@ export default function SettingsPanel({
                         )
                       }
                     >
-                      {day}
+                      {ui(day)}
                     </button>
                   ))}
                 </div>
-                <label className="wide-setting">
-                  Comfortable window
-                  <select
+                <label className="wide-setting">{ui("Comfortable window")}<MaterialSelect aria-label={ui("Comfortable window")}
                     value={settings.availability.window}
                     onChange={(e) =>
                       update("availability", "window", e.target.value)
                     }
                   >
-                    <option>After work</option>
-                    <option>Saturday daytime</option>
-                    <option>Sunday daytime</option>
-                    <option>Flexible</option>
-                  </select>
+                    <option value={"After work"}>{ui("After work")}</option>
+                    <option value={"Saturday daytime"}>{ui("Saturday daytime")}</option>
+                    <option value={"Sunday daytime"}>{ui("Sunday daytime")}</option>
+                    <option value={"Flexible"}>{ui("Flexible")}</option>
+                  </MaterialSelect>
                 </label>
-                <p className="setting-copy">
-                  Choose email reminders separately for each plan before
-                  publishing.
-                </p>
+                <p className="setting-copy">{ui("Choose email reminders separately for each plan before publishing.")}</p>
               </section>
             )}
             {tab === "discovery" && (
               <section className="setting-section">
-                <p className="setting-kicker">city discovery</p>
-                <h3>A few preferences for your shortlist.</h3>
+                <p className="setting-kicker">{ui("city discovery")}</p>
+                <h3>{ui("A few preferences for your shortlist.")}</h3>
                 <div className="setting-grid">
-                  <label>
-                    Venue vibe
-                    <select
+                  <label>{ui("Venue vibe")}<MaterialSelect aria-label={ui("Venue vibe")}
                       value={settings.discovery.vibe}
                       onChange={(e) =>
                         update("discovery", "vibe", e.target.value)
                       }
                     >
-                      <option>Independent and local</option>
-                      <option>Easy and familiar</option>
-                      <option>Creative and unusual</option>
-                      <option>Outdoors first</option>
-                    </select>
+                      <option value={"Independent and local"}>{ui("Independent and local")}</option>
+                      <option value={"Easy and familiar"}>{ui("Easy and familiar")}</option>
+                      <option value={"Creative and unusual"}>{ui("Creative and unusual")}</option>
+                      <option value={"Outdoors first"}>{ui("Outdoors first")}</option>
+                    </MaterialSelect>
                   </label>
-                  <label>
-                    Preferred time
-                    <select
+                  <label>{ui("Preferred time")}<MaterialSelect aria-label={ui("Preferred time")}
                       value={settings.discovery.timing}
                       onChange={(e) =>
                         update("discovery", "timing", e.target.value)
                       }
                     >
-                      <option value="Open now">Open now — confirm with venue</option>
-                      <option>Weekend</option>
-                      <option>After work</option>
-                      <option>Any time</option>
-                    </select>
+                      <option value="Open now">{ui("Open now — confirm with venue")}</option>
+                      <option value={"Weekend"}>{ui("Weekend")}</option>
+                      <option value={"After work"}>{ui("After work")}</option>
+                      <option value={"Any time"}>{ui("Any time")}</option>
+                    </MaterialSelect>
                   </label>
                 </div>
                 <Toggle
-                  label="Prioritise accessibility notes"
-                  note="Flag venue details for the organiser to check."
+                  label={ui("Prioritise accessibility notes")}
+                  note={ui("Flag venue details for the organiser to check.")}
                   checked={settings.discovery.accessible}
                   onChange={(value) => update("discovery", "accessible", value)}
                 />
                 <Toggle
-                  label="Show a small shortlist"
-                  note="Start with four thoughtful options, not a wall of search results."
+                  label={ui("Show a small shortlist")}
+                  note={ui("Start with four thoughtful options, not a wall of search results.")}
                   checked={settings.discovery.shortlist}
                   onChange={(value) => update("discovery", "shortlist", value)}
                 />
@@ -539,23 +488,19 @@ export default function SettingsPanel({
             )}
             {tab === "invite" && (
               <section className="setting-section">
-                <p className="setting-kicker">invite defaults</p>
-                <h3>What should your friends see?</h3>
+                <p className="setting-kicker">{ui("invite defaults")}</p>
+                <h3>{ui("What should your friends see?")}</h3>
                 <div className="setting-grid">
-                  <label>
-                    Default privacy
-                    <select
+                  <label>{ui("Default privacy")}<MaterialSelect aria-label={ui("Default privacy")}
                       value={settings.invite.privacy}
                       onChange={(e) =>
                         update("invite", "privacy", e.target.value)
                       }
                     >
-                      <option>Invite link only</option>
-                    </select>
+                      <option value={"Invite link only"}>{ui("Invite link only")}</option>
+                    </MaterialSelect>
                   </label>
-                  <label>
-                    Guest limit
-                    <input
+                  <label>{ui("Guest limit")}<input
                       type="number"
                       min="2"
                       max="100"
@@ -567,19 +512,19 @@ export default function SettingsPanel({
                   </label>
                 </div>
                 <Toggle
-                  label="Show the guest list"
-                  note="Everyone can see who has said yes."
+                  label={ui("Show the guest list")}
+                  note={ui("Everyone can see who has said yes.")}
                   checked={settings.invite.showGuests}
                   onChange={(value) => update("invite", "showGuests", value)}
                 />
                 <Toggle
-                  label="Send a gentle reminder"
-                  note="A reminder within 24 hours before each event, for guests with email addresses."
+                  label={ui("Send a gentle reminder")}
+                  note={ui("A reminder within 24 hours before each event, for guests with email addresses.")}
                   checked={settings.invite.reminder}
                   onChange={(value) => update("invite", "reminder", value)}
                 />
                 <Toggle
-                  label="Let guests bring someone"
+                  label={ui("Let guests bring someone")}
                   checked={settings.invite.plusOne}
                   onChange={(value) => update("invite", "plusOne", value)}
                 />
@@ -587,54 +532,41 @@ export default function SettingsPanel({
             )}
             {tab === "organizer" && (
               <section className="setting-section organizer-section">
-                <p className="setting-kicker">your organiser space</p>
-                <h3>Your next regular gathering.</h3>
-                <p className="setting-copy">
-                  A reusable event template, kept separate from your
-                  personal plans and private friend notes.
-                </p>
+                <p className="setting-kicker">{ui("your organiser space")}</p>
+                <h3>{ui("Your next regular gathering.")}</h3>
+                <p className="setting-copy">{ui("A reusable event template, kept separate from your personal plans and private friend notes.")}</p>
                 <div className="organizer-status">
-                  <span>Next gathering</span>
-                  <b>{organizerDateLabel}</b>
-                  <small>{settings.organizer.visibility} · draft</small>
+                  <span>{ui("Next gathering")}</span>
+                  <b>{ui(organizerDateLabel)}</b>
+                  <small>{ui(settings.organizer.visibility)}{ui(" · draft")}</small>
                 </div>
                 <div className="setting-grid">
-                  <label>
-                    Series name
-                    <input
+                  <label>{ui("Series name")}<input
                       value={settings.organizer.seriesName}
                       onChange={(e) =>
                         update("organizer", "seriesName", e.target.value)
                       }
                     />
                   </label>
-                  <label>
-                    Default city
-                    <input
+                  <label>{ui("Default city")}<input
                       value={settings.organizer.city}
-                      onChange={(e) =>
-                        update("organizer", "city", e.target.value)
-                      }
+                      readOnly
                     />
                   </label>
-                  <label>
-                    Cadence
-                    <select
+                  <label>{ui("Cadence")}<MaterialSelect aria-label={ui("Cadence")}
                       value={settings.organizer.cadence}
                       onChange={(e) =>
                         update("organizer", "cadence", e.target.value)
                       }
                     >
-                      <option value="Weekly">Every week</option>
-                      <option>Once a month</option>
-                      <option>Every six weeks</option>
-                      <option>Once a quarter</option>
-                    </select>
+                      <option value="Weekly">{ui("Every week")}</option>
+                      <option value={"Once a month"}>{ui("Once a month")}</option>
+                      <option value={"Every six weeks"}>{ui("Every six weeks")}</option>
+                      <option value={"Once a quarter"}>{ui("Once a quarter")}</option>
+                    </MaterialSelect>
                   </label>
-                  <label>Number of events<input type="number" min="2" max="12" value={settings.organizer.count || 3} onChange={e => update("organizer", "count", Number(e.target.value))} /></label>
-                  <label>
-                    Guest capacity
-                    <input
+                  <label>{ui("Number of events")}<input type="number" min="2" max="12" value={settings.organizer.count || 3} onChange={e => update("organizer", "count", Number(e.target.value))} /></label>
+                  <label>{ui("Guest capacity")}<input
                       type="number"
                       min="2"
                       max="100"
@@ -644,9 +576,7 @@ export default function SettingsPanel({
                       }
                     />
                   </label>
-                  <label>
-                    First event date
-                    <input
+                  <label>{ui("First event date")}<input
                       type="date"
                       value={settings.organizer.nextDate}
                       onChange={(e) =>
@@ -654,58 +584,46 @@ export default function SettingsPanel({
                       }
                     />
                   </label>
-                  <label>
-                    Visibility
-                    <select
+                  <label>{ui("Visibility")}<MaterialSelect aria-label={ui("Visibility")}
                       value={settings.organizer.visibility}
                       onChange={(e) =>
                         update("organizer", "visibility", e.target.value)
                       }
                     >
-                      <option>Invite only</option>
-                    </select>
+                      <option value={"Invite only"}>{ui("Invite only")}</option>
+                    </MaterialSelect>
                   </label>
                 </div>
-                <label className="wide-setting">
-                  What makes this gathering worth coming to?
-                  <input
+                <label className="wide-setting">{ui("What makes this gathering worth coming to?")}<input
                     value={settings.organizer.note}
                     onChange={(e) =>
                       update("organizer", "note", e.target.value)
                     }
                   />
                 </label>
-                <p className="setting-copy">
-                  These series defaults are saved for your next gathering.
-                </p>
-                <p className="setting-copy">
-                  Series are private. Each occurrence has its own invitations
-                  and RSVP list.
-                </p>
+                <p className="setting-copy">{ui("These series defaults are saved for your next gathering.")}</p>
+                <p className="setting-copy">{ui("Series are private. Each occurrence has its own invitations and RSVP list.")}</p>
                 {onImportIdea && <form className="import-idea" onSubmit={importIdea}>
-                  <label>
-                    Bring an idea
-                    <input
+                  <label>{ui("Bring an idea")}<input
                       type="url"
                       value={ideaUrl}
                       onChange={(e) => setIdeaUrl(e.target.value)}
-                      placeholder="Paste an approved event or Maps link"
+                      placeholder={ui("Paste an approved event or Maps link")}
                     />
                   </label>
                   <button type="submit" disabled={isImporting}>
-                    {isImporting ? "Checking link…" : "Make an event draft"}
+                    {ui(isImporting ? "Checking link…" : "Make an event draft")}
                   </button>
                 </form>
                 }
                 {importMessage && (
-                  <p className="import-message">{importMessage}</p>
+                  <p className="import-message">{ui(importMessage)}</p>
                 )}
                 <div className="organizer-actions">
                   <button
                     className="organizer-preview"
                     onClick={onCreateOrganizer}
-                  >
-                    Create series draft <ChevronRight />
+                  >{ui("Create series draft ")}<ChevronRight />
                   </button>
                 </div>
               </section>
@@ -725,13 +643,13 @@ export default function SettingsPanel({
                 }}
               >
                 <Check style={{ width: "15px", color: "var(--blue)" }} />
-                {syncStatus === "loading" && "Loading your account..."}
-                {syncStatus === "local" && "Saved on this device."}
-                {syncStatus === "syncing" && "Saving changes to cloud..."}
-                {syncStatus === "synced" &&
-                  `Synced to cloud (${currentUser?.email || "host"})`}
-                {syncStatus === "error" &&
-                  "Cloud sync needs attention. Your local changes are kept."}
+                {ui(syncStatus === "loading" && "Loading your account...")}
+                {ui(syncStatus === "local" && "Saved on this device.")}
+                {ui(syncStatus === "syncing" && "Saving changes to cloud...")}
+                {ui(syncStatus === "synced" &&
+                  `Synced to cloud (${currentUser?.email || "host"})`)}
+                {ui(syncStatus === "error" &&
+                  "Cloud sync needs attention. Your local changes are kept.")}
               </span>
             ) : (
               <span
@@ -743,8 +661,7 @@ export default function SettingsPanel({
                   fontSize: "11px",
                 }}
               >
-                <Check style={{ width: "15px" }} />
-                Saved locally.{" "}
+                <Check style={{ width: "15px" }} />{ui("Saved locally.")}{" "}
                 <button
                   onClick={onLoginClick}
                   style={{
@@ -757,14 +674,10 @@ export default function SettingsPanel({
                     fontWeight: 700,
                     cursor: "pointer",
                   }}
-                >
-                  Sign in as Host
-                </button>{" "}
-                to send invitations. Enable account sync separately in your dashboard.
-              </span>
+                >{ui("Sign in as Host")}</button>{" "}{ui("to send invitations. Enable account sync separately in your dashboard.")}</span>
             )}
           </div>
-          <button onClick={onClose}>Done</button>
+          <button onClick={onClose}>{ui("Done")}</button>
         </footer>
       </aside>
     </dialog>

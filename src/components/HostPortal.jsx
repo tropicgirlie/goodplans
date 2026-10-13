@@ -1,6 +1,7 @@
+import { ui, dateLocale } from "../i18n/core";
 import { OperationsPanel } from "./ServicePages";
 import NewsletterStudio from "./NewsletterStudio";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import {
   listHostEvents,
@@ -11,12 +12,17 @@ import {
   inviteGuest,
   retryEmails,
 } from "../lib/goodPlansApi";
-import { localDate, prettyDate } from "../lib/plans";
-export default function HostPortal({ user, onLogin, onCreate }) {
-  const [showOperations, setShowOperations] = useState(false);
-  const [showNewsletter, setShowNewsletter] = useState(false);
+import { localDate, prettyDate, planDateText, instantForWall, wallDateTime } from "../lib/plans";
+import { hostedPlan } from "../lib/hostedPlans";
+export default function HostPortal({ user, onLogin, onCreate, selected, tool, issueId, onContext, refreshKey, onChanged, country = 'IE' }) {
+  const showOperations = tool === "operations", showNewsletter = tool === "newsletter";
+  const setShowOperations = open => onContext({ tool: open ? "operations" : null });
+  const setShowNewsletter = open => onContext({ tool: open ? "newsletter" : null, issue: null });
+  const setSelected = event => onContext({ event });
+  const requestId = useRef(0);
+  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [events, setEvents] = useState([]),
-    [selected, setSelected] = useState(null),
     [detail, setDetail] = useState(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -24,24 +30,32 @@ export default function HostPortal({ user, onLogin, onCreate }) {
     [confirm, setConfirm] = useState(""),
     [link, setLink] = useState("");
   async function refresh(id = selected) {
+    const current = ++requestId.current;
+    setLoading(true);
     setError("");
     try {
-      const r = await listHostEvents();
-      setEvents(r.events);
-      if (id) setDetail(await hostDashboard(id));
-    } catch (e) {
-      setError(e.message);
-    }
+      const [list, dashboard] = await Promise.all([listHostEvents(), id ? hostDashboard(id) : Promise.resolve(null)]);
+      if (current !== requestId.current) return;
+      setEvents(list.events);
+      setDetail(dashboard);
+      setLoaded(true);
+    } catch (e) { if (current === requestId.current) setError(e.message); }
+    finally { if (current === requestId.current) setLoading(false); }
   }
   useEffect(() => {
-    if (user) refresh();
-  }, [user]);
+    setDetail(null); setEdit(false); setConfirm(""); setLink("");
+  }, [user?.id, selected]);
+  useEffect(() => {
+    if (user) void refresh();
+    return () => { ++requestId.current; };
+  }, [user?.id, selected, refreshKey]);
   async function action(fn) {
     setBusy(true);
     setError("");
     try {
       await fn();
       await refresh();
+      onChanged?.();
     } catch (e) {
       setError(e.message);
     } finally {
@@ -51,94 +65,81 @@ export default function HostPortal({ user, onLogin, onCreate }) {
   if (!user)
     return (
       <section className="gp-empty">
-        <h2>Your organiser portal</h2>
-        <p>
-          Sign in to manage your events, recurring series, invitations and
-          responses.
-        </p>
-        <button className="gp-button" onClick={onLogin}>
-          Sign in as host
-        </button>
+        <h2>{ui("Your events")}</h2>
+        <p>{ui("Sign in to manage your events, recurring series, invitations and responses.")}</p>
+        <button className="gp-button" onClick={onLogin}>{ui("Sign in as host")}</button>
       </section>
     );
-  if (showOperations) return <><button className="gp-text-button" onClick={()=>setShowOperations(false)}>← Back to hosted events</button><OperationsPanel /></>;
+  if (showOperations) return <><button className="gp-text-button" onClick={()=>setShowOperations(false)}>{ui("← Back to your events")}</button><OperationsPanel /></>;
   if (showNewsletter)
     return (
       <>
         <button
           className="gp-text-button"
           onClick={() => setShowNewsletter(false)}
-        >
-          ← Back to hosted events
-        </button>
-        <NewsletterStudio />
+        >{ui("← Back to your events")}</button>
+        <NewsletterStudio selected={issueId} onSelect={issue => onContext({ issue })} />
       </>
     );
   const event = detail?.event;
   return (
-    <section className="host-portal"><button className="gp-text-button" onClick={()=>setShowOperations(true)}>Support & service status</button>
+    <section className="host-portal"><button className="gp-text-button" onClick={()=>setShowOperations(true)}>{ui("Help & status")}</button>
       <div className="gp-section-heading">
-        <h2>{event?.title || "Your hosted events"}</h2>
+        <h2>{event?.title || ui("Your events")}</h2>
         <button
           className="gp-button secondary"
-          disabled={busy}
+          disabled={busy || loading}
           onClick={() => refresh()}
         >
           <RefreshCw />
-          Refresh
+          {ui(loading ? "Refreshing…" : "Refresh")}
         </button>
       </div>
       {error && (
         <p role="alert" className="gp-error">
-          {error}
+          {ui(error)}
         </p>
       )}
       {!selected ? (
         <>
+          <div className="host-primary-actions">
           <button
             className="gp-button"
             onClick={() => onCreate({ kind: "Gathering" })}
           >
-            <Plus />
-            Create event or series
-          </button>
-          <button
+            <Plus />{ui("Create an event")}</button>
+          {country === 'IE' && <button
             className="gp-button secondary"
             onClick={() => setShowNewsletter(true)}
-          >
-            Weekly Dublin newsletter
-          </button>
-          <div className="host-event-list">
+          >{ui("Prepare Dublin email")}</button>}
+          </div>
+          {country === 'IE' && <p className="host-newsletter-note">
+            {ui("Choose Dublin events for a weekly email. It goes only to people who confirm their signup, after you approve it.")}
+          </p>}
+          {loading && <p role="status">{ui("Loading your events…")}</p>}
+          <div className="host-event-list" aria-busy={loading}>
             {events.map((e) => (
               <button
                 key={e.id}
-                onClick={async () => {
-                  setSelected(e.id);
-                  setEdit(false);
-                  setConfirm("");
-                  setLink("");
-                  setDetail(null);
-                  await refresh(e.id);
-                }}
+                onClick={() => setSelected(e.id)}
               >
                 <b>{e.title}</b>
                 <span>
-                  {prettyDate(e.starts_at, {
+                  {ui(prettyDate(e.starts_at, {
                     weekday: "short",
                     year: "numeric",
-                  })}{" "}
-                  · {e.status}
+                    timeZone: e.timezone,
+                  }))}{" "}
+                  · {ui(e.status)}
                 </span>
                 <small>
-                  {e.series_name
-                    ? `${e.series_name} · ${e.cadence}`
-                    : "Single event"}
+                  {e.series_name ? <>{e.series_name} · {ui(e.cadence)}</> : ui("Single event")}
                 </small>
               </button>
             ))}
           </div>
-          {!events.length && (
-            <p>No hosted events yet. Publish a saved plan to see it here.</p>
+          {loaded && !loading && !error && !events.length && (
+            <p>{ui("No events here yet. Publish a plan to manage it here.")}</p>
           )}
         </>
       ) : (
@@ -150,33 +151,24 @@ export default function HostPortal({ user, onLogin, onCreate }) {
               setDetail(null);
             }}
           >
-            <ArrowLeft />
-            All events
-          </button>
+            <ArrowLeft />{ui("All events")}</button>
           {!event ? (
-            <p role="status">Loading event…</p>
+            <p role="status">{ui(loading ? "Loading event…" : "This event could not be loaded. Refresh to try again, or return to All events.")}</p>
           ) : (
             <>
               <p>
-                {prettyDate(event.starts_at, {
-                  weekday: "long",
-                  year: "numeric",
-                })}{" "}
-                · {event.timezone} · <b>{event.status}</b>
+                {ui(planDateText(hostedPlan(event)))} · {event.timezone} · <b>{ui(event.status)}</b>
               </p>
               <p>{event.venue_name}</p>
               <div className="host-counts">
                 {Object.entries(detail.counts).map(([key, n]) => (
                   <span key={key}>
-                    <b>{n}</b>
-                    {key}
+                    <b>{ui(n)}</b>
+                    {ui(key)}
                   </span>
                 ))}
               </div>
-              <p className="gp-field-note">
-                Counts show responses. Each guest’s party size is listed below
-                and included in the capacity check.
-              </p>
+              <p className="gp-field-note">{ui("Counts show responses. Each guest’s party size is listed below and included in the capacity check.")}</p>
               {event.status !== "cancelled" && (
                 <div className="gp-detail-actions">
                   {event.status === "draft" && (
@@ -184,40 +176,29 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                       className="gp-button"
                       disabled={busy}
                       onClick={() => action(() => publishHostEvent(event.id))}
-                    >
-                      Publish event
-                    </button>
+                    >{ui("Publish event")}</button>
                   )}
-                  <button className="gp-button" onClick={() => setEdit(!edit)}>
-                    Edit this occurrence
-                  </button>
+                  <button className="gp-button" onClick={() => setEdit(!edit)}>{ui("Edit this occurrence")}</button>
                   <button
                     className="gp-button secondary"
                     onClick={() => setConfirm("event")}
-                  >
-                    Cancel event
-                  </button>
+                  >{ui("Cancel event")}</button>
                   {event.series_id && (
                     <button
                       className="gp-button secondary"
                       onClick={() => setConfirm("series")}
-                    >
-                      Cancel this and later occurrences
-                    </button>
+                    >{ui("Cancel this and later occurrences")}</button>
                   )}
                 </div>
               )}
               {confirm && (
                 <div className="gp-publish">
                   <b>
-                    {confirm === "series"
+                    {ui(confirm === "series"
                       ? "Cancel this occurrence and the rest of this series?"
-                      : "Cancel this event?"}
+                      : "Cancel this event?")}
                   </b>
-                  <p>
-                    Guests with email addresses will receive a cancellation
-                    notice. Private invite pages will show the cancellation.
-                  </p>
+                  <p>{ui("Guests with email addresses will receive a cancellation notice. Private invite pages will show the cancellation.")}</p>
                   <button
                     className="gp-button"
                     disabled={busy}
@@ -227,15 +208,11 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                         setConfirm("");
                       })
                     }
-                  >
-                    Confirm cancellation
-                  </button>
+                  >{ui("Confirm cancellation")}</button>
                   <button
                     className="gp-text-button"
                     onClick={() => setConfirm("")}
-                  >
-                    Keep the event
-                  </button>
+                  >{ui("Keep the event")}</button>
                 </div>
               )}
               {edit && (
@@ -247,10 +224,9 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                     action(async () => {
                       await updateHostEvent(event.id, {
                         title: f.get("title"),
-                        startsAt: new Date(f.get("start")).toISOString(),
-                        endsAt: new Date(f.get("end")).toISOString(),
-                        timezone:
-                          Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        startsAt: instantForWall(f.get("start"),event.timezone).toISOString(),
+                        endsAt: instantForWall(f.get("end"),event.timezone).toISOString(),
+                        timezone: event.timezone,
                         venueName: f.get("venue"),
                         capacity: Number(f.get("capacity")),
                         description: f.get("notes"),
@@ -260,9 +236,7 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                     });
                   }}
                 >
-                  <label>
-                    Event name
-                    <input
+                  <label>{ui("Event name")}<input
                       name="title"
                       required
                       maxLength={120}
@@ -277,29 +251,22 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                       const d = new Date(iso);
                       return (
                         <label key={name}>
-                          {label}
+                          {ui(label)}
                           <input
                             name={name}
                             type="datetime-local"
                             required
-                            defaultValue={`${localDate(d)}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`}
+                            defaultValue={wallDateTime(d,event.timezone)}
                           />
                         </label>
                       );
                     })}
                   </div>
-                  <p className="gp-field-note">
-                    Editing times in{" "}
-                    {Intl.DateTimeFormat().resolvedOptions().timeZone}. Only
-                    this occurrence changes.
-                  </p>
-                  <label>
-                    Venue
-                    <input name="venue" defaultValue={event.venue_name} />
+                  <p className="gp-field-note">{ui("Editing times in")}{" "}
+                    {event.timezone}{ui(". Only this occurrence changes.")}</p>
+                  <label>{ui("Venue")}<input name="venue" defaultValue={event.venue_name} />
                   </label>
-                  <label>
-                    Capacity
-                    <input
+                  <label>{ui("Capacity")}<input
                       name="capacity"
                       type="number"
                       min="1"
@@ -308,25 +275,21 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                       defaultValue={event.capacity}
                     />
                   </label>
-                  <label>
-                    Details
-                    <textarea name="notes" defaultValue={event.description} />
+                  <label>{ui("Details")}<textarea name="notes" defaultValue={event.description} />
                   </label>
-                  <button className="gp-button" disabled={busy}>
-                    Save & notify guests
-                  </button>
+                  <button className="gp-button" disabled={busy}>{ui("Save & notify guests")}</button>
                 </form>
               )}
-              <h3 className="host-subtitle">Guest list & responses</h3>
+              <h3 className="host-subtitle">{ui("Guest list & responses")}</h3>
               <div className="host-guests">
                 {detail.guests.map((g) => (
                   <div key={g.id}>
                     <span>
-                      <b>{g.guest_name}</b>
+                      <b>{ui(g.guest_name)}</b>
                       <small>
-                        {g.guest_email || "Link-only invitation"} ·{" "}
-                        {g.status || "No reply"}
-                        {g.party_size === 2 ? " · with a plus-one" : ""}
+                        {ui(g.guest_email || "Link-only invitation")} ·{" "}
+                        {ui(g.status || "No reply")}
+                        {ui(g.party_size === 2 ? " · with a plus-one" : "")}
                       </small>
                     </span>
                     {event.status !== "cancelled" && (
@@ -342,9 +305,7 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                               setLink(r.inviteUrl);
                             })
                           }
-                        >
-                          Get fresh link
-                        </button>
+                        >{ui("Get fresh link")}</button>
                         {g.guest_email && (
                           <button
                             className="gp-text-button"
@@ -357,9 +318,7 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                                 });
                               })
                             }
-                          >
-                            Email invitation
-                          </button>
+                          >{ui("Email invitation")}</button>
                         )}
                       </div>
                     )}
@@ -367,9 +326,7 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                 ))}
               </div>
               {link && (
-                <label className="gp-form">
-                  Private link (replaces the previous link for this guest)
-                  <input
+                <label className="gp-form">{ui("Private link (replaces the previous link for this guest)")}<input
                     readOnly
                     value={link}
                     onFocus={(e) => e.target.select()}
@@ -394,42 +351,27 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                     });
                   }}
                 >
-                  <h3>Add a guest</h3>
-                  <label>
-                    Name
-                    <input name="name" required />
+                  <h3>{ui("Add a guest")}</h3>
+                  <label>{ui("Name")}<input name="name" required />
                   </label>
-                  <label>
-                    Email{" "}
-                    <span className="gp-optional">
-                      optional for link-only invitations
-                    </span>
+                  <label>{ui("Email")}{" "}
+                    <span className="gp-optional">{ui("optional for link-only invitations")}</span>
                     <input name="email" type="email" />
                   </label>
                   <label>
-                    <input type="checkbox" name="send" /> Email this invitation
-                    now
-                  </label>
-                  <button className="gp-button" disabled={busy}>
-                    Create invitation
-                  </button>
+                    <input type="checkbox" name="send" />{ui(" Email this invitation now")}</label>
+                  <button className="gp-button" disabled={busy}>{ui("Create invitation")}</button>
                 </form>
               )}
-              <h3 className="host-subtitle">Email delivery</h3>
+              <h3 className="host-subtitle">{ui("Email delivery")}</h3>
               {!detail.emailReady && (
-                <p className="gp-error">
-                  Email is not configured on this server. You can still copy
-                  private links.
-                </p>
+                <p className="gp-error">{ui("Email is not configured on this server. You can still copy private links.")}</p>
               )}
-              <p className="gp-field-note">
-                “Sent” means accepted by the email provider, not proof that the
-                guest read it.
-              </p>
+              <p className="gp-field-note">{ui("“Sent” means accepted by the email provider, not proof that the guest read it.")}</p>
               {detail.deliveries.map((d) => (
                 <p className="host-delivery" key={d.id}>
-                  <b>{d.recipient}</b> — {d.subject} · {d.status}
-                  {d.error && <small>{d.error}</small>}
+                  <b>{ui(d.recipient)}</b> — {d.subject} · {ui(d.status)}
+                  {d.error && <small>{ui(d.error)}</small>}
                 </p>
               ))}
               {detail.deliveries.some((d) => d.status === "failed") && (
@@ -437,9 +379,7 @@ export default function HostPortal({ user, onLogin, onCreate }) {
                   className="gp-button secondary"
                   disabled={busy}
                   onClick={() => action(() => retryEmails(event.id))}
-                >
-                  Retry failed deliveries
-                </button>
+                >{ui("Retry failed deliveries")}</button>
               )}
             </>
           )}

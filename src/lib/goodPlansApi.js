@@ -1,3 +1,6 @@
+import { brazilCity, brazilVenues } from "../../shared/brazil";
+import { spainCity, spainVenues } from "../../shared/spain";
+import { activityCategories } from "../../shared/recommendations";
 const root = (import.meta.env.VITE_GOOD_PLANS_API_URL || "").replace(/\/$/, "");
 const devHostKey = import.meta.env.VITE_GOOD_PLANS_DEV_HOST_KEY;
 
@@ -31,6 +34,8 @@ async function request(path, options = {}) {
 }
 
 export function findVenues(input) {
+  if (input.country === "ES" || (!input.country && spainCity(input.city))) return Promise.resolve({source:"spain_starter",venues:spainVenues(input.city,activityCategories(input.activity))});
+  if (input.country === "BR" || (!input.country && brazilCity(input.city))) return Promise.resolve({source:"brazil_starter",venues:brazilVenues(input.city,activityCategories(input.activity))});
   return request("/api/recommendations", {
     method: "POST",
     body: JSON.stringify(input),
@@ -42,10 +47,10 @@ export function createEvent(input) {
     body: JSON.stringify(input),
   });
 }
-export function submitRsvp(eventId, status, partySize = 1) {
+export function submitRsvp(eventId, status, partySize = 1, invitationId) {
   return request(`/api/events/${encodeURIComponent(eventId)}/rsvps`, {
     method: "POST",
-    body: JSON.stringify({ status, partySize }),
+    body: JSON.stringify({ status, partySize, invitationId }),
   });
 }
 export function importEventLink(url) {
@@ -60,8 +65,8 @@ export function confirmImportedEvent(importId, input) {
     { method: "POST", body: JSON.stringify(input) },
   );
 }
-export function readEvent(slug) {
-  return request(`/api/events/${encodeURIComponent(slug)}`);
+export function readEvent(slug, invitationId) {
+  return request(`/api/events/${encodeURIComponent(slug)}${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ""}`);
 }
 export function exchangeInvite(token) {
   return request("/api/invites/exchange", {

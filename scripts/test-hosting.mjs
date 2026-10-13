@@ -31,7 +31,7 @@ await writeFile(
       bindings: [{ name: "EVENT_ROOM", class_name: "EventRoom" }],
     },
     migrations: [{ tag: "v1", new_sqlite_classes: ["EventRoom"] }],
-    vars: { RESEND_WEBHOOK_SECRET: webhookSecret, ENVIRONMENT: "development", HOST_EMAILS: "tessa@example.com" },
+    vars: { RESEND_WEBHOOK_SECRET: webhookSecret, ENVIRONMENT: "development", HOST_EMAILS: "tessa@example.com,identitytest@example.com" },
     triggers: { crons: ["*/15 * * * *"] },
   }),
 );

@@ -3,19 +3,21 @@ import test from "node:test";
 import assert from "node:assert/strict";
 const root = process.env.TEST_API_URL || "http://127.0.0.1:8787";
 function client() {
-  let cookie = "";
+  const cookies = new Map();
   return async (path, method = "GET", body) => {
     const response = await fetch(`${root}${path}`, {
       method,
       headers: {
         "content-type": "application/json",
-        cookie,
+        cookie: [...cookies].map(([name, value]) => `${name}=${value}`).join("; "),
         "cf-connecting-ip": `test-${process.pid}`,
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
-    const set = response.headers.get("set-cookie");
-    if (set) cookie = set.split(";")[0];
+    for (const set of response.headers.getSetCookie()) {
+      const pair = set.split(";")[0], index = pair.indexOf("=");
+      cookies.set(pair.slice(0, index), pair.slice(index + 1));
+    }
     return { status: response.status, data: await response.json() };
   };
 }
@@ -94,6 +96,7 @@ test("host journey: sign-in, series, private invites, plus-ones, waitlist, edit,
   assert.equal(
     (
       await first(`/api/events/${event.id}/rsvps`, "POST", {
+        invitationId: event.inviteLinks[0].invitationId,
         status: "accepted",
         partySize: 2,
       })
@@ -103,6 +106,7 @@ test("host journey: sign-in, series, private invites, plus-ones, waitlist, edit,
   assert.equal(
     (
       await second(`/api/events/${event.id}/rsvps`, "POST", {
+        invitationId: event.inviteLinks[1].invitationId,
         status: "accepted",
       })
     ).data.rsvp.status,
@@ -111,6 +115,7 @@ test("host journey: sign-in, series, private invites, plus-ones, waitlist, edit,
   assert.equal(
     (
       await first(`/api/events/${event.id}/rsvps`, "POST", {
+        invitationId: event.inviteLinks[0].invitationId,
         status: "declined",
       })
     ).status,
@@ -191,6 +196,7 @@ test("host journey: sign-in, series, private invites, plus-ones, waitlist, edit,
   assert.equal(
     (
       await second(`/api/events/${event.id}/rsvps`, "POST", {
+        invitationId: event.inviteLinks[1].invitationId,
         status: "accepted",
       })
     ).status,
@@ -478,4 +484,36 @@ test("Dublin newsletter: discovery, opt-in, interests, preview, approval, idempo
   assert.equal((await manage('delete')).data.status,'deleted');
   assert.equal((await manage('read')).status,404);
 
+});
+
+test("shared-browser invitations keep separate HttpOnly identities and reject wrong or missing context", async () => {
+  const host = client(), browser = client(), outsider = client();
+  const login = await host("/api/auth/otp/request", "POST", { email: "identitytest@example.com" });
+  await host("/api/auth/otp/verify", "POST", { email: "identitytest@example.com", code: login.data.devCode });
+  const created = await host("/api/host/events", "POST", {
+    clientId: crypto.randomUUID(), title: "Shared browser overnight retreat",
+    startsAt: "2026-10-24T22:00:00Z", endsAt: "2026-10-25T03:00:00Z", timezone: "Europe/Dublin", capacity: 4, publish: true,
+    guests: [{ name: "Emma test" }, { name: "Sam test" }],
+  });
+  assert.equal(created.status, 201, JSON.stringify(created.data));
+  const event = created.data.event, [emma, sam] = event.inviteLinks;
+  const exchange = async link => browser("/api/invites/exchange", "POST", { token: new URLSearchParams(new URL(link.inviteUrl).hash.slice(1)).get("invite") });
+  assert.equal((await exchange(emma)).data.invitationId, emma.invitationId);
+  assert.equal((await exchange(sam)).data.invitationId, sam.invitationId);
+  for (const link of [emma, sam]) {
+    const read = await browser(`/api/events/${event.slug}?invitation=${link.invitationId}`);
+    assert.equal(read.data.guest.name, link.guestName);
+    assert.equal(read.data.event.ends_at, "2026-10-25T03:00:00.000Z");
+  }
+  assert.equal((await browser(`/api/events/${event.id}/rsvps`, "POST", { status: "accepted", invitationId: emma.invitationId })).status, 200);
+  assert.equal((await browser(`/api/events/${event.id}/rsvps`, "POST", { status: "maybe", invitationId: sam.invitationId })).status, 200);
+  assert.equal((await browser(`/api/events/${event.id}/rsvps`, "POST", { status: "declined" })).status, 409);
+  assert.equal((await browser(`/api/events/${event.id}/rsvps`, "POST", { status: "declined", invitationId: "invite-not-owned" })).status, 403);
+  assert.equal((await outsider(`/api/events/${event.id}/rsvps`, "POST", { status: "accepted", invitationId: emma.invitationId })).status, 403);
+  const dashboard = await host(`/api/host/events/${event.id}/dashboard`);
+  assert.equal(dashboard.data.guests.find(g => g.id === emma.invitationId).status, "accepted");
+  assert.equal(dashboard.data.guests.find(g => g.id === sam.invitationId).status, "maybe");
+  const listing = (await host("/api/host/events")).data.events.find(e => e.id === event.id);
+  assert.equal(listing.counts.accepted, 1);
+  assert.equal(listing.guests.find(g => g.id === sam.invitationId).status, "maybe");
 });

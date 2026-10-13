@@ -1,3 +1,4 @@
+import { ui } from "../i18n/core";
 import { useState, useEffect, useMemo } from "react";
 import { ArrowUpRight, Check, ChevronDown } from "lucide-react";
 import VibeDoodle from "./VibeDoodle";
@@ -43,7 +44,7 @@ export default function AffinityMatchMatrix({
     setError("");
     setCatalog([]);
     setLoading(true);
-    findVenues({ city })
+    findVenues({ city, country: preferences.profile?.country })
       .then((result) => {
         if (current) setCatalog(result.venues || []);
       })
@@ -57,36 +58,34 @@ export default function AffinityMatchMatrix({
     return () => {
       current = false;
     };
-  }, [city, retry]);
+  }, [city, preferences.profile?.country, retry]);
 
   return (
     <section className="circle-edit" aria-labelledby="circle-title">
       <header className="circle-heading">
         <div>
-          <p className="circle-eyebrow">Women’s social cohorts</p>
-          <h2 id="circle-title">
-            Good company.
-            <br />
-            <em>A few good ideas.</em>
+          <p className="circle-eyebrow">{ui("Women’s social cohorts")}</p>
+          <h2 id="circle-title">{ui("Good company.")}<br />
+            <em>{ui("A few good ideas.")}</em>
           </h2>
         </div>
         <p>
-          {example ? "Interactive example · These are fictional friends and illustrative ideas. Try changing the group, then add your own people. No account needed." : "Choose your saved friends and explore ideas for time together. Suggestions are starting points; confirm details with the venue."}
+          {ui(example ? "Interactive example · These are fictional friends and illustrative ideas. Try changing the group, then add your own people. No account needed." : "Choose your saved friends and explore ideas for time together. Suggestions are starting points; confirm details with the venue.")}
         </p>
       </header>
-      {example && onPersonalise && <button className="circle-more" onClick={onPersonalise}>Plan with my people <ArrowUpRight size={18} /></button>}
+      {example && onPersonalise && <button className="circle-more" onClick={onPersonalise}>{ui("Plan with my people ")}<ArrowUpRight size={18} /></button>}
       <div className="circle-workspace">
         <div className="circle-people">
           <div className="circle-step">
             <span>01</span>
-            <h3>Who’s coming?</h3>
-            <small>{activeFriends.length} selected</small>
+            <h3>{ui("Who’s coming?")}</h3>
+            <small>{activeFriends.length}{" "}{ui(activeFriends.length === 1 ? "friend selected" : "friends selected")}</small>
           </div>
-          <p className="circle-hint">Tap a friend to add or remove them.</p>
+          <p className="circle-hint">{ui("Tap a friend to add or remove them.")}</p>
           <div
             className="circle-friends"
             role="group"
-            aria-label="Choose friends"
+            aria-label={ui("Choose friends")}
           >
             {friends.map((friend) => {
               const selected = selectedFriends.includes(friend.id);
@@ -107,7 +106,7 @@ export default function AffinityMatchMatrix({
                   {friend.avatar ? <img src={friend.avatar} alt="" loading="lazy" /> : <span className="circle-initial" aria-hidden="true">{friend.name.slice(0, 1)}</span>}
                   <span>
                     <b>{friend.name}</b>
-                    <small>{(friend.interests || []).slice(0, 2).join(" · ")}</small>
+                    <small>{(example ? (friend.interests || []).slice(0, 2).map(ui) : (friend.interests || []).slice(0, 2)).join(" · ")}</small>
                   </span>
                   <span className="circle-check" aria-hidden="true">
                     {selected && <Check size={14} />}
@@ -117,20 +116,13 @@ export default function AffinityMatchMatrix({
             })}
           </div>
           {example && <details className="circle-context">
-            <summary>
-              About this example <ChevronDown size={15} />
+            <summary>{ui("About this example ")}<ChevronDown size={15} />
             </summary>
-            <p>
-              These are sample friends and illustrative suggestions. Explore how
-              changing the group changes the ideas; check the venue before
-              making a plan.
-            </p>
-            <p>
-              Ideas use stated interests, not age or personality assumptions.
-            </p>
+            <p>{ui("These are sample friends and illustrative suggestions. Explore how changing the group changes the ideas; check the venue before making a plan.")}</p>
+            <p>{ui("Ideas use stated interests, not age or personality assumptions.")}</p>
             {activeFriends.map((f) => (
               <p key={f.id}>
-                <b>{f.name.split(" ")[0]}</b> · {(f.interests || []).join(", ")}
+                <b>{f.name.split(" ")[0]}</b> · {(example ? (f.interests || []).map(ui) : (f.interests || [])).join(", ")}
               </p>
             ))}
           </details>}
@@ -138,32 +130,28 @@ export default function AffinityMatchMatrix({
         <div className="circle-ideas" aria-busy={loading}>
           <div className="circle-step">
             <span>02</span>
-            <h3>Pick your kind of plan.</h3>
+            <h3>{ui("Pick your kind of plan.")}</h3>
           </div>
           <p className="circle-hint">
-            {activeFriends.length
+            {ui(activeFriends.length
               ? `Ideas for ${activeFriends.map((f) => f.name.split(" ")[0]).join(", ")}.`
-              : "Start by choosing someone on the left."}
+              : "Start by choosing someone on the left.")}
           </p>
-          {!activeFriends.length ? <p className="circle-state">Select a friend to see ideas.</p> : loading ? (
-            <p className="circle-state" role="status">
-              Finding a few good ideas…
-            </p>
+          {!activeFriends.length ? <p className="circle-state">{ui("Select a friend to see ideas.")}</p> : loading ? (
+            <p className="circle-state" role="status">{ui("Finding a few good ideas…")}</p>
           ) : error ? (
             <div className="circle-state" role="alert">
-              <p>{error}</p>
+              <p>{ui(error)}</p>
               <button
                 className="circle-more"
                 onClick={() => setRetry((n) => n + 1)}
-              >
-                Try again
-              </button>
+              >{ui("Try again")}</button>
             </div>
           ) : !recommendations.length ? (
             <p className="circle-state">
-              {activeFriends.length
+              {ui(activeFriends.length
                 ? "No starter venues for this city yet. You can still create your own plan."
-                : "Good plans start with your people. Select a friend to see ideas."}
+                : "Good plans start with your people. Select a friend to see ideas.")}
             </p>
           ) : (
             <>
@@ -181,16 +169,13 @@ export default function AffinityMatchMatrix({
                       </span>
                       <span className="circle-idea-copy">
                         {index === 0 && (
-                          <small className="circle-pick-label">
-                            A place to start
-                          </small>
+                          <small className="circle-pick-label">{ui("A place to start")}</small>
                         )}
-                        <b>{activityNames[idea.iconName] || idea.name}</b>
-                        <span>{idea.venue?.name || idea.vibe}</span>
-                        {idea.reason && <small className="circle-reason">{idea.reason}</small>}
+                        <b>{ui(preferences.profile?.country === "BR" ? idea.name : activityNames[idea.iconName] || idea.name)}</b>
+                        <span>{idea.venue?.name || ui(idea.vibe)}</span>
+                        {idea.reason && <small className="circle-reason">{ui(idea.reason)}</small>}
                       </span>
-                      <span className="circle-idea-action">
-                        Make a plan <ArrowUpRight size={18} />
+                      <span className="circle-idea-action">{ui("Make a plan ")}<ArrowUpRight size={18} />
                       </span>
                     </button>
                   ))}
@@ -201,9 +186,9 @@ export default function AffinityMatchMatrix({
                   aria-expanded={expanded}
                   onClick={() => setExpanded(!expanded)}
                 >
-                  {expanded
+                  {ui(expanded
                     ? "Show fewer ideas"
-                    : `See ${recommendations.length - 3} more ideas`}
+                    : `See ${recommendations.length - 3} more ideas`)}
                   <ChevronDown
                     size={16}
                     style={{
@@ -215,7 +200,7 @@ export default function AffinityMatchMatrix({
             </>
           )}
           <p className="circle-footnote">
-            {example ? "Illustrative suggestions, not a compatibility test." : "Ideas are ordered using your saved interests and preferences on this device. Names and notes are not sent to the recommendation service."}
+            {ui(example ? "Illustrative suggestions, not a compatibility test." : "Ideas are ordered using your saved interests and preferences on this device. Names and notes are not sent to the recommendation service.")}
           </p>
         </div>
       </div>

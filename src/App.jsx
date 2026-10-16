@@ -215,7 +215,19 @@ function Brand() {
 }
 function Modal({ title, onClose, children, wide = false, compact = false, invitation = false }) {
   const ref = useRef();
-  const [expanded, setExpanded] = useState(false);
+  const [expandedOverride, setExpandedOverride] = useState(null);
+  const [automaticExpanded, setAutomaticExpanded] = useState(
+    () => invitation && window.matchMedia("(min-width: 768px)").matches,
+  );
+  const expanded = expandedOverride ?? automaticExpanded;
+  useEffect(() => {
+    if (!invitation) return;
+    const screen = window.matchMedia("(min-width: 768px)");
+    const updateLayout = () => setAutomaticExpanded(screen.matches);
+    updateLayout();
+    screen.addEventListener("change", updateLayout);
+    return () => screen.removeEventListener("change", updateLayout);
+  }, [invitation]);
   useEffect(() => {
     const previous = document.activeElement;
     ref.current.showModal();
@@ -244,7 +256,7 @@ function Modal({ title, onClose, children, wide = false, compact = false, invita
           <LanguageSwitcher />
           {wide && <button className="gp-icon" aria-label={ui(expanded ? "Shrink panel" : "Expand panel")}
             title={ui(expanded ? "Shrink panel" : "Expand panel")} aria-pressed={expanded}
-            onClick={() => setExpanded(value => !value)}>
+            onClick={() => setExpandedOverride(!expanded)}>
             {expanded ? <Minimize2 /> : <Maximize2 />}
           </button>}
           <button

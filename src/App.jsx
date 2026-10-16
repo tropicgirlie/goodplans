@@ -1,3 +1,4 @@
+import RsvpEmail from './components/RsvpEmail';
 import MaterialSelect from "./components/MaterialSelect";
 import { launchSettings, regionDiscoveryLabel } from "./lib/region";
 import LanguageSwitcher, { useLocale } from "./i18n/LanguageSwitcher";
@@ -231,7 +232,7 @@ function Modal({ title, onClose, children, wide = false, compact = false, invita
   useEffect(() => {
     const previous = document.activeElement;
     ref.current.showModal();
-    ref.current.querySelector("input:not([type=checkbox])")?.focus();
+    if (!invitation) ref.current.querySelector("input:not([type=checkbox])")?.focus();
     return () => {
       if (previous?.isConnected) previous.focus();
     };
@@ -745,13 +746,14 @@ function PlanDetail({
             </details>
           </>
         )}
+        {guest&&plan.invitationId&&rsvp&&<RsvpEmail key={plan.invitationId} plan={plan} onRefresh={onRefresh}/>}
         {calendar && plan.status !== "cancelled" && (
           <div className="gp-calendar-links">
             <a href={calendar.google} target="_blank" rel="noreferrer">
               <CalendarDays />{ui("Google Calendar")}<ArrowUpRight />
             </a>
             <button onClick={download}>
-              <Download />{ui("Download .ics")}</button>
+              <Download />Apple / Outlook (.ics)</button>
           </div>
         )}
         {!guest && !plan.remoteId && (
@@ -900,7 +902,7 @@ export default function App() {
         try { sessionStorage.setItem(key, result.guest.invitationId); } catch { /* Optional recovery only. */ }
       }
       setInvite({ ...hostedPlan(result.event), guests: result.guests?.map(g => g.guest_name) || [],
-        counts:result.counts, rsvp: result.rsvp, invitationId: result.guest?.invitationId, invitee: result.guest?.name });
+        guestEmail:result.guest?.email, confirmation:result.confirmation, counts:result.counts, rsvp: result.rsvp, invitationId: result.guest?.invitationId, invitee: result.guest?.name });
       setInviteError("");
       setInviteState("ready");
     } catch (error) {

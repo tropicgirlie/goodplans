@@ -1,13 +1,13 @@
 import { id, sha256 } from "./core.js";
 import { fail } from "./hosting-core.js";
-export async function sendEmail(env, { key, to, subject, text, html }) {
+export async function sendEmail(env, { key, to, subject, text, html, attachments = [] }) {
   if (await env.DB.prepare('SELECT reason FROM email_suppressions WHERE email_hash=?').bind(await sha256(to.trim().toLowerCase())).first())
     throw Object.assign(new Error('Delivery suppressed after a bounce or complaint.'), { suppressed: true, status: 400 });
   if (env.ENVIRONMENT === "development") {
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO local_mailbox (id,recipient,subject,body,created_at) VALUES (?,?,?,?,?)",
+      "INSERT OR IGNORE INTO local_mailbox (id,recipient,subject,body,created_at,html_body,attachments_json) VALUES (?,?,?,?,?,?,?)",
     )
-      .bind(key, to, subject, text, new Date().toISOString())
+      .bind(key, to, subject, text, new Date().toISOString(),html||null,JSON.stringify(attachments))
       .run();
     return `local:${key}`;
   }
@@ -18,6 +18,7 @@ export async function sendEmail(env, { key, to, subject, text, html }) {
     );
   const result = await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(12000),
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
@@ -29,6 +30,7 @@ export async function sendEmail(env, { key, to, subject, text, html }) {
       subject,
       text,
       ...(html ? { html } : {}),
+      ...(attachments.length ? { attachments } : {}),
     }),
   });
   if (!result.ok)
@@ -39,10 +41,10 @@ export async function sendEmail(env, { key, to, subject, text, html }) {
 }
 export function emailStatement(
   env,
-  { key = id("mail"), eventId = null, invitationId = null, to, subject, text },
+  { key = id("mail"), eventId = null, invitationId = null, to, subject, text, html = null, attachments = [] },
 ) {
   return env.DB.prepare(
-    "INSERT OR IGNORE INTO email_deliveries (id,event_id,invitation_id,recipient,subject,body,created_at) VALUES (?,?,?,?,?,?,?)",
+    "INSERT OR IGNORE INTO email_deliveries (id,event_id,invitation_id,recipient,subject,body,created_at,html_body,attachments_json) VALUES (?,?,?,?,?,?,?,?,?)",
   ).bind(
     key,
     eventId,
@@ -51,12 +53,13 @@ export function emailStatement(
     subject,
     text,
     new Date().toISOString(),
+    html,JSON.stringify(attachments),
   );
 }
-export async function deliverPending(env) {
+export async function deliverPending(env, onlyId = null) {
   const { results } = await env.DB.prepare(
-    "SELECT * FROM email_deliveries WHERE status IN ('queued','failed') AND attempts < 5 ORDER BY created_at LIMIT 30",
-  ).all();
+    "SELECT * FROM email_deliveries WHERE status IN ('queued','failed') AND attempts < 5 AND (? IS NULL OR id=?) ORDER BY created_at LIMIT 30",
+  ).bind(onlyId,onlyId).all();
   for (const row of results) {
     try {
       const provider = await sendEmail(env, {
@@ -64,6 +67,8 @@ export async function deliverPending(env) {
         to: row.recipient,
         subject: row.subject,
         text: row.body,
+        html:row.html_body||undefined,
+        attachments:JSON.parse(row.attachments_json||'[]'),
       });
       await env.DB.prepare(
         "UPDATE email_deliveries SET status='sent',provider_id=?,sent_at=?,error=NULL,attempts=attempts+1 WHERE id=?",
@@ -109,6 +114,7 @@ export async function queueEventNotice(env, event, kind, invitationId = null) {
   if (statements.length) await env.DB.batch(statements);
 }
 export async function processNotifications(env) {
+  await env.DB.prepare('DELETE FROM guest_access_tokens WHERE expires_at<?').bind(new Date().toISOString()).run();
   const notices = await env.DB.prepare(
     "SELECT * FROM notification_outbox WHERE status='queued' LIMIT 20",
   ).all();

@@ -195,3 +195,7 @@ export function newsletterSave(id, input) {
     body: JSON.stringify(input),
   });
 }
+
+export function emailRsvpConfirmation(eventId,invitationId,email) {
+  return request(`/api/events/${encodeURIComponent(eventId)}/confirmation`,{method:'POST',body:JSON.stringify({invitationId,email})});
+}

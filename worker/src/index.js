@@ -1,3 +1,5 @@
+import { guestEmail } from '../../shared/invitations.js';
+import { queueRsvpConfirmation, currentConfirmation } from './rsvp-mail.js';
 import { activityCategories, categoryLabels } from "../../shared/recommendations.js";
 import { operations, trackJob } from './operations.js';
 import { newsletter, scheduledNewsletter, finishDiscoveryRun } from './newsletter.js';
@@ -355,8 +357,8 @@ async function addInvitations(request, env, eventId) {
 async function exchangeInvite(request, env) {
   const { token } = await body(request);
   if (!token || token.length < 32) return response({ error: 'That invitation link is not valid.' }, { status: 400 });
-  const invitation = await env.DB.prepare(`SELECT i.*, e.slug FROM invitations i JOIN events e ON e.id = i.event_id WHERE i.token_hash = ? AND (i.expires_at IS NULL OR i.expires_at > ?)`)
-    .bind(await sha256(token), now()).first();
+  const invitation = await env.DB.prepare(`SELECT i.*, e.slug FROM invitations i JOIN events e ON e.id = i.event_id WHERE (i.token_hash = ? OR EXISTS (SELECT 1 FROM guest_access_tokens a WHERE a.invitation_id=i.id AND a.token_hash=? AND a.expires_at>?)) AND (i.expires_at IS NULL OR i.expires_at > ?)`)
+    .bind(await sha256(token),await sha256(token),now(),now()).first();
   if (!invitation) return response({ error: 'That invitation link has expired or is not valid.' }, { status: 404 });
   const rawSession = randomToken();
   await env.DB.prepare(`INSERT INTO guest_sessions (id, invitation_id, session_hash, expires_at) VALUES (?, ?, ?, ?)`)
@@ -375,7 +377,11 @@ async function submitRsvp(request, env, eventId) {
   const event = await env.DB.prepare('SELECT visibility,ends_at FROM events WHERE id=?').bind(eventId).first();
   if(event?.visibility==='public'&&event.ends_at<=now())return response({error:'This meet-up has ended. Responses are closed.'},{status:409});
   const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
-  return room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status, partySize: input.partySize ?? 1 }) });
+  const saved=await room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status, partySize: input.partySize ?? 1 }) });
+  if(!saved.ok)return saved;
+  const invitation=await env.DB.prepare('SELECT * FROM invitations WHERE id=?').bind(guest.invitation_id).first();
+  const confirmation=await queueRsvpConfirmation(env,{id:eventId},invitation,env.PUBLIC_ORIGIN||originOf(request));
+  return response({...await saved.json(),confirmation});
 }
 
 async function createImport(request, env) {
@@ -450,6 +456,7 @@ async function joinOpenEvent(request, env, eventId) {
   const event=await env.DB.prepare("SELECT * FROM events WHERE id=? AND visibility='public' AND status='published'").bind(eventId).first();
   if(!event)return response({error:'This open invitation is not available.'},{status:404});
   if(event.ends_at<=now())return response({error:'This meet-up has ended.'},{status:409});
+  const email=guestEmail(input.email);
   const name=typeof input.name==='string'?input.name.trim():'';
   if(!name||name.length>80||!/^([a-f0-9]{64})$/.test(input.joinToken||''))return response({error:'Enter your name and try joining again.'},{status:400});
   if(![1,2].includes(input.partySize??1)||(input.partySize===2&&!event.plus_one))return response({error:'Choose a valid party size for this invitation.'},{status:400});
@@ -458,19 +465,22 @@ async function joinOpenEvent(request, env, eventId) {
   const rate=await env.DB.prepare('INSERT INTO auth_limits(key,count,expires_at) VALUES (?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN expires_at<? THEN 1 ELSE count+1 END,expires_at=CASE WHEN expires_at<? THEN excluded.expires_at ELSE expires_at END RETURNING count').bind(key,seconds+3600,seconds,seconds).first();
   if(rate.count>30)return response({error:'Too many attempts. Please try again later.'},{status:429});
   const current=await guestIdentity(request,env,input.invitationId);
-  let invitation=current?.event_id===event.id?{id:current.invitation_id,guest_name:current.guest_name}:null;
+  let invitation=current?.event_id===event.id?await env.DB.prepare('SELECT * FROM invitations WHERE id=?').bind(current.invitation_id).first():null;
   if(!invitation){
     const hash=await sha256(`open:${event.id}:${input.joinToken}`);
-    await env.DB.prepare("INSERT OR IGNORE INTO invitations(id,event_id,guest_name,token_hash) SELECT ?,?,?,? FROM events WHERE id=? AND visibility='public' AND status='published' AND (SELECT count(*) FROM invitations WHERE event_id=?)<2000").bind(id('invite'),event.id,name,hash,event.id,event.id).run();
-    invitation=await env.DB.prepare('SELECT id,guest_name FROM invitations WHERE event_id=? AND token_hash=?').bind(event.id,hash).first();
+    await env.DB.prepare("INSERT OR IGNORE INTO invitations(id,event_id,guest_name,token_hash,guest_email) SELECT ?,?,?,?,? FROM events WHERE id=? AND visibility='public' AND status='published' AND (SELECT count(*) FROM invitations WHERE event_id=?)<2000").bind(id('invite'),event.id,name,hash,email,event.id,event.id).run();
+    invitation=await env.DB.prepare('SELECT * FROM invitations WHERE event_id=? AND token_hash=?').bind(event.id,hash).first();
     if(!invitation)return response({error:'This invitation is no longer accepting new responses.'},{status:409});
   }
   const room=env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
   const result=await room.fetch('https://event-room/rsvp',{method:'POST',body:JSON.stringify({eventId,invitationId:invitation.id,requestedStatus:input.status,partySize:input.partySize??1})});
   if(!result.ok)return result;
+  await env.DB.prepare('UPDATE invitations SET guest_email=? WHERE id=?').bind(email,invitation.id).run();
+  invitation.guest_email=email;
+  const confirmation=await queueRsvpConfirmation(env,event,invitation,env.PUBLIC_ORIGIN||originOf(request));
   const token=randomToken();
   await env.DB.prepare('INSERT INTO guest_sessions(id,invitation_id,session_hash,expires_at) VALUES (?,?,?,?)').bind(id('session'),invitation.id,await sha256(token),new Date(Date.now()+30*86400000).toISOString()).run();
-  const reply=response({...await result.json(),invitationId:invitation.id,eventSlug:event.slug},{headers:{'set-cookie':cookie('good_plans_guest',token,30*86400,env.ENVIRONMENT==='production')}});
+  const reply=response({...await result.json(),confirmation,invitationId:invitation.id,eventSlug:event.slug},{headers:{'set-cookie':cookie('good_plans_guest',token,30*86400,env.ENVIRONMENT==='production')}});
   reply.headers.append('set-cookie',cookie(`good_plans_guest_${invitation.id}`,token,30*86400,env.ENVIRONMENT==='production'));
   return reply;
 }
@@ -550,7 +560,8 @@ export default {
         if (url.searchParams.has('invitation') && !guest) return response({ error: 'This invitation session has changed or expired. Reopen your own private invitation link.' }, { status: 409 });
         const rsvp=guest?await env.DB.prepare('SELECT status,party_size FROM rsvps WHERE invitation_id=?').bind(guest.invitation_id).first():null;
         const guests=event.show_guests?(await env.DB.prepare("SELECT i.guest_name,r.party_size FROM invitations i JOIN rsvps r ON r.invitation_id=i.id WHERE i.event_id=? AND r.status='accepted'").bind(event.id).all()).results:[];
-        return response({ event: publicEvent(event, originOf(request)), guest: guest ? { invitationId: guest.invitation_id, name: guest.guest_name } : null, rsvp,guests, counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
+        const confirmation=guest?await currentConfirmation(env,event,{id:guest.invitation_id,guest_email:guest.guest_email},rsvp):null;
+        return response({ confirmation,event: publicEvent(event, originOf(request)), guest: guest ? { invitationId: guest.invitation_id, name: guest.guest_name, email:guest.guest_email } : null, rsvp,guests, counts: await counts(env, event.id), calendar: calendarUrls(event, originOf(request)) });
       }
       const updateMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)$/);
       if (updateMatch && request.method === 'PATCH') return await updateEvent(request, env, decodeURIComponent(updateMatch[1]));
@@ -560,6 +571,19 @@ export default {
       if (artworkMatch && request.method === 'POST') return await requestArtwork(request, env, decodeURIComponent(artworkMatch[1]));
       const openJoinMatch=url.pathname.match(/^\/api\/events\/([^/]+)\/join$/);
       if(openJoinMatch&&request.method==='POST')return await joinOpenEvent(request,env,decodeURIComponent(openJoinMatch[1]));
+      const confirmationMatch=url.pathname.match(/^\/api\/events\/([^/]+)\/confirmation$/);
+      if(confirmationMatch&&request.method==='POST'){
+        const input=await body(request),eventId=decodeURIComponent(confirmationMatch[1]);
+        if(!input.invitationId)return response({error:'Reopen your own invitation before requesting an email.'},{status:409});
+        const guest=await guestIdentity(request,env,input.invitationId);
+        if(!guest||guest.event_id!==eventId)return response({error:'Reopen your own invitation before requesting an email.'},{status:403});
+        const email=guestEmail(input.email);
+        const rsvp=await env.DB.prepare('SELECT status FROM rsvps WHERE invitation_id=?').bind(guest.invitation_id).first();
+        if(!rsvp)return response({error:'Choose an RSVP before requesting its confirmation.'},{status:409});
+        await env.DB.prepare('UPDATE invitations SET guest_email=? WHERE id=?').bind(email,guest.invitation_id).run();
+        const invitation=await env.DB.prepare('SELECT * FROM invitations WHERE id=?').bind(guest.invitation_id).first();
+        return response({confirmation:await queueRsvpConfirmation(env,{id:eventId},invitation,env.PUBLIC_ORIGIN||originOf(request))});
+      }
       const rsvpMatch = url.pathname.match(/^\/api\/events\/([^/]+)\/rsvps$/);
       if (rsvpMatch && request.method === 'POST') return await submitRsvp(request, env, decodeURIComponent(rsvpMatch[1]));
       const invitationMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/invitations$/);

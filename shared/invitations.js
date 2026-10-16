@@ -27,3 +27,10 @@ export function inviterName(raw) {
     throw Object.assign(new Error('Use an invitation host name of up to 80 characters.'), { status: 400 });
   return raw.trim();
 }
+
+export function guestEmail(raw) {
+  const email = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    throw Object.assign(new Error('Enter your email address to receive your invitation and calendar details.'), { status: 400 });
+  return email;
+}

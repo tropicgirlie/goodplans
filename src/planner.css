@@ -2772,3 +2772,8 @@
 
 .gp-invitation-host { font-size: 18px; font-weight: 650; line-height: 1.35; margin: 16px 0 8px; overflow-wrap: anywhere; }
 .gp-invitation-host + .gp-invitation-identity { margin-top: 0; font-size: 12px; }
+
+.gp-rsvp-email { margin-block:16px; padding-block:12px; border-top:1px solid var(--gp-line); }
+.gp-rsvp-email summary { cursor:pointer; min-height:44px; display:flex; align-items:center; font-size:13px; font-weight:600; }
+.gp-rsvp-email .gp-form { margin-top:12px; }
+.gp-rsvp-email .gp-field-note { margin:8px 0; line-height:1.5; }

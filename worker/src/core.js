@@ -140,5 +140,9 @@ export function compactDate(value) {
 
 export function makeIcs(event) {
   const escape = (value = '') => String(value).replaceAll('\\', '\\\\').replaceAll(';', '\\;').replaceAll(',', '\\,').replaceAll(/\r?\n/g, '\\n');
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Good Plans//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', `UID:${escape(event.id)}@goodplans`, `DTSTAMP:${compactDate(new Date().toISOString())}`, `DTSTART:${compactDate(event.starts_at)}`, `DTEND:${compactDate(event.ends_at)}`, `SUMMARY:${escape(event.title)}`, `DESCRIPTION:${escape([event.description || 'Planned with Good Plans',bookingDetails(event.booking_url,event.plan_type==='attend')].filter(Boolean).join('\n\n'))}`, `LOCATION:${escape([event.venue_name, event.venue_address].filter(Boolean).join(', '))}`, 'END:VEVENT', 'END:VCALENDAR', ''].join('\r\n');
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Good Plans//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', `SEQUENCE:${Number(event.revision)||0}`, `STATUS:${event.calendar_status||'CONFIRMED'}`, `UID:${escape(event.id)}@goodplans`, `DTSTAMP:${compactDate(new Date().toISOString())}`, `DTSTART:${compactDate(event.starts_at)}`, `DTEND:${compactDate(event.ends_at)}`, `SUMMARY:${escape(event.title)}`, `DESCRIPTION:${escape([event.description || 'Planned with Good Plans',bookingDetails(event.booking_url,event.plan_type==='attend')].filter(Boolean).join('\n\n'))}`, `LOCATION:${escape([event.venue_name, event.venue_address].filter(Boolean).join(', '))}`, 'END:VEVENT', 'END:VCALENDAR', ''].map(line=>{
+    let folded='',size=0;
+    for(const character of line){const length=new TextEncoder().encode(character).length;if(size+length>75){folded+='\r\n ';size=1;}folded+=character;size+=length;}
+    return folded;
+  }).join('\r\n');
 }

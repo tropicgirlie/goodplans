@@ -97,6 +97,7 @@ test("email provider receives stable idempotency key and confirms acceptance", a
     assert.equal(url, "https://api.resend.com/emails");
     assert.equal(options.headers["Idempotency-Key"], "stable-test-key");
     assert.deepEqual(JSON.parse(options.body).to, ["guest@example.com"]);
+    assert.deepEqual(JSON.parse(options.body).attachments,[{filename:"invitation.ics",content:"VGVzdA=="}]);
     return Response.json({ id: "provider-test-id" });
   });
   assert.equal(
@@ -104,6 +105,7 @@ test("email provider receives stable idempotency key and confirms acceptance", a
       { DB, RESEND_API_KEY: "test-only", EMAIL_FROM: "test@example.com" },
       {
         key: "stable-test-key",
+        attachments:[{filename:"invitation.ics",content:"VGVzdA=="}],
         to: "guest@example.com",
         subject: "Test",
         text: "Test",

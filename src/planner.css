@@ -2672,3 +2672,38 @@
   .compact-plan .gp-form-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gp-form input:not([type=checkbox]), .gp-form select, .gp-form textarea { font-size: 16px; }
 }
+
+/* Event curation: two clear paths with one shared review flow. */
+.discovery-manager { margin-block: 28px; }
+.discovery-manager header { max-width: 680px; margin-bottom: 24px; }
+.newsletter-studio h1 { font-size: clamp(30px, 4vw, 44px); }
+.discovery-manager h2 { font-size: 28px; line-height: 1.05; }
+.discovery-manager h3, .discovery-listing-editor h3 { font-size: 24px; line-height: 1.1; margin: 14px 0; }
+.discovery-manager-paths { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.discovery-manager-paths > section { min-width: 0; border-top: 2px solid var(--ink); padding-block: 20px; }
+.discovery-manager .gp-form { margin-block: 20px; }
+.discovery-manager .gp-form > .gp-button { width: fit-content; justify-self: start; }
+.discovery-manager details { margin-top: 22px; }
+.discovery-manager summary { cursor: pointer; font-weight: 700; }
+.discovery-listing-editor { padding: clamp(16px,3vw,28px); margin-block: 24px; background: var(--paper); border: 1px solid var(--ink); border-left: 5px solid var(--olive); }
+.discovery-listing-editor ul { padding-left: 20px; }
+.discovery-sources { padding-block: 24px; border-block: 1px solid var(--line); scroll-margin-top: 24px; }
+.discovery-source-list article { padding-block: 18px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.discovery-source-list h4 { margin: 0 0 8px; }
+.discovery-manager-filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-block: 24px; align-items: end; }
+.discovery-manager-filters .gp-checkbox, .discovery-listing-editor .gp-checkbox { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+.discovery-manager-filters .gp-checkbox input, .discovery-listing-editor .gp-checkbox input { width: 20px; height: 20px; min-height: 20px; flex: 0 0 20px; margin: 0; }
+@media(max-width:800px) { .discovery-manager-paths { grid-template-columns: minmax(0,1fr); gap: 0; } .discovery-manager-filters { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:480px) { .discovery-manager-filters { grid-template-columns: minmax(0,1fr); } }
+
+/* Invitation choices keep the privacy boundary visible at the point of sharing. */
+.gp-invitation-settings { border:1px solid var(--gp-line, #d8c8a6); padding:16px; margin:4px 0 12px; display:grid; gap:10px; min-width:0; }
+.gp-invitation-settings legend { font-weight:700; padding:0 6px; }
+.gp-form .gp-invitation-settings>label:not(.gp-booking-field) { display:flex; flex-direction:row; align-items:flex-start; gap:10px; min-height:44px; padding:10px; border:1px solid transparent; cursor:pointer; }
+.gp-invitation-settings label.selected { background:#fff1c5; border-color:#827048!important; }
+.gp-form .gp-invitation-settings input[type=radio], .gp-form .gp-invitation-settings input[type=checkbox] { width:18px; height:18px; min-height:18px; margin:3px 0 0; flex-shrink:0; accent-color:#58468d; }
+.gp-invitation-settings small { display:block; margin-top:4px; font-size:12px; line-height:1.5; font-weight:400; }
+.gp-open-join { margin:20px 0; padding:18px; background:#fff5db; border:1px solid #dbcda9; }
+.gp-open-join h3 { margin:0 0 8px; }
+.gp-open-join p { line-height:1.55; }
+.gp-private-link,.gp-publish { overflow-wrap:anywhere; }

@@ -20,6 +20,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
   const setShowNewsletter = open => onContext({ tool: open ? "newsletter" : null, issue: null });
   const setSelected = event => onContext({ event });
   const requestId = useRef(0);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const [events, setEvents] = useState([]),
@@ -111,10 +112,10 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
           {country === 'IE' && <button
             className="gp-button secondary"
             onClick={() => setShowNewsletter(true)}
-          >{ui("Prepare Dublin email")}</button>}
+          >{ui("Manage Dublin events & email")}</button>}
           </div>
           {country === 'IE' && <p className="host-newsletter-note">
-            {ui("Choose Dublin events for a weekly email. It goes only to people who confirm their signup, after you approve it.")}
+            {ui("Paste an event link, review automatic discoveries, and choose what appears in Dublin picks or your weekly email.")}
           </p>}
           {loading && <p role="status">{ui("Loading your events…")}</p>}
           <div className="host-event-list" aria-busy={loading}>
@@ -160,6 +161,9 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                 {ui(planDateText(hostedPlan(event)))} · {event.timezone} · <b>{ui(event.status)}</b>
               </p>
               <p>{event.venue_name}</p>
+              <p className="gp-field-note">{event.visibility==='public'?'Open invitation · anyone with the link can join.':'Private invitation · each guest has their own link.'}</p>
+              {event.visibility==='public'&&event.status==='published'&&event.share_url&&<div className="gp-publish"><button className="gp-button secondary" onClick={async()=>{try{await navigator.clipboard.writeText(event.share_url);setCopied(true);}catch{setError('Could not copy. Select the invitation link below.');}}}>{copied?'Link copied':'Copy open invitation link'}</button><a href={event.share_url}>{event.share_url}</a><p className="gp-field-note">This link can be forwarded. {event.show_guests?'Guest names are visible to anyone with the link.':'Guest names stay private.'} Joining does not book an event ticket.</p></div>}
+              {event.booking_url&&<p><a href={event.booking_url} target="_blank" rel="noreferrer">Original event & booking ↗</a></p>}
               <div className="host-counts">
                 {Object.entries(detail.counts).map(([key, n]) => (
                   <span key={key}>
@@ -182,7 +186,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                   <button
                     className="gp-button secondary"
                     onClick={() => setConfirm("event")}
-                  >{ui("Cancel event")}</button>
+                  >{event.plan_type==='attend'?'Cancel our meet-up':ui("Cancel event")}</button>
                   {event.series_id && (
                     <button
                       className="gp-button secondary"
@@ -198,7 +202,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                       ? "Cancel this occurrence and the rest of this series?"
                       : "Cancel this event?")}
                   </b>
-                  <p>{ui("Guests with email addresses will receive a cancellation notice. Private invite pages will show the cancellation.")}</p>
+                  <p>Guests with email addresses will receive a cancellation notice. Invitation pages will show the cancellation. {event.plan_type==='attend'&&'This cancels your meet-up only; it does not cancel the original class or refund tickets.'}</p>
                   <button
                     className="gp-button"
                     disabled={busy}
@@ -224,12 +228,13 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                     action(async () => {
                       await updateHostEvent(event.id, {
                         title: f.get("title"),
-                        startsAt: instantForWall(f.get("start"),event.timezone).toISOString(),
-                        endsAt: instantForWall(f.get("end"),event.timezone).toISOString(),
+                        startsAt: instantForWall(String(f.get("start")).slice(0,16),event.timezone).toISOString(),
+                        endsAt: instantForWall(String(f.get("end")).slice(0,16),event.timezone).toISOString(),
                         timezone: event.timezone,
                         venueName: f.get("venue"),
                         capacity: Number(f.get("capacity")),
                         description: f.get("notes"),
+                        bookingUrl: f.get("booking"),
                         revision: event.revision,
                       });
                       setEdit(false);
@@ -275,6 +280,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                       defaultValue={event.capacity}
                     />
                   </label>
+                  <label>Ticket or booking link<input name="booking" type="url" maxLength={2048} defaultValue={event.booking_url||''} /></label>
                   <label>{ui("Details")}<textarea name="notes" defaultValue={event.description} />
                   </label>
                   <button className="gp-button" disabled={busy}>{ui("Save & notify guests")}</button>

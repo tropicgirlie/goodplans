@@ -130,5 +130,11 @@
     "width": 1200,
     "height": 896,
     "srcSet": "/images/scrapbook_sunset_hike-320.webp 320w, /images/scrapbook_sunset_hike-768.webp 768w, /images/scrapbook_sunset_hike.webp 1200w"
+  },
+  "good-plans-hero-wide.png": {
+    "src": "/images/good-plans-hero-wide.webp",
+    "width": 1200,
+    "height": 800,
+    "srcSet": "/images/good-plans-hero-wide-480.webp 480w, /images/good-plans-hero-wide-768.webp 768w, /images/good-plans-hero-wide.webp 1200w"
   }
 }

@@ -77,7 +77,7 @@ const themeRules = [
 ];
 const themeLabels = {
   women: "Women-centred",
-  caregiving: "Caregiving-friendly",
+  caregiving: "Family & caregiving topic — check suitability",
   creative: "Creative class",
   dance: "Dance & movement",
   wellbeing: "Wellbeing",

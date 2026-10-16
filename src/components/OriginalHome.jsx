@@ -400,10 +400,11 @@ export default function OriginalHome({
         >
           <div className="hero-picture">
             <Artwork
-              src="/images/good-plans-hero-sticker.png"
+              src="/images/good-plans-hero-wide.png"
+              sizes="(max-width: 760px) calc(100vw - 48px), (max-width: 1320px) 48vw, 620px"
               loading="eager"
               fetchPriority="high"
-              alt={ui("A transparent cut-paper collage of friends, a calendar, map, headphones, travel and making")}
+              alt={ui("Three friends laughing together in a wide cut-paper collage with a calendar, map and coffee")}
             />
           </div>
         </div>

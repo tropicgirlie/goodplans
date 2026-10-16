@@ -1,0 +1,15 @@
+# Landscape homepage hero
+
+The creator asked for a sideways, less crowded collage with more presence than the tiny portrait version. The original generation prompt was not found in the repository; the existing artwork was used as the visual reference instead.
+
+Generated with the built-in image-generation tool, using `public/images/good-plans-hero-sticker.png` as the reference and requesting a transparent background. The previous artwork is preserved.
+
+Final source asset: `public/images/good-plans-hero-wide.png` (1536 × 1024, RGBA). Responsive WebP copies preserve alpha: 480px/52KB, 768px/117KB, 1200px/267KB. `src/lib/imageSources.json` and the homepage reference the new asset.
+
+The desktop hero is 540px high, with balanced text/art columns and a landscape illustration approximately 618 × 412px at the review viewport. Mobile uses the available content width rather than a tiny sticker. The headline and planning actions remain first. Original fonts, palette and scrapbook styling are preserved.
+
+Verified locally in Chrome at desktop, 768px, 390px and 320px: no horizontal page overflow, and no overlap between tablet text and artwork. Build and whitespace checks pass. Not deployed.
+
+## Final generation prompt
+
+Use case: compositing / ads-marketing. Create the replacement hero artwork for Good Plans, a warm Dublin friendship and outings planner. Input image is the STYLE and CHARACTER reference: preserve the joyful, photorealistic cut-paper friends and tactile scrapbook feel, but completely redesign its tall crowded composition into a WIDE LANDSCAPE collage, approximately 3:2 aspect ratio. This is an image asset, not a website mockup. Three adult women friends with different appearances laughing naturally together, arranged SIDE BY SIDE as one coherent candid group, waist-up/seated upper bodies, faces large and expressive. Let their companionship be the dominant focal point. Horizontal left-to-right flow, generous breathing room between supporting elements, not a vertical tower. Only two or three small supporting cutouts: a little blank paper calendar, a folded map with a pin, and optionally a takeaway coffee. Keep those secondary at the lower edges, never covering faces. Behind the group use just a few broad torn-paper shapes in coral, cobalt blue, warm yellow and lavender; off-white rough paper edges. Genuine photographic skin and fabric with editorial grain, natural hands, tactile paper texture. Keep the original happy, personal, playful brand, but simplify radically. No palm trees, no Los Angeles skyline, no suitcase, headphones, paintbrush, flowers, scenic panels, extra tiny objects, heavy sticker borders, circular frame, text, words, logos or watermark. Build a striking, unified horizontal silhouette that fills most of the landscape canvas and reads clearly at 580px wide. Deliver an actual transparent background outside the cut-paper artwork, with no grey gradient, no cream rectangle and no baked background glow. Keep all people and meaningful cutouts fully within the image edges. Do not make it tall, sparse, miniature, or overly complicated.

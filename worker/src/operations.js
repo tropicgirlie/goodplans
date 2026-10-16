@@ -61,7 +61,8 @@ export async function operations(request, env, { response, body, requireHost }) 
         env.DB.prepare('SELECT status,count(*) AS count FROM email_deliveries GROUP BY status').all(),
         env.DB.prepare('SELECT status,count(*) AS count FROM newsletter_deliveries GROUP BY status').all(),
       ]);
-      return response({requests:requests.results,jobs:jobs.results,mail:mail.results,newsletter:newsletter.results,ready:{email:!!(env.RESEND_API_KEY&&env.EMAIL_FROM),webhook:!!env.RESEND_WEBHOOK_SECRET,discovery:!!env.TICKETMASTER_API_KEY}});
+      const activeSources=await env.DB.prepare('SELECT count(*) AS count FROM discovery_sources WHERE enabled=1').first();
+      return response({requests:requests.results,jobs:jobs.results,mail:mail.results,newsletter:newsletter.results,ready:{email:!!(env.RESEND_API_KEY&&env.EMAIL_FROM),webhook:!!env.RESEND_WEBHOOK_SECRET,discovery:!!(env.TICKETMASTER_API_KEY||activeSources.count)}});
     }
   }
   return null;

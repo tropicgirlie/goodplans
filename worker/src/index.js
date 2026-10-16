@@ -1,6 +1,6 @@
 import { activityCategories, categoryLabels } from "../../shared/recommendations.js";
 import { operations, trackJob } from './operations.js';
-import { newsletter, scheduledNewsletter } from './newsletter.js';
+import { newsletter, scheduledNewsletter, finishDiscoveryRun } from './newsletter.js';
 import { hosting } from './hosting.js';
 import { partyStatus } from './hosting-core.js';
 import { processNotifications } from './mail.js';
@@ -94,8 +94,8 @@ async function canReadEvent(request, env, event) {
 }
 
 function publicEvent(event, origin) {
-  const { host_user_id, organisation_id, series_id, template_id, cover_key, ...safe } = event;
-  return { ...safe, cover_url: cover_key ? `${origin}/api/events/${encodeURIComponent(event.slug)}/cover` : null };
+  const { host_user_id, organisation_id, series_id, template_id, cover_key, client_id, ...safe } = event;
+  return { ...safe, share_url:event.visibility==='public'?`${origin}/events/${event.slug}`:null, cover_url: cover_key ? `${origin}/api/events/${encodeURIComponent(event.slug)}/cover` : null };
 }
 
 async function counts(env, eventId) {
@@ -372,6 +372,8 @@ async function submitRsvp(request, env, eventId) {
   if (!input.invitationId) return response({ error: 'Reopen your private invitation before responding.' }, { status: 409 });
   const guest = await guestIdentity(request, env, input.invitationId);
   if (!guest || guest.event_id !== eventId) return response({ error: 'Open this event from your invite link to respond.' }, { status: 403 });
+  const event = await env.DB.prepare('SELECT visibility,ends_at FROM events WHERE id=?').bind(eventId).first();
+  if(event?.visibility==='public'&&event.ends_at<=now())return response({error:'This meet-up has ended. Responses are closed.'},{status:409});
   const room = env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
   return room.fetch('https://event-room/rsvp', { method: 'POST', body: JSON.stringify({ eventId, invitationId: guest.invitation_id, requestedStatus: input.status, partySize: input.partySize ?? 1 }) });
 }
@@ -442,14 +444,45 @@ async function recommendations(request, env) {
   return response({ source: 'curated_starter', venues: activities });
 }
 
+
+async function joinOpenEvent(request, env, eventId) {
+  const input=await body(request);
+  const event=await env.DB.prepare("SELECT * FROM events WHERE id=? AND visibility='public' AND status='published'").bind(eventId).first();
+  if(!event)return response({error:'This open invitation is not available.'},{status:404});
+  if(event.ends_at<=now())return response({error:'This meet-up has ended.'},{status:409});
+  const name=typeof input.name==='string'?input.name.trim():'';
+  if(!name||name.length>80||!/^([a-f0-9]{64})$/.test(input.joinToken||''))return response({error:'Enter your name and try joining again.'},{status:400});
+  if(![1,2].includes(input.partySize??1)||(input.partySize===2&&!event.plus_one))return response({error:'Choose a valid party size for this invitation.'},{status:400});
+  if(!['accepted','maybe'].includes(input.status))return response({error:'Choose going or maybe.'},{status:400});
+  const seconds=Math.floor(Date.now()/1000),key='open-join:'+await sha256(`${eventId}:${request.headers.get('cf-connecting-ip')||'local'}`);
+  const rate=await env.DB.prepare('INSERT INTO auth_limits(key,count,expires_at) VALUES (?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN expires_at<? THEN 1 ELSE count+1 END,expires_at=CASE WHEN expires_at<? THEN excluded.expires_at ELSE expires_at END RETURNING count').bind(key,seconds+3600,seconds,seconds).first();
+  if(rate.count>30)return response({error:'Too many attempts. Please try again later.'},{status:429});
+  const current=await guestIdentity(request,env,input.invitationId);
+  let invitation=current?.event_id===event.id?{id:current.invitation_id,guest_name:current.guest_name}:null;
+  if(!invitation){
+    const hash=await sha256(`open:${event.id}:${input.joinToken}`);
+    await env.DB.prepare("INSERT OR IGNORE INTO invitations(id,event_id,guest_name,token_hash) SELECT ?,?,?,? FROM events WHERE id=? AND visibility='public' AND status='published' AND (SELECT count(*) FROM invitations WHERE event_id=?)<2000").bind(id('invite'),event.id,name,hash,event.id,event.id).run();
+    invitation=await env.DB.prepare('SELECT id,guest_name FROM invitations WHERE event_id=? AND token_hash=?').bind(event.id,hash).first();
+    if(!invitation)return response({error:'This invitation is no longer accepting new responses.'},{status:409});
+  }
+  const room=env.EVENT_ROOM.get(env.EVENT_ROOM.idFromName(eventId));
+  const result=await room.fetch('https://event-room/rsvp',{method:'POST',body:JSON.stringify({eventId,invitationId:invitation.id,requestedStatus:input.status,partySize:input.partySize??1})});
+  if(!result.ok)return result;
+  const token=randomToken();
+  await env.DB.prepare('INSERT INTO guest_sessions(id,invitation_id,session_hash,expires_at) VALUES (?,?,?,?)').bind(id('session'),invitation.id,await sha256(token),new Date(Date.now()+30*86400000).toISOString()).run();
+  const reply=response({...await result.json(),invitationId:invitation.id,eventSlug:event.slug},{headers:{'set-cookie':cookie('good_plans_guest',token,30*86400,env.ENVIRONMENT==='production')}});
+  reply.headers.append('set-cookie',cookie(`good_plans_guest_${invitation.id}`,token,30*86400,env.ENVIRONMENT==='production'));
+  return reply;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
     const url = new URL(request.url);
     try {
       const handled=await hosting(request,env,{response,requireHost,body,cookie,counts}); if(handled)return handled;
       const ops=await operations(request,env,{response,requireHost,body}); if(ops)return ops;
-      const news=await newsletter(request,env,{response,requireHost,body}); if(news)return news;
+      const news=await newsletter(request,env,{response,requireHost,body,ctx}); if(news)return news;
       if (url.pathname === '/api/health') return response({ ok: true, service: 'good-plans', mode: env.ENVIRONMENT || 'production' });
 
       // Authentication and Cloud Sync Endpoints
@@ -525,6 +558,8 @@ export default {
       if (publishMatch && request.method === 'POST') return await publishEvent(request, env, decodeURIComponent(publishMatch[1]));
       const artworkMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/artwork$/);
       if (artworkMatch && request.method === 'POST') return await requestArtwork(request, env, decodeURIComponent(artworkMatch[1]));
+      const openJoinMatch=url.pathname.match(/^\/api\/events\/([^/]+)\/join$/);
+      if(openJoinMatch&&request.method==='POST')return await joinOpenEvent(request,env,decodeURIComponent(openJoinMatch[1]));
       const rsvpMatch = url.pathname.match(/^\/api\/events\/([^/]+)\/rsvps$/);
       if (rsvpMatch && request.method === 'POST') return await submitRsvp(request, env, decodeURIComponent(rsvpMatch[1]));
       const invitationMatch = url.pathname.match(/^\/api\/host\/events\/([^/]+)\/invitations$/);
@@ -555,7 +590,8 @@ export default {
   async queue(batch, env) {
     for (const message of batch.messages) {
       try {
-        if (message.body?.sourceId) await processImport(env, message.body.sourceId);
+        if (message.body?.discoveryRun) await finishDiscoveryRun(env, message.body.discoveryRun);
+        else if (message.body?.sourceId) await processImport(env, message.body.sourceId);
         if (message.body?.eventId && message.body?.prompt) await env.DB.prepare(`UPDATE event_artwork SET status = 'ready_for_approval' WHERE id = ?`).bind(message.body.id).run();
         if (message.body?.kind) await processNotifications(env);
         message.ack();

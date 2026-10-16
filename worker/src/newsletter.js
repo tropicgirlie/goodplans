@@ -1,8 +1,20 @@
+import { eventCare } from '../../shared/event-care.js';
 import { id, randomToken, sha256 } from "./core.js";
 import { fail } from "./hosting-core.js";
 import { sendEmail } from "./mail.js";
 import {
+  DEFAULT_DISCOVERY_HOSTS,
+  draftFromDiscoveryPage,
+  fetchDiscoveryPage,
+} from "./discovery-import.js";
+import {
+  collectWebSource,
+  discoverySources,
+  saveDiscoverySource,
+} from "./discovery-sources.js";
+import {
   categories,
+  discoveryMatch,
   discoverySearches,
   validateListing,
   normaliseTicketmaster,
@@ -60,7 +72,7 @@ async function listingRows(env, days = 14) {
 async function candidateRows(env) {
   return (
     await env.DB.prepare(
-      "SELECT * FROM discovered_events WHERE status='active' AND review_status='candidate' AND starts_at>? ORDER BY discovery_score DESC,starts_at LIMIT 150",
+      "SELECT * FROM discovered_events WHERE status='active' AND status='active' AND review_status='candidate' AND starts_at>? ORDER BY discovery_score DESC,starts_at LIMIT 150",
     )
       .bind(now())
       .all()
@@ -68,7 +80,7 @@ async function candidateRows(env) {
 }
 function listingStatement(env, e) {
   return env.DB.prepare(
-    "INSERT INTO discovered_events(id,source,source_id,title,starts_at,ends_at,venue,category,price,url,status,updated_at,themes_json,match_reason,discovery_score,review_status,first_seen_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(source,source_id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,ends_at=excluded.ends_at,venue=excluded.venue,category=excluded.category,price=excluded.price,url=excluded.url,status=CASE WHEN discovered_events.status='hidden' THEN 'hidden' ELSE excluded.status END,updated_at=excluded.updated_at,themes_json=excluded.themes_json,match_reason=excluded.match_reason,discovery_score=excluded.discovery_score,review_status=CASE WHEN discovered_events.review_status IN ('approved','rejected') THEN discovered_events.review_status ELSE excluded.review_status END",
+    "INSERT INTO discovered_events(id,source,source_id,title,starts_at,ends_at,venue,category,price,url,status,updated_at,themes_json,match_reason,discovery_score,review_status,first_seen_at,collector_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(source,source_id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,ends_at=excluded.ends_at,venue=excluded.venue,category=excluded.category,price=excluded.price,url=excluded.url,status=CASE WHEN excluded.source='manual' THEN excluded.status WHEN discovered_events.status='hidden' THEN 'hidden' ELSE excluded.status END,updated_at=excluded.updated_at,themes_json=excluded.themes_json,match_reason=excluded.match_reason,discovery_score=excluded.discovery_score,children_welcome=CASE WHEN excluded.source='manual' OR NOT (discovered_events.title<>excluded.title OR discovered_events.starts_at<>excluded.starts_at OR COALESCE(discovered_events.ends_at,'')<>COALESCE(excluded.ends_at,'') OR discovered_events.venue<>excluded.venue OR discovered_events.price<>excluded.price OR discovered_events.url<>excluded.url OR discovered_events.category<>excluded.category OR discovered_events.themes_json<>excluded.themes_json) THEN discovered_events.children_welcome ELSE 'unknown' END,childcare=CASE WHEN excluded.source='manual' OR NOT (discovered_events.title<>excluded.title OR discovered_events.starts_at<>excluded.starts_at OR COALESCE(discovered_events.ends_at,'')<>COALESCE(excluded.ends_at,'') OR discovered_events.venue<>excluded.venue OR discovered_events.price<>excluded.price OR discovered_events.url<>excluded.url OR discovered_events.category<>excluded.category OR discovered_events.themes_json<>excluded.themes_json) THEN discovered_events.childcare ELSE 'unknown' END,care_url=CASE WHEN excluded.source='manual' OR NOT (discovered_events.title<>excluded.title OR discovered_events.starts_at<>excluded.starts_at OR COALESCE(discovered_events.ends_at,'')<>COALESCE(excluded.ends_at,'') OR discovered_events.venue<>excluded.venue OR discovered_events.price<>excluded.price OR discovered_events.url<>excluded.url OR discovered_events.category<>excluded.category OR discovered_events.themes_json<>excluded.themes_json) THEN discovered_events.care_url ELSE NULL END,review_status=CASE WHEN excluded.source='manual' THEN 'approved' WHEN discovered_events.review_status='rejected' THEN 'rejected' WHEN discovered_events.review_status='approved' AND (discovered_events.title<>excluded.title OR discovered_events.starts_at<>excluded.starts_at OR COALESCE(discovered_events.ends_at,'')<>COALESCE(excluded.ends_at,'') OR discovered_events.venue<>excluded.venue OR discovered_events.price<>excluded.price OR discovered_events.url<>excluded.url OR discovered_events.category<>excluded.category OR discovered_events.themes_json<>excluded.themes_json) THEN 'candidate' WHEN discovered_events.review_status='approved' THEN 'approved' ELSE excluded.review_status END",
   ).bind(
     e.id,
     e.source,
@@ -87,6 +99,7 @@ function listingStatement(env, e) {
     e.discovery_score || 0,
     e.review_status || (e.source === "manual" ? "approved" : "candidate"),
     now(),
+    e.collector_id || null,
   );
 }
 export async function collectDublin(env) {
@@ -138,10 +151,9 @@ export async function collectDublin(env) {
             existing.discovery_score,
             event.discovery_score,
           );
-          event.match_reason = [...new Set([
-            existing.match_reason,
-            event.match_reason,
-          ])].join("; ");
+          event.match_reason = [
+            ...new Set([existing.match_reason, event.match_reason]),
+          ].join("; ");
         }
         byId.set(event.source_id, event);
       }
@@ -155,6 +167,63 @@ export async function collectDublin(env) {
     );
   return collected.length;
 }
+
+export async function collectConfiguredDublin(env) {
+  const sources = (await discoverySources(env)).filter(
+    (source) => source.enabled,
+  );
+  if (!env.TICKETMASTER_API_KEY && !sources.length)
+    fail(
+      "Add an automatic website source below, or connect Ticketmaster. You can always paste an event link.",
+      503,
+    );
+  let count = 0;
+  const errors = [];
+  if (env.TICKETMASTER_API_KEY) {
+    try {
+      count += await collectDublin(env);
+    } catch (e) {
+      errors.push(e.message);
+    }
+  }
+  for (const source of sources) {
+    const result = await collectWebSource(env, source, (event) =>
+      listingStatement(env, event).run(),
+    );
+    count += result.count;
+    if (result.error) errors.push(result.error);
+  }
+  return { count, errors };
+}
+export async function finishDiscoveryRun(env, key) {
+  const claimed = await env.DB.prepare(
+    "UPDATE discovery_runs SET status='running' WHERE key=? AND status='queued'",
+  )
+    .bind(key)
+    .run();
+  if (!claimed.meta.changes) return;
+  try {
+    const result = await collectConfiguredDublin(env);
+    await env.DB.prepare(
+      "UPDATE discovery_runs SET status=?,finished_at=?,count=?,error=? WHERE key=?",
+    )
+      .bind(
+        result.errors.length ? "partial" : "complete",
+        now(),
+        result.count,
+        result.errors.join("; ").slice(0, 2000) || null,
+        key,
+      )
+      .run();
+  } catch (e) {
+    await env.DB.prepare(
+      "UPDATE discovery_runs SET status='failed',finished_at=?,error=? WHERE key=?",
+    )
+      .bind(now(), e.message, key)
+      .run();
+  }
+}
+
 async function prepareIssue(env, origin) {
   const week = weekKey();
   const existing = await env.DB.prepare(
@@ -250,35 +319,28 @@ export async function scheduledNewsletter(env) {
     day: "2-digit",
   }).format(new Date());
   const key = `daily-${day}`;
+  // Recover abandoned queue deliveries, and avoid overlapping manual/scheduled checks.
+  await env.DB.prepare(
+    "UPDATE discovery_runs SET status='failed',finished_at=?,error='Collection did not finish. Run another check.' WHERE status IN ('running','queued') AND started_at<?",
+  )
+    .bind(now(), new Date(Date.now() - 20 * 60000).toISOString())
+    .run();
   const claimed = await env.DB.prepare(
-    "INSERT OR IGNORE INTO discovery_runs(key,status,started_at) VALUES (?,'running',?)",
+    "INSERT OR IGNORE INTO discovery_runs(key,status,started_at) SELECT ?,'queued',? WHERE NOT EXISTS (SELECT 1 FROM discovery_runs WHERE status IN ('running','queued'))",
   )
     .bind(key, now())
     .run();
   if (claimed.meta.changes) {
-    try {
-      const count = await collectDublin(env);
-      if ((await listingRows(env)).length)
-        await prepareIssue(env, publicOrigin(null, env));
-      await env.DB.prepare(
-        "UPDATE discovery_runs SET status='complete',finished_at=?,count=? WHERE key=?",
-      )
-        .bind(now(), count, key)
-        .run();
-    } catch (e) {
-      await env.DB.prepare(
-        "UPDATE discovery_runs SET status='failed',finished_at=?,error=? WHERE key=?",
-      )
-        .bind(now(), e.message, key)
-        .run();
-    }
+    await finishDiscoveryRun(env, key);
+    if ((await listingRows(env)).length)
+      await prepareIssue(env, publicOrigin(null, env));
   }
   await deliverNewsletters(env);
 }
 export async function newsletter(
   request,
   env,
-  { response, requireHost, body },
+  { response, requireHost, body, ctx },
 ) {
   const url = new URL(request.url),
     path = url.pathname,
@@ -293,7 +355,7 @@ export async function newsletter(
     return response({ events: curate(await listingRows(env), 100) });
   if (path.startsWith("/api/discovery/") && method === "GET") {
     const event = await env.DB.prepare(
-      "SELECT * FROM discovered_events WHERE id=? AND status='active' AND starts_at>? AND (source='manual' OR updated_at>?)",
+      "SELECT * FROM discovered_events WHERE id=? AND status='active' AND review_status='approved' AND starts_at>? AND (source='manual' OR updated_at>?)",
     )
       .bind(
         decodeURIComponent(path.split("/").at(-1)),
@@ -386,12 +448,20 @@ export async function newsletter(
     if (!subscriber) fail("This subscription link is not valid.", 404);
     if (input.action === "delete") {
       await env.DB.batch([
-        env.DB.prepare('DELETE FROM newsletter_deliveries WHERE subscriber_id=?').bind(subscriber.id),
-        env.DB.prepare('DELETE FROM newsletter_tokens WHERE subscriber_id=?').bind(subscriber.id),
-        env.DB.prepare('DELETE FROM local_mailbox WHERE recipient=?').bind(subscriber.email),
-        env.DB.prepare('DELETE FROM newsletter_subscribers WHERE id=?').bind(subscriber.id),
+        env.DB.prepare(
+          "DELETE FROM newsletter_deliveries WHERE subscriber_id=?",
+        ).bind(subscriber.id),
+        env.DB.prepare(
+          "DELETE FROM newsletter_tokens WHERE subscriber_id=?",
+        ).bind(subscriber.id),
+        env.DB.prepare("DELETE FROM local_mailbox WHERE recipient=?").bind(
+          subscriber.email,
+        ),
+        env.DB.prepare("DELETE FROM newsletter_subscribers WHERE id=?").bind(
+          subscriber.id,
+        ),
       ]);
-      return response({status:'deleted',interests:[]});
+      return response({ status: "deleted", interests: [] });
     }
     if (input.action === "confirm") {
       if (subscriber.status !== "active") {
@@ -457,68 +527,130 @@ export async function newsletter(
         "SELECT issue_id,status,error,count(*) AS count FROM newsletter_deliveries GROUP BY issue_id,status,error",
       ).all()
     ).results;
+    const sources = await discoverySources(env);
     return response({
       issues,
+      sources,
+      importHosts: (env.DISCOVERY_ALLOWED_HOSTS || DEFAULT_DISCOVERY_HOSTS)
+        .split(",")
+        .map((host) => host.trim())
+        .filter(Boolean),
+      ticketmasterReady: Boolean(env.TICKETMASTER_API_KEY),
       subscribers: subscribers.count,
       runs,
       deliveries,
-      events: await listingRows(env),
+      events: await listingRows(env, 90),
       candidates: await candidateRows(env),
       searches: discoverySearches.map(({ query, label }) => ({ query, label })),
-      collectionReady: Boolean(env.TICKETMASTER_API_KEY),
-      scheduledCollection: await env.DB.prepare("SELECT * FROM discovery_runs WHERE key LIKE 'daily-%' ORDER BY started_at DESC LIMIT 1").first(),
+      collectionReady: Boolean(
+        env.TICKETMASTER_API_KEY || sources.some((source) => source.enabled),
+      ),
+      scheduledCollection: await env.DB.prepare(
+        "SELECT * FROM discovery_runs WHERE key LIKE 'daily-%' ORDER BY started_at DESC LIMIT 1",
+      ).first(),
       emailReady: emailReady(env),
     });
   }
+  if (path === "/api/host/newsletter/import-link" && method === "POST") {
+    await throttle(env, `link:${host.id}`, 30);
+    const input = await body(request);
+    let page;
+    try {
+      page = await fetchDiscoveryPage(input.url, env);
+    } catch (e) {
+      if (e.name === "TimeoutError")
+        fail(
+          "This source took too long. Try again or enter its details manually.",
+          504,
+        );
+      throw e;
+    }
+    return response({ draft: draftFromDiscoveryPage(page.html, page.url) });
+  }
+  if (path === "/api/host/newsletter/sources" && method === "POST") {
+    await saveDiscoverySource(env, await body(request));
+    return response({ ok: true });
+  }
   if (path === "/api/host/newsletter/collect" && method === "POST") {
     await throttle(env, `collect:${host.id}`, 6);
+    const sources = await discoverySources(env);
+    if (!env.TICKETMASTER_API_KEY && !sources.some((source) => source.enabled))
+      fail(
+        "Add an automatic website source first, or connect Ticketmaster.",
+        503,
+      );
     const key = id("manual-run");
-    await env.DB.prepare(
-      "INSERT INTO discovery_runs(key,status,started_at) VALUES (?,'running',?)",
+    const claimed = await env.DB.prepare(
+      "INSERT INTO discovery_runs(key,status,started_at) SELECT ?,'queued',? WHERE NOT EXISTS (SELECT 1 FROM discovery_runs WHERE status IN ('running','queued') AND started_at>?)",
     )
-      .bind(key, now())
+      .bind(key, now(), new Date(Date.now() - 20 * 60000).toISOString())
       .run();
+    if (!claimed.meta.changes)
+      fail(
+        "An event check is already running. Refresh to see its progress.",
+        409,
+      );
     try {
-      const count = await collectDublin(env);
-      await env.DB.prepare(
-        "UPDATE discovery_runs SET status='complete',finished_at=?,count=? WHERE key=?",
-      )
-        .bind(now(), count, key)
-        .run();
-      return response({ count });
+      if (env.IMPORT_QUEUE) await env.IMPORT_QUEUE.send({ discoveryRun: key });
+      else if (ctx) ctx.waitUntil(finishDiscoveryRun(env, key));
+      else await finishDiscoveryRun(env, key);
     } catch (e) {
       await env.DB.prepare(
-        "UPDATE discovery_runs SET status='failed',finished_at=?,error=? WHERE key=?",
+        "UPDATE discovery_runs SET status='failed',finished_at=?,error='Could not queue collection.' WHERE key=?",
       )
-        .bind(now(), e.message, key)
+        .bind(now(), key)
         .run();
       throw e;
     }
+    return response({ key, status: "queued" }, { status: 202 });
   }
   if (path === "/api/host/newsletter/listings" && method === "POST") {
     const input = await body(request),
-      listing = validateListing(input);
+      listing = validateListing(input),
+      care = eventCare(input);
     if (listing.starts_at <= now()) fail("Choose an upcoming event.");
+    if (!/\bdublin\b/i.test(listing.venue) && input.confirmDublin !== true)
+      fail("Confirm the venue is in Dublin, Ireland.");
+    const match = discoveryMatch({ name: listing.title });
     const event = {
       ...listing,
+      themes: match.themes,
+      match_reason: match.reason,
+      discovery_score: match.score,
       id: input.id || id("pick"),
       source: "manual",
       source_id:
-        input.id ||
-        (await sha256(
-          `${listing.title}:${listing.starts_at}:${listing.venue}`,
-        )),
+        input.id || (await sha256(`${listing.url}:${listing.starts_at}`)),
     };
     if (input.id) {
       const old = await env.DB.prepare(
-        "SELECT * FROM discovered_events WHERE id=? AND source='manual'",
+        "SELECT * FROM discovered_events WHERE id=?",
       )
         .bind(input.id)
         .first();
       if (!old) fail("Manual event not found.", 404);
-      event.source_id = old.source_id;
+      await env.DB.prepare(
+        "UPDATE discovered_events SET title=?,starts_at=?,ends_at=?,venue=?,category=?,price=?,url=?,status='active',review_status='approved',updated_at=?,themes_json=?,match_reason=?,discovery_score=?,children_welcome=?,childcare=?,care_url=? WHERE id=?",
+      )
+        .bind(
+          listing.title,
+          listing.starts_at,
+          listing.ends_at,
+          listing.venue,
+          listing.category,
+          listing.price,
+          listing.url,
+          now(),
+          JSON.stringify(match.themes),
+          match.reason,
+          match.score,
+          care.children_welcome,care.childcare,care.care_url,
+          old.id,
+        )
+        .run();
+      return response({ ok: true });
     }
-    await listingStatement(env, event).run();
+    await env.DB.batch([listingStatement(env, event),env.DB.prepare('UPDATE discovered_events SET children_welcome=?,childcare=?,care_url=? WHERE source=? AND source_id=?').bind(care.children_welcome,care.childcare,care.care_url,event.source,event.source_id)]);
     return response({ ok: true });
   }
   if (path === "/api/host/newsletter/hide" && method === "POST") {
@@ -532,14 +664,15 @@ export async function newsletter(
   }
   if (path === "/api/host/newsletter/review" && method === "POST") {
     const input = await body(request);
-    if (!['approved', 'rejected'].includes(input.decision))
+    if (!["approved", "rejected"].includes(input.decision))
       fail("Choose approve or skip.");
     const result = await env.DB.prepare(
-      "UPDATE discovered_events SET review_status=? WHERE id=? AND review_status='candidate' AND starts_at>?",
+      "UPDATE discovered_events SET review_status=? WHERE id=? AND status='active' AND review_status='candidate' AND starts_at>?",
     )
       .bind(input.decision, input.id, now())
       .run();
-    if (!result.meta.changes) fail("This candidate is no longer available.", 409);
+    if (!result.meta.changes)
+      fail("This candidate is no longer available.", 409);
     return response({ ok: true });
   }
   if (path === "/api/host/newsletter/prepare" && method === "POST")

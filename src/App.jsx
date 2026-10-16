@@ -36,6 +36,8 @@ import {
   X,
 } from "lucide-react";
 import HostPortal from "./components/HostPortal";
+import InvitationSettings from './components/InvitationSettings';
+import OpenInvitationJoin from './components/OpenInvitationJoin';
 
 import useCloudWorkspace from "./lib/useCloudWorkspace";
 import OriginalHome, { defaultSettings } from "./components/OriginalHome";
@@ -278,10 +280,11 @@ function PlanForm({ initial, people, onSave, onClose }) {
     plusOne: false,
     showGuests: true,
     reminder: false,
+    visibility:'invite',planType:'own',bookingUrl:'',
     guestEmails: {},
     image: "scrapbook_coffee_walk.jpg",
     ...initial,
-  }; return { ...draft, guestEntries: guestRecords(draft, people) }; });
+  }; return { ...draft, showGuests:draft.visibility==='public'&&initial?.showGuests===undefined?false:draft.showGuests, guestEntries: guestRecords(draft, people) }; });
   const [error, setError] = useState("");
   const update = (key, value) => setForm(old => {
     const next = { ...old, [key]: value };
@@ -341,6 +344,7 @@ function PlanForm({ initial, people, onSave, onClose }) {
             onChange={(e) => update("title", e.target.value)}
           />
         </label>
+        <InvitationSettings form={form} onChange={setForm}/>
         <details className="gp-schedule" open={form.date || form.endDate ? true : undefined}>
           <summary>{ui(form.date ? "Date & time" : "Add a date & time")}</summary>
         <div className="gp-form-grid">
@@ -583,6 +587,7 @@ function PlanDetail({
     setPartySize(plan.rsvp?.party_size || 1);
   }, [plan.rsvp?.status, plan.rsvp?.party_size]);
   const calendar = calendarData(plan);
+  const ended = plan.visibility==='public' && plan.endsAt && +new Date(plan.endsAt)<=Date.now();
   async function copy(text) {
     try {
       await navigator.clipboard.writeText(text);
@@ -621,16 +626,16 @@ function PlanDetail({
       <div className="gp-detail">
         <Artwork className="gp-detail-cover" src={`/images/${plan.image}`} alt="" />
         <div className="gp-detail-badges">
-          <span className="gp-tag">{ui(plan.seriesName ? "Series occurrence" : plan.kind)}</span>
+          <span className="gp-tag">{ui(plan.seriesName ? "Series occurrence" : plan.planType==='attend'?"Joining an event":plan.kind)}</span>
           <span className="gp-tag sage">
             {ui(plan.status === "cancelled"
               ? "Cancelled"
               : plan.remoteId
-                ? "Published invitation"
+                ? (plan.visibility==='public'?"Open invitation":"Private invitation")
                 : "Your private draft")}
           </span>
         </div>
-        {guest && <p className="gp-invitation-identity" role="status">{plan.invitee ? <>{ui("Invitation for ")}<strong>{plan.invitee}</strong></> : ui("Open your personal invitation link to respond.")}</p>}
+        {guest && <p className="gp-invitation-identity" role="status">{plan.invitee ? <>{plan.visibility==='public'?'Your response, ':ui("Invitation for ")}<strong>{plan.invitee}</strong></> : plan.visibility==='public'?'You’re invited to join. Share this link with friends.':ui("Open your personal invitation link to respond.")}</p>}
         <div className="gp-detail-meta">
           <p>
             <CalendarDays />
@@ -654,19 +659,21 @@ function PlanDetail({
             <UsersRound />
             <span>
               <b>
-                {plan.guests?.filter(Boolean).join(", ") || ui("The guest list is open")}
+                {guest && !plan.showGuests ? 'Guest names are private' : plan.guests?.filter(Boolean).join(", ") || (plan.visibility==='public'?'An open invitation to join me':ui("The guest list is open"))}
               </b>
-              <small>{ui("Up to ")}{ui(plan.capacity)}{ui(" guests")}{ui(plan.counts && ` · ${plan.counts.accepted || 0} confirmed · ${plan.counts.waitlisted || 0} waitlisted`)}
+              <small>{ui(plan.planType==='attend'?"Our group: up to ":"Up to ")}{ui(plan.capacity)}{ui(" guests")}{ui(plan.counts && ` · ${plan.counts.accepted || 0} confirmed · ${plan.counts.waitlisted || 0} waitlisted`)}
                 {ui(!plan.remoteId && " · no invitations sent yet")}
               </small>
             </span>
           </p>
         </div>
         {plan.notes && <p className="gp-detail-notes">{plan.notes}</p>}
+        {plan.bookingUrl && <p><a className="gp-button secondary" href={plan.bookingUrl} target="_blank" rel="noreferrer">{plan.planType==='attend'?'Get tickets / booking':'Booking details'}<ArrowUpRight/></a></p>}
+        {plan.planType==='attend'&&<p className="gp-field-note">This invitation is to join the host’s group. An RSVP does not buy or reserve a ticket for the original event.</p>}
         {plan.status === "cancelled" && (
-          <p className="gp-error" role="status">{ui("This event has been cancelled. No further responses are accepted.")}</p>
+          <p className="gp-error" role="status">{plan.planType==='attend'?'This meet-up is cancelled. The original event may still go ahead; check with the ticket provider.':ui("This event has been cancelled. No further responses are accepted.")}</p>
         )}
-        {guest && plan.plusOne && plan.status !== "cancelled" && (
+        {guest && plan.plusOne && !ended && plan.status !== "cancelled" && (
           <label>
             <input
               type="checkbox"
@@ -674,7 +681,7 @@ function PlanDetail({
               onChange={(e) => setPartySize(e.target.checked ? 2 : 1)}
             />{" "}{ui("I’m bringing a plus-one")}</label>
         )}
-        {guest ? (
+        {guest && ended ? <p role="status">This meet-up has ended. Responses are closed.</p> : guest && plan.visibility==='public' && !plan.invitationId && plan.status!=='cancelled' ? <OpenInvitationJoin plan={plan} partySize={partySize} onJoined={onRefresh}/> : guest ? (
           <div className="gp-detail-actions">
             {[
               ["accepted", "I’m in"],
@@ -735,7 +742,7 @@ function PlanDetail({
           <div className="gp-publish">
             <div>
               <b>{ui("Ready for RSVPs?")}</b>
-              <p>{ui("Publish a private invitation with a separate link for each guest. Host sign-in and a date are required. You can add guests in the organiser portal.")}</p>
+              <p>{plan.visibility==='public'?'Publish an open link you can post in your group chat. Anyone with it can join; ticket booking stays separate.':ui("Publish a private invitation with a separate link for each guest. Host sign-in and a date are required. You can add guests in the organiser portal.")}</p>
             </div>
             <button
               className="gp-button secondary"
@@ -758,6 +765,7 @@ function PlanDetail({
               <Copy />{ui("Copy link")}</button>
           </div>
         ))}
+        {!guest && plan.remoteId && plan.visibility==='public'&&plan.publicUrl&&<div className="gp-private-link"><span>Open invitation · anyone with this link can join</span><button className="gp-button secondary" onClick={()=>copy(plan.publicUrl)}><Copy/>Copy open invitation link</button></div>}
         {(feedback || publishError) && (
           <p
             role="status"
@@ -875,7 +883,7 @@ export default function App() {
         try { sessionStorage.setItem(key, result.guest.invitationId); } catch { /* Optional recovery only. */ }
       }
       setInvite({ ...hostedPlan(result.event), guests: result.guests?.map(g => g.guest_name) || [],
-        rsvp: result.rsvp, invitationId: result.guest?.invitationId, invitee: result.guest?.name });
+        counts:result.counts, rsvp: result.rsvp, invitationId: result.guest?.invitationId, invitee: result.guest?.name });
       setInviteError("");
       setInviteState("ready");
     } catch (error) {
@@ -1056,7 +1064,8 @@ export default function App() {
         venueName: active.location,
         city: active.city || settings.profile.city,
         capacity: active.capacity,
-        visibility: "invite",
+        visibility: active.visibility || 'invite',
+        planType:active.planType||'own',bookingUrl:active.bookingUrl||null,
         publish: true,
         guests: guestRecords(active, friends).map(({ name, email }) => ({ name, email })),
       });
@@ -1122,7 +1131,7 @@ export default function App() {
           )}
         </div>
         <div className="gp-plan-body">
-          <small>{ui(plan.seriesName ? "Series occurrence" : plan.kind)}</small>
+          <small>{ui(plan.seriesName ? "Series occurrence" : plan.planType==='attend'?"Joining an event":plan.kind)}</small>
           <h3>{plan.title}</h3>
           <p>
             <MapPin />

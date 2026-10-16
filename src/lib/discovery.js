@@ -1,3 +1,4 @@
+import { careNotes } from '../../shared/event-care.js';
 import { ui } from "../i18n/core.js";
 import { localDate, wallDateTime } from "./plans.js";
 export const DUBLIN_INTERESTS = [
@@ -23,6 +24,7 @@ export function discoveryDraft(event, planningContext = "all") {
   const time = d => wallDateTime(d,timezone).split("T")[1];
   return {
     title: event.title,
+    planType:'attend',bookingUrl:event.url,
     kind: "Friends outing",
     date: localDate(start,timezone),
     timezone,
@@ -34,7 +36,7 @@ export function discoveryDraft(event, planningContext = "all") {
     location: event.venue,
     cost: event.price,
     discoveryId: event.id,
-    notes: [planningContext === "partner" ? ui("Planning with: my partner.") : "", ui(`Details & tickets: ${event.url}`), event.ends_at ? "" : ui("End time is a suggested two-hour planning window; check the event details."), ui("Adding this plan does not reserve tickets. Check the source for availability and changes.")].filter(Boolean).join("\n\n"),
+    notes: [careNotes(event),planningContext === "partner" ? ui("Planning with: my partner.") : "", ui(`Details & tickets: ${event.url}`), event.ends_at ? "" : ui("End time is a suggested two-hour planning window; check the event details."), ui("Adding this plan does not reserve tickets. Check the source for availability and changes.")].filter(Boolean).join("\n\n"),
     image: "good-plans-gathering-collage.png",
   };
 }
@@ -77,8 +79,8 @@ export function fitsPlanningContext(event, context) {
   }
   if (context === "family")
     return (
-      themes.includes("caregiving") || event.category === "Family & caregiving"
+      themes.includes("caregiving") || event.category === "Family & caregiving" || (event.care_url&&(event.children_welcome==='yes'||event.childcare==='provided'))
     );
-  if (context === "friends") return !themes.includes("caregiving");
+  if (context === "friends") return !themes.includes("caregiving") || (event.care_url && event.childcare==='provided');
   return true;
 }

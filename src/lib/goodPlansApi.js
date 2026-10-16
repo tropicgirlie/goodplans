@@ -53,6 +53,9 @@ export function submitRsvp(eventId, status, partySize = 1, invitationId) {
     body: JSON.stringify({ status, partySize, invitationId }),
   });
 }
+export function joinOpenInvitation(eventId,input) {
+  return request(`/api/events/${encodeURIComponent(eventId)}/join`,{method:'POST',body:JSON.stringify(input)});
+}
 export function importEventLink(url) {
   return request("/api/host/event-imports", {
     method: "POST",

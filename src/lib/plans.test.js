@@ -129,3 +129,20 @@ test("the diary includes every day of a retreat and excludes midnight end and ca
   assert.equal(planOnDate({ ...retreat, endTime: "00:00" }, "2026-10-26"), false);
   assert.equal(planOnDate({ ...retreat, status: "cancelled" }, "2026-10-25"), false);
 });
+
+test('open invitations retain booking links, private defaults and a separate RSVP meaning', async () => {
+  const { invitationOptions, bookingLink } = await import('../../shared/invitations.js');
+  const { hostedPlan } = await import('./hostedPlans.js');
+  assert.equal(invitationOptions().visibility,'invite');
+  assert.equal(invitationOptions({visibility:'public'}).showGuests,false);
+  assert.equal(invitationOptions({visibility:'public',showGuests:true}).showGuests,true);
+  for(const url of ['javascript:alert(1)','http://example.com','https://user:pass@example.com'])assert.throws(()=>bookingLink(url));
+  const draft=discoveryDraft({id:'dance',title:'Dance with Mari',starts_at:'2026-10-17T09:30:00Z',ends_at:'2026-10-17T10:25:00Z',url:'https://www.mari-ribeiro.com/book-online',venue:'Curved Street, Dublin',price:'Check booking page'});
+  assert.equal(draft.time,'10:30');assert.equal(draft.endTime,'11:25');assert.equal(draft.planType,'attend');
+  const projected=hostedPlan({id:'a',title:draft.title,starts_at:draft.startsAt,ends_at:draft.endsAt,timezone:'Europe/Dublin',visibility:'public',plan_type:'attend',booking_url:draft.bookingUrl,share_url:'https://goodplans.example/events/dance',capacity:20,show_guests:0});
+  const text=invitationText(projected);
+  assert.match(text,/mari-ribeiro.com\/book-online/);assert.match(text,/does not buy or reserve/);assert.match(text,/goodplans.example\/events\/dance/);
+  assert.equal(projected.showGuests,false);
+  assert.match(new URL(calendarData(projected).google).searchParams.get('details'),/mari-ribeiro.com\/book-online/);
+  assert.match(calendarData(projected).ics.replace(/\r\n /g,''),/does not buy or reserve/);
+});

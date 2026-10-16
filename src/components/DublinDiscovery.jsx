@@ -1,3 +1,5 @@
+import { DiscoveryFilters } from "./DiscoveryManager";
+import { filterDiscoveryEvents } from "../../shared/discovery-filters";
 import MaterialSelect from "./MaterialSelect";
 import { ui, dateLocale, localeHref } from "../i18n/core";
 import { useEffect, useState } from "react";
@@ -23,6 +25,7 @@ export function EventPick({ event, onAdd, children }) {
         )}
       </div>
       <h3>{event.title}</h3>
+      {event.care_url&&(event.childcare==='provided'||event.children_welcome==='yes')&&<p className="gp-field-note">{event.childcare==='provided'?'Childcare listed by organiser. Confirm age limits, cost and availability.':'Children welcome. This does not mean childcare is provided.'} <a href={event.care_url} target="_blank" rel="noreferrer">Check support details ↗</a></p>}
       <p>
         <CalendarDays size={16} />
         {ui(new Date(event.starts_at).toLocaleString(dateLocale(), {
@@ -156,9 +159,8 @@ export default function DublinDiscovery({ onAdd }) {
   const [events, setEvents] = useState([]),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
-    [category, setCategory] = useState("All"),
-    [planningContext, setPlanningContext] = useState("all"),
-    [query, setQuery] = useState("");
+    [filters, setFilters] = useState({}),
+    [planningContext, setPlanningContext] = useState("all");
   useEffect(() => {
     let active = true;
     discoveryEvents()
@@ -175,12 +177,7 @@ export default function DublinDiscovery({ onAdd }) {
       active = false;
     };
   }, []);
-  const visible = events.filter(
-    (e) =>
-      (category === "All" || e.category === category) &&
-      fitsPlanningContext(e, planningContext) &&
-      `${e.title} ${e.venue}`.toLowerCase().includes(query.toLowerCase()),
-  );
+  const visible = filterDiscoveryEvents(events,filters).filter(event=>fitsPlanningContext(event,planningContext));
   return (
     <section className="dublin-discovery">
       <span className="gp-eyebrow">{ui("A LITTLE INSPIRATION, CLOSE TO HOME")}</span>
@@ -208,24 +205,8 @@ export default function DublinDiscovery({ onAdd }) {
       {planningContext === "partner" && (
         <p className="dublin-context-copy">{ui("Ideas for time together, including music, comedy, culture, sport, outdoors, workshops, festivals, and food experiences.")}</p>
       )}
-      <div className="dublin-filters gp-form">
-        <label>{ui("Find an event")}<input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={ui("Music, a venue, something you love…")}
-          />
-        </label>
-        <label>{ui("Category")}<MaterialSelect aria-label={ui("Category")}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {["All", ...DUBLIN_INTERESTS].map((c) => (
-              <option key={c} value={c}>{ui(c)}</option>
-            ))}
-          </MaterialSelect>
-        </label>
-      </div>
+      {planningContext==='family'&&<p className="dublin-context-copy">Make time for yourself and your friends. Use the childcare filter for events whose organiser explicitly lists support. Children welcome and childcare provided are separate options; confirm arrangements before booking.</p>}
+      <DiscoveryFilters filters={filters} onChange={setFilters}/>
       {loading ? (
         <p role="status">{ui("Finding the latest picks…")}</p>
       ) : error ? (

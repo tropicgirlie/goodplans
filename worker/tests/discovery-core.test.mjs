@@ -60,7 +60,8 @@ test("focused discovery explains women, caregiving, creative and seasonal matche
   );
   assert.ok(match.score >= 90);
   assert.match(match.reason, /women-centred/);
-  assert.match(match.reason, /caregiving-friendly/);
+  assert.match(match.reason, /family & caregiving topic/i);
+  assert.doesNotMatch(match.reason, /caregiving-friendly|childcare provided/i);
 });
 test("partner discovery includes broad shared activities without gender assumptions", () => {
   const match = discoveryMatch({

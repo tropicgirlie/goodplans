@@ -1,6 +1,6 @@
 # Good Plans backlog
 
-Updated 12 October 2026. Sources: [initial audit](./AUDIT-2026-10-09.md), [current UI/UX and flow audit](./AUDIT-2026-10-12.md). Preserve the original scrapbook design. A checked implementation item means verified locally, not deployed or verified in production.
+Updated 16 October 2026. Sources: [initial audit](./AUDIT-2026-10-09.md), [current UI/UX and flow audit](./AUDIT-2026-10-12.md). Preserve the original scrapbook design. A checked implementation item means verified locally, not deployed or verified in production.
 
 ## Before release — P1
 
@@ -168,3 +168,22 @@ The creator narrowed Brazil to São Paulo and Spain to Barcelona. Country select
 ### Public launch scope — English and Dublin only
 
 The creator has narrowed the visible release to English and Dublin. Language and country/city selectors are hidden. Existing saved plans retain their authored content, locations and timezones. Spanish, Brazilian Portuguese, São Paulo and Barcelona remain deferred; their dictionaries and catalogue work are kept for a later release. Regional source collectors and newsletters are not blockers for this Dublin release. English links and legacy translated URLs use the English interface; new planning defaults use Dublin, EUR and Europe/Dublin.
+
+
+## Dublin curation — 16 October 2026
+
+- [x] GP-45 — Add an organiser event manager with paste-link → editable draft → checked publication, manual fallback, public/admin filters, approved website sources, daily background collection, queue/history, source editing/pause, and re-review of changed automatic details. Dublin.ie works without a Ticketmaster key. See [usage and activation](./DUBLIN-EVENT-MANAGER.md). Verified locally with 60 tests, three Worker/D1 integration journeys and Chrome desktop/mobile checks.
+- [ ] GP-46 — Expand reviewed Dublin source coverage: additional venue adapters or authorised feeds, RSS/iCalendar where dates are reliable, larger crawl budgets/pagination, and optional search-provider integration. Current collector scans configured public sources, not the whole web; no exhaustive event-coverage claim.
+- [ ] REL-10 — Migration 0009 and the event manager/collector are deployed. Remaining: enable Dublin.ie on the production host portal, verify manual import/publication and approval privacy, inspect daily cron runs and check event-to-plan handoff. Production website sources have not been activated.
+
+## Invitations and care support — 16 October 2026
+
+- [x] GP-47 — Open shareable invitations alongside private personal guest links. Existing-event meet-ups have a separate booking URL and RSVP, no-account guest joining, private guest names by default, idempotency, capacity/waitlist and cancellation support. Verified with the local Mari dance-class test, 62 unit checks and four isolated Worker/D1 journeys. See [invitation guide](./INVITATION-MODES.md).
+- [x] GP-48 — Separate children-welcome and childcare-support discovery fields, require an organiser confirmation page for explicit claims, public filters and source links, and retain support notes when making a plan. Keyword matching never confirms childcare. No children’s profiles collected.
+- [ ] REL-11 — Migrations 0009–0011 and the matching frontend/Worker are deployed. Remaining: published open/private invitation and care-filter smoke tests on the production origin. The local test invitation remains local; the creator’s separate live draft is unpublished. Sign-in email request accepted; no guest invitations or bookings were sent.
+- [ ] GP-49 — Add reviewed Dublin event sources that explicitly advertise childcare, crèche support, parent-and-baby sessions or children-welcome arrangements. Verify eligibility, age limits, charges and booking with the original organiser before applying support labels.
+
+### Production account preparation — 16 October 2026
+
+- Migrations 0009–0011 applied and deployment `2c70f0a8-cf1e-44d9-b1f9-ff3ef21dbd4a` completed. Production health/discovery/auth protection checked. REL-10/11 remain open for source activation and published invitation smoke checks.
+- An account-owned, unpublished dance-class draft is ready for the creator’s next email-code sign-in. Guest names stay private, reminders are off, and no guest invitations were generated. Anonymous read/join checks return 404. Production email request accepted; inbox receipt and successful sign-in are not yet verified.

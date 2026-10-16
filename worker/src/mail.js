@@ -103,7 +103,7 @@ export async function queueEventNotice(env, event, kind, invitationId = null) {
       invitationId: g.id,
       to: g.guest_email,
       subject: `${label}: ${event.title}`,
-      text: `${label}: ${event.title}\n\n${event.starts_at} (${event.timezone})\n${event.venue_name || "Venue to be decided"}\n\n${event.description || ""}\n\nOpen your original private invitation link to see the details.`,
+      text: `${label}: ${event.title}\n\n${event.starts_at} (${event.timezone})\n${event.venue_name || "Venue to be decided"}\n\n${event.description || ""}\n\n${event.booking_url ? `Booking: ${event.booking_url}\n\n` : ''}${event.plan_type==='attend' ? (kind==='event_cancelled'?'Only our meet-up is cancelled. Check with the original organiser about the event and tickets.':'An RSVP joins our group; it does not buy or reserve an event ticket.') : ''}\n\nOpen your original invitation link to see the details.`,
     }),
   );
   if (statements.length) await env.DB.batch(statements);

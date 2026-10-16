@@ -1,5 +1,6 @@
 import { zonedParts, wallTimeToUTC } from "../../shared/timezones.js";
 import { ui, dateLocale } from "../i18n/core.js";
+import { bookingLink, invitationOptions, bookingDetails } from '../../shared/invitations.js';
 export const PLAN_KEY = "good-plans-outings-v2";
 export function localDate(date = new Date(), timezone) {
   if (timezone) { const p = zonedParts(date, timezone); return `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`; }
@@ -18,6 +19,7 @@ export function prettyDate(value, options = {}) {
 }
 export function validatePlan(plan) {
   if (!plan.title.trim()) return "Give your plan a name.";
+  try { invitationOptions(plan); } catch(error) { return error.message; }
   if (plan.endDate && !plan.date) return "Choose a start date before adding an end date.";
   if (plan.date) {
     const { start, end } = planInstants(plan);
@@ -80,12 +82,13 @@ export function calendarData(plan) {
       .replace(/\r?\n/g, "\\n")
       .replace(/;/g, "\\;")
       .replace(/,/g, "\\,");
+  const details = [plan.notes, bookingDetails(plan.bookingUrl,plan.planType==='attend')].filter(Boolean).join("\n\n");
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: plan.title,
     dates: `${start}/${end}`,
     location: plan.location || "",
-    details: plan.notes || "",
+    details,
   });
   const lines = [
     "BEGIN:VCALENDAR",
@@ -98,7 +101,7 @@ export function calendarData(plan) {
     `DTEND:${end}`,
     `SUMMARY:${escape(plan.title)}`,
     `LOCATION:${escape(plan.location)}`,
-    `DESCRIPTION:${escape(plan.notes)}`,
+    `DESCRIPTION:${escape(details)}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ];
@@ -130,6 +133,9 @@ export function invitationText(plan) {
     plan.location || ui("Place to be decided"),
     plan.cost ? ui(`Cost: ${plan.cost}`) : "",
     plan.notes,
+    plan.bookingUrl ? `Tickets / booking: ${bookingLink(plan.bookingUrl)}` : '',
+    plan.planType==='attend' ? 'Join me at this event. Our RSVP does not buy or reserve an event ticket.' : '',
+    plan.visibility==='public' && plan.publicUrl ? `Join me: ${plan.publicUrl}` : '',
     ui("Let me know if you can make it!"),
   ]
     .filter(Boolean)

@@ -1,5 +1,6 @@
 import { id, randomToken, sha256, slugify } from "./core.js";
 import { fail, seriesDates, validateEvent } from "./hosting-core.js";
+import { invitationOptions, bookingLink } from '../../shared/invitations.js';
 import {
   sendEmail,
   emailStatement,
@@ -236,12 +237,13 @@ export async function hosting(
       const guests = byEvent.get(event.id) || [];
       const counts = { accepted: 0, maybe: 0, declined: 0, waitlisted: 0 };
       for (const guest of guests) if (guest.status in counts) counts[guest.status]++;
-      return { ...event, guests, counts };
+      return { ...event, guests, counts, share_url:event.visibility==='public'?`${publicOrigin}/events/${event.slug}`:null };
     }) });
   }
   if (path === "/api/host/events" && method === "POST") {
     const input = await body(request);
     validateEvent(input);
+    const options = invitationOptions(input);
     if (!input.clientId || String(input.clientId).length > 100)
       fail("A draft identifier is required.");
     const existing = await env.DB.prepare(
@@ -305,11 +307,14 @@ export async function hosting(
         show_guests: input.showGuests === false ? 0 : 1,
         reminder: input.reminder ? 1 : 0,
         client_id: input.clientId,
+        visibility:options.visibility,
+        plan_type:options.planType,
+        booking_url:options.bookingUrl,
         revision: 1,
       };
       statements.push(
         env.DB.prepare(
-          "INSERT INTO events(id,organisation_id,series_id,host_user_id,slug,title,description,starts_at,ends_at,timezone,venue_name,capacity,visibility,status,plus_one,show_guests,reminder,client_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO events(id,organisation_id,series_id,host_user_id,slug,title,description,starts_at,ends_at,timezone,venue_name,capacity,visibility,status,plus_one,show_guests,reminder,client_id,booking_url,plan_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).bind(
           event.id,
           org.id,
@@ -323,15 +328,19 @@ export async function hosting(
           event.timezone,
           event.venue_name,
           event.capacity,
-          "invite",
+          event.visibility,
           event.status,
           event.plus_one,
-          event.show_guests,
+          options.showGuests ? 1 : 0,
           event.reminder,
           input.clientId,
+          event.booking_url,
+          event.plan_type,
         ),
       );
       event.inviteLinks = [];
+      event.show_guests = options.showGuests ? 1 : 0;
+      event.share_url = event.visibility==='public' ? `${publicOrigin}/events/${event.slug}` : null;
       for (const guest of guests) {
         const token = randomToken(),
           invitationId = id("invite");
@@ -393,7 +402,7 @@ export async function hosting(
       .bind(eventId)
       .all();
     return response({
-      event,
+      event:{...event,share_url:event.visibility==='public'?`${publicOrigin}/events/${event.slug}`:null},
       guests: guests.results,
       counts: await counts(env, eventId),
       deliveries: mail.results,
@@ -442,6 +451,7 @@ export async function hosting(
       capacity: input.capacity ?? event.capacity,
     };
     validateEvent(merged);
+    const nextBooking = bookingLink(input.bookingUrl === undefined ? event.booking_url : input.bookingUrl);
     const seats = await env.DB.prepare(
       "SELECT COALESCE(SUM(party_size),0) AS n FROM rsvps WHERE event_id=? AND status='accepted'",
     )
@@ -450,7 +460,7 @@ export async function hosting(
     if (merged.capacity < seats.n)
       fail("Capacity cannot be lower than the number of confirmed guests.");
     const changed = await env.DB.prepare(
-      "UPDATE events SET title=?,starts_at=?,ends_at=?,timezone=?,capacity=?,venue_name=?,description=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status!='cancelled' AND ? >= (SELECT COALESCE(SUM(party_size),0) FROM rsvps WHERE event_id=? AND status='accepted')",
+      "UPDATE events SET title=?,starts_at=?,ends_at=?,timezone=?,capacity=?,venue_name=?,description=?,booking_url=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status!='cancelled' AND ? >= (SELECT COALESCE(SUM(party_size),0) FROM rsvps WHERE event_id=? AND status='accepted')",
     )
       .bind(
         merged.title,
@@ -460,6 +470,7 @@ export async function hosting(
         Number(merged.capacity),
         input.venueName ?? event.venue_name,
         input.description ?? event.description,
+        nextBooking,
         now(),
         eventId,
         input.revision,
@@ -530,7 +541,7 @@ export async function hosting(
         invitationId: guest.id,
         to: guest.guest_email,
         subject: `You're invited: ${event.title}`,
-        text: `Hi ${guest.guest_name},\n\nYou're invited to ${event.title}.\n${event.starts_at} (${event.timezone})\n${event.venue_name || ""}\n\nYour private RSVP link:\n${inviteUrl}`,
+        text: `Hi ${guest.guest_name},\n\nYou're invited to ${event.title}.\n${event.starts_at} (${event.timezone})\n${event.venue_name || ""}\n\nYour private RSVP link:\n${inviteUrl}\n\n${event.booking_url?`Booking: ${event.booking_url}`:''}${event.plan_type==='attend'?'\nAn RSVP joins our group; it does not buy or reserve an event ticket.':''}`,
       }).run();
       await deliverPending(env);
     }

@@ -1,6 +1,6 @@
 import { id, randomToken, sha256, slugify } from "./core.js";
 import { fail, seriesDates, validateEvent } from "./hosting-core.js";
-import { invitationOptions, bookingLink } from '../../shared/invitations.js';
+import { invitationOptions, bookingLink, inviterName } from '../../shared/invitations.js';
 import {
   sendEmail,
   emailStatement,
@@ -244,6 +244,7 @@ export async function hosting(
     const input = await body(request);
     validateEvent(input);
     const options = invitationOptions(input);
+    const hostName = inviterName(input.hostName);
     if (!input.clientId || String(input.clientId).length > 100)
       fail("A draft identifier is required.");
     const existing = await env.DB.prepare(
@@ -310,11 +311,12 @@ export async function hosting(
         visibility:options.visibility,
         plan_type:options.planType,
         booking_url:options.bookingUrl,
+        host_name:hostName,
         revision: 1,
       };
       statements.push(
         env.DB.prepare(
-          "INSERT INTO events(id,organisation_id,series_id,host_user_id,slug,title,description,starts_at,ends_at,timezone,venue_name,capacity,visibility,status,plus_one,show_guests,reminder,client_id,booking_url,plan_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO events(id,organisation_id,series_id,host_user_id,slug,title,description,starts_at,ends_at,timezone,venue_name,capacity,visibility,status,plus_one,show_guests,reminder,client_id,booking_url,plan_type,host_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).bind(
           event.id,
           org.id,
@@ -336,6 +338,7 @@ export async function hosting(
           input.clientId,
           event.booking_url,
           event.plan_type,
+          event.host_name,
         ),
       );
       event.inviteLinks = [];
@@ -451,6 +454,7 @@ export async function hosting(
       capacity: input.capacity ?? event.capacity,
     };
     validateEvent(merged);
+    const nextHostName = inviterName(input.hostName === undefined ? event.host_name : input.hostName);
     const nextBooking = bookingLink(input.bookingUrl === undefined ? event.booking_url : input.bookingUrl);
     const seats = await env.DB.prepare(
       "SELECT COALESCE(SUM(party_size),0) AS n FROM rsvps WHERE event_id=? AND status='accepted'",
@@ -460,7 +464,7 @@ export async function hosting(
     if (merged.capacity < seats.n)
       fail("Capacity cannot be lower than the number of confirmed guests.");
     const changed = await env.DB.prepare(
-      "UPDATE events SET title=?,starts_at=?,ends_at=?,timezone=?,capacity=?,venue_name=?,description=?,booking_url=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status!='cancelled' AND ? >= (SELECT COALESCE(SUM(party_size),0) FROM rsvps WHERE event_id=? AND status='accepted')",
+      "UPDATE events SET title=?,starts_at=?,ends_at=?,timezone=?,capacity=?,venue_name=?,description=?,booking_url=?,host_name=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status!='cancelled' AND ? >= (SELECT COALESCE(SUM(party_size),0) FROM rsvps WHERE event_id=? AND status='accepted')",
     )
       .bind(
         merged.title,
@@ -471,6 +475,7 @@ export async function hosting(
         input.venueName ?? event.venue_name,
         input.description ?? event.description,
         nextBooking,
+        nextHostName,
         now(),
         eventId,
         input.revision,
@@ -541,7 +546,7 @@ export async function hosting(
         invitationId: guest.id,
         to: guest.guest_email,
         subject: `You're invited: ${event.title}`,
-        text: `Hi ${guest.guest_name},\n\nYou're invited to ${event.title}.\n${event.starts_at} (${event.timezone})\n${event.venue_name || ""}\n\nYour private RSVP link:\n${inviteUrl}\n\n${event.booking_url?`Booking: ${event.booking_url}`:''}${event.plan_type==='attend'?'\nAn RSVP joins our group; it does not buy or reserve an event ticket.':''}`,
+        text: `Hi ${guest.guest_name},\n\n${event.host_name || 'Your host'} is inviting you to ${event.title}.\n${event.starts_at} (${event.timezone})\n${event.venue_name || ""}\n\nYour private RSVP link:\n${inviteUrl}\n\n${event.booking_url?`Booking: ${event.booking_url}`:''}${event.plan_type==='attend'?'\nAn RSVP joins our group; it does not buy or reserve an event ticket.':''}`,
       }).run();
       await deliverPending(env);
     }

@@ -20,3 +20,10 @@ export function bookingDetails(url, attending = false) {
   const link = bookingLink(url);
   return [link ? `Tickets / booking: ${link}` : '', attending ? 'An RSVP joins our group; it does not buy or reserve an event ticket.' : ''].filter(Boolean).join('\n');
 }
+
+export function inviterName(raw) {
+  if (raw === undefined || raw === null || raw === '') return '';
+  if (typeof raw !== 'string' || raw.trim().length > 80)
+    throw Object.assign(new Error('Use an invitation host name of up to 80 characters.'), { status: 400 });
+  return raw.trim();
+}

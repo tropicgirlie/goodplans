@@ -228,6 +228,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                     action(async () => {
                       await updateHostEvent(event.id, {
                         title: f.get("title"),
+                        hostName: f.get("hostName"),
                         startsAt: instantForWall(String(f.get("start")).slice(0,16),event.timezone).toISOString(),
                         endsAt: instantForWall(String(f.get("end")).slice(0,16),event.timezone).toISOString(),
                         timezone: event.timezone,
@@ -241,6 +242,7 @@ export default function HostPortal({ user, onLogin, onCreate, selected, tool, is
                     });
                   }}
                 >
+                  <label>Your name on the invitation<input name="hostName" required maxLength={80} defaultValue={event.host_name||''} placeholder="e.g. Luana" /></label>
                   <label>{ui("Event name")}<input
                       name="title"
                       required

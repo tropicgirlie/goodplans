@@ -2699,7 +2699,7 @@
 /* Invitation choices keep the privacy boundary visible at the point of sharing. */
 .gp-invitation-settings { border:1px solid var(--gp-line, #d8c8a6); padding:16px; margin:4px 0 12px; display:grid; gap:10px; min-width:0; }
 .gp-invitation-settings legend { font-weight:700; padding:0 6px; }
-.gp-form .gp-invitation-settings>label:not(.gp-booking-field) { display:flex; flex-direction:row; align-items:flex-start; gap:10px; min-height:44px; padding:10px; border:1px solid transparent; cursor:pointer; }
+.gp-form .gp-invitation-settings>label:not(.gp-booking-field):not(.gp-host-name-field) { display:flex; flex-direction:row; align-items:flex-start; gap:10px; min-height:44px; padding:10px; border:1px solid transparent; cursor:pointer; }
 .gp-invitation-settings label.selected { background:#fff1c5; border-color:#827048!important; }
 .gp-form .gp-invitation-settings input[type=radio], .gp-form .gp-invitation-settings input[type=checkbox] { width:18px; height:18px; min-height:18px; margin:3px 0 0; flex-shrink:0; accent-color:#58468d; }
 .gp-invitation-settings small { display:block; margin-top:4px; font-size:12px; line-height:1.5; font-weight:400; }
@@ -2707,3 +2707,68 @@
 .gp-open-join h3 { margin:0 0 8px; }
 .gp-open-join p { line-height:1.55; }
 .gp-private-link,.gp-publish { overflow-wrap:anywhere; }
+
+/* Invitation expansion follows the available space, independently of editor panels. */
+.gp-dialog.invitation-panel {
+  container-type: inline-size;
+}
+.gp-dialog.invitation-panel.expanded {
+  width: min(1080px, calc(100vw - 24px));
+}
+.invitation-panel .gp-dialog-content > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+.invitation-panel .gp-detail-body {
+  min-width: 0;
+}
+.invitation-panel .gp-detail-artwork {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #fff5df;
+  border-radius: 9px;
+  padding: 12px;
+}
+.invitation-panel .gp-detail-cover {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  object-position: center;
+}
+.invitation-panel.expanded .gp-detail-cover {
+  max-height: 320px;
+}
+@container (min-width: 850px) {
+  .invitation-panel .gp-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .invitation-panel .gp-detail-artwork {
+    padding: 16px;
+  }
+  .invitation-panel.expanded .gp-detail-cover {
+    max-height: min(680px, calc(100dvh - 180px));
+  }
+  .invitation-panel .gp-detail-badges {
+    margin-top: 0;
+  }
+}
+@media (max-width: 480px) {
+  .invitation-panel .gp-dialog-content > header {
+    gap: 8px;
+  }
+  .invitation-panel .gp-detail-cover,
+  .invitation-panel.expanded .gp-detail-cover {
+    max-height: 200px;
+  }
+}
+
+.gp-invitation-host { font-size: 18px; font-weight: 650; line-height: 1.35; margin: 16px 0 8px; overflow-wrap: anywhere; }
+.gp-invitation-host + .gp-invitation-identity { margin-top: 0; font-size: 12px; }

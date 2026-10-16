@@ -1,6 +1,6 @@
 import { zonedParts, wallTimeToUTC } from "../../shared/timezones.js";
 import { ui, dateLocale } from "../i18n/core.js";
-import { bookingLink, invitationOptions, bookingDetails } from '../../shared/invitations.js';
+import { bookingLink, invitationOptions, bookingDetails, inviterName } from '../../shared/invitations.js';
 export const PLAN_KEY = "good-plans-outings-v2";
 export function localDate(date = new Date(), timezone) {
   if (timezone) { const p = zonedParts(date, timezone); return `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`; }
@@ -19,7 +19,7 @@ export function prettyDate(value, options = {}) {
 }
 export function validatePlan(plan) {
   if (!plan.title.trim()) return "Give your plan a name.";
-  try { invitationOptions(plan); } catch(error) { return error.message; }
+  try { inviterName(plan.hostName); invitationOptions(plan); } catch(error) { return error.message; }
   if (plan.endDate && !plan.date) return "Choose a start date before adding an end date.";
   if (plan.date) {
     const { start, end } = planInstants(plan);
@@ -127,7 +127,7 @@ export function calendarData(plan) {
 }
 export function invitationText(plan) {
   return [
-    ui(`You're invited: ${plan.title}`),
+    plan.hostName ? `${inviterName(plan.hostName)} is inviting you: ${plan.title}` : ui(`You're invited: ${plan.title}`),
     planDateText(plan),
     plan.timezone ? `${ui("Times in ")}${plan.timezone}` : "",
     plan.location || ui("Place to be decided"),

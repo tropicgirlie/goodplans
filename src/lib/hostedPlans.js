@@ -5,6 +5,7 @@ export function hostedPlan(event, base = {}, metadata = {}) {
   const start = new Date(event.starts_at), end = new Date(event.ends_at);
   const guests = event.guests;
   return { ...base, ...metadata, id: base.id || `hosted-${event.id}`, remoteId: event.id, slug: event.slug,
+    hostName:event.host_name||'',
     title: event.title, date: localDate(start,event.timezone), endDate: localDate(end,event.timezone) === localDate(start,event.timezone) ? "" : localDate(end,event.timezone),
     time: time(start,event.timezone), endTime: time(end,event.timezone), timezone:event.timezone, city:event.city || base.city, startsAt: event.starts_at, endsAt: event.ends_at,
     location: [event.venue_name, event.venue_address].filter(Boolean).join(", "), notes: event.description,

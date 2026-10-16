@@ -187,3 +187,9 @@ The creator has narrowed the visible release to English and Dublin. Language and
 
 - Migrations 0009–0011 applied and deployment `2c70f0a8-cf1e-44d9-b1f9-ff3ef21dbd4a` completed. Production health/discovery/auth protection checked. REL-10/11 remain open for source activation and published invitation smoke checks.
 - An account-owned, unpublished dance-class draft is ready for the creator’s next email-code sign-in. Guest names stay private, reminders are off, and no guest invitations were generated. Anonymous read/join checks return 404. Production email request accepted; inbox receipt and successful sign-in are not yet verified.
+
+### Invitation sizing — 16 October 2026
+
+- [x] GP-50 — Expanded invitations now reach 1,080px on desktop, with artwork beside details when the panel has at least 850px of content width. Compact remains 480px; tablet/phone layouts stack. Artwork uses its intrinsic aspect ratio and contain sizing rather than a fixed-height crop. Existing editor expansion stays 720px. Verified at 320px, 390px, 768px and the normal desktop browser viewport, with no horizontal overflow and the same RSVP retained through expand/shrink. Build and 62 checks pass. Verified in the local preview; production deployment remains pending.
+
+- [x] GP-51 — Add an editable inviter name per event, separate from account email and guest identity. Display “Luana is inviting you” in the local dance test; use the host name in copied invitation text and emailed invitations. New frontend publishing asks for a name; organiser edits can update it. Verified with 63 checks, four Worker/D1 journeys, build and browser confirmation. Migration 0012 applied locally; production activation and naming the creator’s live draft remain pending.

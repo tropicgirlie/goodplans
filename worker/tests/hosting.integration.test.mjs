@@ -533,13 +533,13 @@ test('open meet-up: anonymous join, private names, ticket link, idempotency, cap
   const login=await host('/api/auth/otp/request','POST',{email:'identitytest@example.com'});
   assert.equal(login.status,200,JSON.stringify(login.data));
   assert.equal((await host('/api/auth/otp/verify','POST',{email:'identitytest@example.com',code:login.data.devCode})).status,200);
-  const input={clientId:crypto.randomUUID(),title:'LOCAL TEST — Join my dance class',startsAt:new Date(Date.now()+86400000).toISOString(),endsAt:new Date(Date.now()+90000000).toISOString(),timezone:'Europe/Dublin',capacity:1,publish:true,visibility:'public',planType:'attend',venueName:'Test dance studio, Dublin',bookingUrl:'https://www.mari-ribeiro.com/book-online',guests:[]};
+  const input={clientId:crypto.randomUUID(),title:'LOCAL TEST — Join my dance class',hostName:'Luana',startsAt:new Date(Date.now()+86400000).toISOString(),endsAt:new Date(Date.now()+90000000).toISOString(),timezone:'Europe/Dublin',capacity:1,publish:true,visibility:'public',planType:'attend',venueName:'Test dance studio, Dublin',bookingUrl:'https://www.mari-ribeiro.com/book-online',guests:[]};
   const invalid=await host('/api/host/events','POST',{...input,clientId:crypto.randomUUID(),bookingUrl:'javascript:alert(1)'});
   assert.equal(invalid.status,400);
   const created=await host('/api/host/events','POST',input);assert.equal(created.status,201,JSON.stringify(created.data));
   const event=created.data.event;
   let page=await anonymous(`/api/events/${event.slug}`);
-  assert.equal(page.status,200);assert.equal(page.data.event.visibility,'public');assert.equal(page.data.event.booking_url,input.bookingUrl);assert.equal(page.data.event.plan_type,'attend');assert.equal(page.data.event.show_guests,0);assert.ok(page.data.event.share_url.endsWith(`/events/${event.slug}`));assert.equal(page.data.event.host_user_id,undefined);assert.equal(page.data.event.client_id,undefined);
+  assert.equal(page.status,200);assert.equal(page.data.event.visibility,'public');assert.equal(page.data.event.booking_url,input.bookingUrl);assert.equal(page.data.event.plan_type,'attend');assert.equal(page.data.event.host_name,'Luana');assert.equal(page.data.event.show_guests,0);assert.ok(page.data.event.share_url.endsWith(`/events/${event.slug}`));assert.equal(page.data.event.host_user_id,undefined);assert.equal(page.data.event.client_id,undefined);
   const token='a'.repeat(64),token2='b'.repeat(64);
   assert.equal((await first(`/api/events/${event.id}/join`,'POST',{name:'Bad party size',status:'accepted',partySize:2,joinToken:token})).status,400);
   const joined=await first(`/api/events/${event.id}/join`,'POST',{name:'First test dancer',status:'accepted',partySize:1,joinToken:token});
@@ -552,8 +552,10 @@ test('open meet-up: anonymous join, private names, ticket link, idempotency, cap
   assert.equal((await first(`/api/events/${event.slug}`)).data.guest.name,'First test dancer');
   assert.equal((await first(`/api/events/${event.id}/rsvps`,'POST',{invitationId:joined.data.invitationId,status:'declined',partySize:1})).status,200);
   assert.equal((await second(`/api/events/${event.slug}`)).data.rsvp.status,'accepted');
-  assert.equal((await host(`/api/host/events/${event.id}`,'PATCH',{bookingUrl:'https://www.mari-ribeiro.com/service-page/all-levels-brazilian-dance',revision:1})).status,200);
+  assert.equal((await host(`/api/host/events/${event.id}`,'PATCH',{hostName:'Viviane',bookingUrl:'https://www.mari-ribeiro.com/service-page/all-levels-brazilian-dance',revision:1})).status,200);
   assert.match((await anonymous(`/api/events/${event.slug}`)).data.event.booking_url,/service-page/);
+  assert.equal((await anonymous(`/api/events/${event.slug}`)).data.event.host_name,'Viviane');
+  assert.equal((await second(`/api/events/${event.slug}`)).data.guest.name,'Second test dancer');
   const privateEvent=(await host('/api/host/events','POST',{...input,clientId:crypto.randomUUID(),title:'Private dinner',visibility:'invite'})).data.event;
   assert.equal((await anonymous(`/api/events/${privateEvent.slug}`)).status,404);
   assert.equal((await anonymous(`/api/events/${privateEvent.id}/join`,'POST',{name:'Intruder',status:'accepted',joinToken:token})).status,404);

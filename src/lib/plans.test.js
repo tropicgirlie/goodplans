@@ -146,3 +146,13 @@ test('open invitations retain booking links, private defaults and a separate RSV
   assert.match(new URL(calendarData(projected).google).searchParams.get('details'),/mari-ribeiro.com\/book-online/);
   assert.match(calendarData(projected).ics.replace(/\r\n /g,''),/does not buy or reserve/);
 });
+
+test('inviter name stays separate from guest identity in invitations and survives server projection', async () => {
+  const { hostedPlan }=await import('./hostedPlans.js');
+  const { inviterName }=await import('../../shared/invitations.js');
+  const invitation=hostedPlan({id:'host-test',title:'Saturday dance',starts_at:'2026-10-17T09:30:00Z',ends_at:'2026-10-17T10:25:00Z',timezone:'Europe/Dublin',host_name:'Luana',capacity:12,visibility:'public'}, {}, {invitee:'Mary'});
+  assert.equal(invitation.hostName,'Luana');assert.equal(invitation.invitee,'Mary');
+  assert.match(invitationText(invitation),/^Luana is inviting you: Saturday dance/);
+  assert.doesNotMatch(invitationText(invitation),/Mary is inviting/);
+  assert.equal(inviterName('  Viviane  '),'Viviane');assert.throws(()=>inviterName('x'.repeat(81)));
+});

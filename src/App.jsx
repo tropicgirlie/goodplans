@@ -213,7 +213,7 @@ function Brand() {
     </span>
   );
 }
-function Modal({ title, onClose, children, wide = false, compact = false }) {
+function Modal({ title, onClose, children, wide = false, compact = false, invitation = false }) {
   const ref = useRef();
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
@@ -228,7 +228,7 @@ function Modal({ title, onClose, children, wide = false, compact = false }) {
     <dialog
       ref={ref}
       aria-label={title}
-      className={`gp-dialog ${wide ? "wide" : ""} ${compact ? "compact-plan" : ""} ${expanded ? "expanded" : ""}`}
+      className={`gp-dialog ${wide ? "wide" : ""} ${compact ? "compact-plan" : ""} ${expanded ? "expanded" : ""} ${invitation ? "invitation-panel" : ""}`}
       onCancel={onClose}
       onClick={(e) => {
         if (e.target === ref.current) onClose();
@@ -622,9 +622,12 @@ function PlanDetail({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
-    <Modal title={plan.title} onClose={onClose} wide>
+    <Modal title={plan.title} onClose={onClose} wide invitation>
       <div className="gp-detail">
-        <Artwork className="gp-detail-cover" src={`/images/${plan.image}`} alt="" />
+        <div className="gp-detail-artwork">
+          <Artwork className="gp-detail-cover" src={`/images/${plan.image}`} alt="" sizes="(max-width: 700px) 85vw, 480px" />
+        </div>
+        <div className="gp-detail-body">
         <div className="gp-detail-badges">
           <span className="gp-tag">{ui(plan.seriesName ? "Series occurrence" : plan.planType==='attend'?"Joining an event":plan.kind)}</span>
           <span className="gp-tag sage">
@@ -635,6 +638,7 @@ function PlanDetail({
                 : "Your private draft")}
           </span>
         </div>
+        <p className="gp-invitation-host">{plan.status==='cancelled'?`A plan from ${plan.hostName||'your host'}`:`${plan.hostName||'Your host'} is inviting you`}</p>
         {guest && <p className="gp-invitation-identity" role="status">{plan.invitee ? <>{plan.visibility==='public'?'Your response, ':ui("Invitation for ")}<strong>{plan.invitee}</strong></> : plan.visibility==='public'?'You’re invited to join. Share this link with friends.':ui("Open your personal invitation link to respond.")}</p>}
         <div className="gp-detail-meta">
           <p>
@@ -787,6 +791,7 @@ function PlanDetail({
             )}
           </div>
         )}
+        </div>
       </div>
     </Modal>
   );
@@ -1046,7 +1051,9 @@ export default function App() {
     setPublishing(true);
     setPublishError("");
     try {
+      if (!active.hostName?.trim()) throw new Error('Add your name in Edit plan before publishing, so friends know who is inviting them.');
       const result = await createEvent({
+        hostName:active.hostName,
         title: active.title,
         clientId: active.id,
         seriesName: active.seriesName,

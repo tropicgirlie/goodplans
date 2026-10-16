@@ -34,3 +34,9 @@ Applied migrations 0009–0011 and deployed version `2c70f0a8-cf1e-44d9-b1f9-ff3
 Production health and discovery return 200; anonymous organiser access returns 401. An account-owned dance-class draft was prepared with no guest invitations, mail reminders or published attendance details. Anonymous reads and open-join attempts against the unpublished draft return 404. A live email sign-in request was accepted; receipt and completion of the email verification remain user steps. No password credential was created.
 
 The four complete RSVP journeys were tested in the isolated environment. Published production RSVP/cancellation checks and reviewed childcare sources remain follow-ups.
+
+## Inviter’s name (local follow-up)
+
+The plan editor and organiser edit form include **Your name on the invitation**. This explicit, editable name is stored on the event, independently of account email and guest names. The invitation page, copied invitation text and guest invitation email identify the host. New frontend publication asks for a name; older events without one use a generic host label rather than deriving a name from an email address. Cancelled invitations say “A plan from …”.
+
+Migration **0012_invitation_host_name.sql** is applied to the local preview only. Apply it before deploying this follow-up. The local Mari test shows “Luana is inviting you”; the creator’s production draft still needs its explicit name set when this update is activated.

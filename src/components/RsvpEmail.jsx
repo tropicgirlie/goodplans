@@ -4,9 +4,10 @@ import { emailRsvpConfirmation } from '../lib/goodPlansApi';
 export function confirmationMessage(status) {
   if(status==='development')return 'Your RSVP is saved. In this test preview, no real email is sent.';
   if(status==='sent')return 'Your RSVP email is on its way. Check your inbox or spam folder.';
+  if(status==='delivered')return 'Your RSVP email was accepted by your email service. Check your inbox or spam folder.';
   if(status==='queued')return 'Your RSVP is saved. Your confirmation email is queued.';
   if(status==='limited')return 'Your RSVP is saved. The email limit has been reached; try again later.';
-  if(['failed','suppressed'].includes(status))return 'Your RSVP is saved, but the email could not be sent. Check your address below or ask your host for help.';
+  if(['failed','suppressed','bounced','complained'].includes(status))return 'Your RSVP is saved, but the email could not be delivered. Check your address below or ask your host for help.';
   return '';
 }
 export default function RsvpEmail({plan,onRefresh}) {

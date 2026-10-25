@@ -15,14 +15,14 @@ The support form saves requests in D1, visible to authenticated hosts. It does n
 ## Release and recovery
 
 1. Run `npm ci`, `npm test`, `npm run build`, `npm run test:integration`, and a Wrangler deployment dry-run. CI runs these for pushes and PRs.
-2. Save a private D1 export outside the repository before migrations. An export was saved locally at `/tmp/good-plans-prelaunch.backup.sql` on 9 September 2026; move it to approved encrypted backup storage before this machine cleans temporary files.
+2. Save a private D1 export outside the repository before migrations. A new owner-readable-only export was saved outside temporary storage on 25 October 2026 and restored into a separate local SQLite database with integrity OK and no foreign-key violations. Agree durable backup storage/retention and complete a remote D1 recovery/failover drill; the local restore is only part of that requirement.
 3. Apply additive migrations, then deploy built assets and Worker together. Verify both custom domains, login, RSVP, series, sync, webhook delivery, newsletter confirmation and unsubscribe with approved test mailboxes.
 4. For a code regression, use Cloudflare’s deployment rollback to the preceding known-good version. Additive tables can remain. Do not drop production data as a rollback shortcut.
 5. For data recovery, restore the private export to a separate D1 database, verify counts and critical records there, and review changes since the backup before switching bindings. A restore drill and retained backup policy are still required before broad release.
 
 The scheduled handler records job status; the newsletter studio also shows collection errors. Once `TICKETMASTER_API_KEY` is configured, the 15-minute scheduler claims one discovery run per Dublin calendar day. It searches a 90-day window using broad and focused terms for creative classes, dance, women-centred gatherings, caregivers, retreats, festivals, family activities and seasonal events. Results are deduplicated and enter a private review queue. A source must explicitly mention women before the system applies the women-centred label. Only organiser-approved candidates become public or eligible for a newsletter. Configure external alerting and inspect both views. No automatic newsletter is sent until an organiser approves its draft.
 
-Ticketmaster is the first licensed discovery source. It does not cover every independent class, community group or retreat. Add verified local listings manually in the studio while additional source adapters are assessed; do not scrape sites that do not provide an authorised API or feed.
+The first active production website source is Dublin.ie, enabled and checked on 25 October 2026. Its public programme is collected with publisher crawler rules, bounded detail-page checks and mandatory listing review. Ticketmaster is an optional API source. Neither provides complete coverage of independent classes, community groups or retreats. Add verified local listings manually while additional permitted sources/adapters are assessed; use a feed or manual fallback when a publisher blocks collection.
 
 ## Known release limits
 

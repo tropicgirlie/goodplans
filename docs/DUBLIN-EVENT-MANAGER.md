@@ -1,6 +1,6 @@
 # Dublin event manager
 
-Implemented and verified locally on 16 October 2026. The matching Worker/frontend and migrations 0009–0011 were deployed on 16 October 2026. Production sources still need to be chosen and checked.
+Implemented and verified locally on 16 October 2026. The matching Worker/frontend and migrations 0009–0011 were deployed on 16 October 2026. Dublin.ie was enabled on 25 October; the real background queue collected three candidates and all three became public after source/classification review. See the [current activation record](./LAUNCH-2026-10-25.md) for evidence and remaining host/cron checks.
 
 ## Add something you found
 
@@ -46,13 +46,15 @@ The public showcase covers 14 days; organiser picks and collection cover 90 days
 
 Optional secret: `TICKETMASTER_API_KEY`. Resend settings are needed only for real mail delivery, not collection. No paid search or AI service is required for the implemented website collector.
 
-## Production activation — not performed yet
+## Production activation procedure
 
 1. Build deployment assets using the normal release workflow; preserve unrelated local build changes.
 2. Apply migration `0009` to production D1.
 3. Deploy Worker and frontend, preserving secrets, routes, import queue and cron.
 4. Sign in on the real domain, enable Dublin.ie, run a check and inspect queue/history. Approve only checked listings.
 5. Verify public filters, event-to-plan handoff, the daily cron and existing email approval behaviour on the real domain.
+
+Steps 1–3 are complete through migration 0013. Source activation, real import-queue execution, public review gating, filters and the event-to-plan handoff are checked. An unattended daily collection after activation and manual paste-link/publication through the signed-in portal remain open. The bounded collector now prioritises upcoming single-date entries before ambiguous ranges, without inventing their session times.
 
 ## Verification
 

@@ -2,6 +2,8 @@
 
 Implemented and verified locally on 16 October 2026. Deployed to production on 16 October 2026; see activation notes below.
 
+**25 October update:** migrations through 0013, responsive invitation layouts, inviter-name support and illustrated RSVP confirmations are now deployed on both custom domains. The local follow-up sections below describe the original implementation history. Future live host/guest receipt tests and delivery callbacks remain open; see the [current activation record](./LAUNCH-2026-10-25.md).
+
 ## Create a plan
 
 Choose **New plan**, then **Who can join?**:

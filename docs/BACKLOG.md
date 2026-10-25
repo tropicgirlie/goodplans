@@ -1,6 +1,6 @@
 # Good Plans backlog
 
-Updated 16 October 2026. Sources: [initial audit](./AUDIT-2026-10-09.md), [current UI/UX and flow audit](./AUDIT-2026-10-12.md). Preserve the original scrapbook design. A checked implementation item means verified locally, not deployed or verified in production.
+Updated 25 October 2026. Sources: [initial audit](./AUDIT-2026-10-09.md), [UI/UX and flow audit](./AUDIT-2026-10-12.md), [production activation](./LAUNCH-2026-10-25.md). Preserve the original scrapbook design. A checked implementation item means verified locally unless production evidence is stated explicitly.
 
 ## Before release — P1
 
@@ -68,16 +68,16 @@ Implementation evidence: [12 October fixes and validation](./FIXES-2026-10-12.md
 
 ## Production verification — remains separate from local fixes
 
-- [ ] REL-01 — Deploy and verify the intended version on both public domains. Commit `ffe0ec1` was pushed; 12 October live inspection still shows the older example/map/planner behaviour. Verify live local-first behaviour after deployment.
-- [ ] REL-02 — Populate discovery with reviewed manual events or configure an authorised source. Ticketmaster key was absent and production feed empty at audit time.
+- [x] REL-01 — Latest invitation layouts, inviter-name support, illustrated RSVP email and migrations 0012–0013 deployed to both custom domains on 25 October. Matching frontend assets, health, illustration delivery and anonymous host protection checked; live local-first friend draft/save/reload/calendar handoff verified. See the production activation record for remaining authenticated checks.
+- [x] REL-02 — Dublin.ie source enabled in production; a real queue run collected three dated candidates. All three source-checked listings approved for the public showcase after correcting a classifier false positive. Ticketmaster remains optional and absent.
 - [ ] REL-03 — Register the Resend webhook/secret and verify real delivered/bounced callbacks. Sending credentials exist and an OTP was received earlier.
 - [ ] REL-04 — Real-domain host → single event/series → private invite → guest RSVP/plus-one/waitlist → edit/cancel email → calendar smoke test, including phone UI.
-- [ ] REL-05 — Approved test newsletter: subscribe/confirm → edition → delivery → add to plan → unsubscribe/deletion.
+- [ ] REL-05 — Live signup confirmation reached the creator’s connected Gmail inbox; pending → active → preferences → unsubscribe → deletion verified on 25 October, ending with zero subscribers and an invalidated preferences link. Remaining: an approved test edition, its actual delivery/callback and edition-to-plan handoff. No newsletter edition was sent.
 - [ ] REL-06 — Two-browser sync and shared-browser account switching/conflict recovery verification.
-- [ ] REL-07 — Confirm operator/contact, retention, deletion handling, support/operations owner, external alerts and a database restore drill.
+- [ ] REL-07 — Private pre-release database export and an isolated local restore verified on 25 October (integrity OK, no foreign-key violations). Remaining: operator/contact, retention/deletion decisions, monitoring owner, external alerts, durable backup storage and remote D1 recovery/failover drill.
 - [ ] REL-08 — Keep the pilot host-allowlisted; implement public organiser registration before advertising self-service signup.
 
-- [ ] REL-09 — Finish full device, 200% zoom and keyboard review. The localisation follow-up successfully tested real 320/390px viewport overrides for homepage, organiser/editor and planner layouts, plus 768px organiser layout. The earlier override failure is historical; a full phone journey, physical devices, zoom and full keyboard coverage remain open.
+- [ ] REL-09 — Finish full device, 200% zoom and keyboard review. On 25 October the live local-first friend plan was created, dated, saved and reopened by URL; phone checks at 320/390px, keyboard opening and Escape passed. The earlier localisation checks also covered 768px organiser layout. Physical devices, complete hosted phone RSVP journey, zoom, full keyboard coverage and slower-connection performance remain open.
 
 ## Later product work
 
@@ -174,13 +174,13 @@ The creator has narrowed the visible release to English and Dublin. Language and
 
 - [x] GP-45 — Add an organiser event manager with paste-link → editable draft → checked publication, manual fallback, public/admin filters, approved website sources, daily background collection, queue/history, source editing/pause, and re-review of changed automatic details. Dublin.ie works without a Ticketmaster key. See [usage and activation](./DUBLIN-EVENT-MANAGER.md). Verified locally with 60 tests, three Worker/D1 integration journeys and Chrome desktop/mobile checks.
 - [ ] GP-46 — Expand reviewed Dublin source coverage: additional venue adapters or authorised feeds, RSS/iCalendar where dates are reliable, larger crawl budgets/pagination, and optional search-provider integration. Current collector scans configured public sources, not the whole web; no exhaustive event-coverage claim.
-- [ ] REL-10 — Migration 0009 and the event manager/collector are deployed. Remaining: enable Dublin.ie on the production host portal, verify manual import/publication and approval privacy, inspect daily cron runs and check event-to-plan handoff. Production website sources have not been activated.
+- [ ] REL-10 — Source activated and real import-queue execution verified on 25 October. Candidates returned 404 publicly before review; approved picks became visible. Live search, free-only exclusion and event-to-editable-plan handoff passed. Remaining: manual paste-link/publication through the signed-in portal and an unattended daily collection observed after activation. Sources remain bounded and approval remains required.
 
 ## Invitations and care support — 16 October 2026
 
 - [x] GP-47 — Open shareable invitations alongside private personal guest links. Existing-event meet-ups have a separate booking URL and RSVP, no-account guest joining, private guest names by default, idempotency, capacity/waitlist and cancellation support. Verified with the local Mari dance-class test, 62 unit checks and four isolated Worker/D1 journeys. See [invitation guide](./INVITATION-MODES.md).
 - [x] GP-48 — Separate children-welcome and childcare-support discovery fields, require an organiser confirmation page for explicit claims, public filters and source links, and retain support notes when making a plan. Keyword matching never confirms childcare. No children’s profiles collected.
-- [ ] REL-11 — Migrations 0009–0011 and the matching frontend/Worker are deployed. Remaining: published open/private invitation and care-filter smoke tests on the production origin. The local test invitation remains local; the creator’s separate live draft is unpublished. Sign-in email request accepted; no guest invitations or bookings were sent.
+- [ ] REL-11 — Migrations through 0013 and matching frontend/Worker are deployed. Anonymous private invitation returns 404; the creator’s previously published October dance invitation is readable and rejects new responses after its end. Remaining: a future open/private host-to-guest journey, actual RSVP receipt, edit/cancellation delivery and care-filter smoke tests on the real domain. No new hosted event or guest invitation was created during 25 October activation.
 - [ ] GP-49 — Add reviewed Dublin event sources that explicitly advertise childcare, crèche support, parent-and-baby sessions or children-welcome arrangements. Verify eligibility, age limits, charges and booking with the original organiser before applying support labels.
 
 ### Production account preparation — 16 October 2026
@@ -199,3 +199,9 @@ The creator has narrowed the visible release to English and Dublin. Language and
 - [x] GP-53 — Require name and email for new open-invitation joins; send an accurate RSVP confirmation with a private return link, Google Calendar link and Apple/Outlook ICS attachment. Existing guests can add an email. Preserve saved responses on mail failure, deduplicate deliveries, limit requests per recipient/invitation and avoid merging guests by unverified email. Recovery works across browsers without invalidating original links; public guest lists exclude email. No newsletter opt-in. Verified locally with 68 unit checks, four Worker/D1 journeys, build, new/existing guest browser flows and generated mail/ICS inspection. [Example confirmation](./screenshots/rsvp-confirmation-email-2026-10-16.jpg). Migration 0013 applied locally; production migration/deployment, verified sender and approved-recipient inbox delivery remain pending. No real guest email sent.
 
 - Confirmation design follow-up: restored the original illustrated gathering collage, cream paper, pink edge and compact RSVP badge in the email. Email-friendly tables/inline styles, uncropped optimised JPEG and readable text fallback; verified desktop and 320/390px phone browser previews. Five receipt/delivery checks pass. [Illustrated preview](./screenshots/rsvp-confirmation-illustrated-2026-10-16.jpg). Live email-client rendering remains part of the production check; no real email sent.
+
+### Production activation — 25 October 2026
+
+- [x] GP-54 — Prefer upcoming single-date programme entries within the existing three-detail-page crawl budget so multi-day listings without session times do not consume the whole scan. Also exclude the idiom “drawing on” from creative-class matching; genuine life-drawing workshops retain their match. Meaningful regressions cover both failures found against the real Dublin programme. No invented start/end times or extra crawl budget.
+- [x] GP-55 — Preserve useful guest confirmation feedback when callbacks report delivered, bounced or complained instead of sent/failed. Actual delivery callbacks still require Resend webhook activation.
+- 70 unit checks, four isolated Worker/D1 journeys, temporary frontend build and deployment dry-run pass. Both public domains serve the reviewed frontend. Source collection, public review gating, live discovery filters, local-first friend planning and newsletter confirmation/preferences/unsubscribe/deletion verified. See [activation evidence and remaining user steps](./LAUNCH-2026-10-25.md).

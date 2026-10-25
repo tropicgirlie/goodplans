@@ -20,7 +20,7 @@ import {
   finishDiscoveryRun,
   scheduledNewsletter,
 } from "../src/newsletter.js";
-import { robotsPolicy } from "../src/discovery-sources.js";
+import { robotsPolicy, collectWebSource } from "../src/discovery-sources.js";
 import { filterDiscoveryEvents } from "../../shared/discovery-filters.js";
 
 const future = new Date(Date.now() + 7 * 86400000).toISOString();
@@ -191,6 +191,32 @@ test("Dublin.ie adapter uses programme day and visible performance time, never a
     "",
     "ranges must not invent an occurrence",
   );
+});
+test("a range-heavy programme still collects dated sessions within its three-page budget", async (t) => {
+  const { env, db } = database();
+  const base = 'https://dublin.ie/whats-on/';
+  const date = new Date(Date.now() + 10 * 86400000);
+  date.setUTCHours(12, 0, 0, 0);
+  const epoch = Math.floor(+date / 1000);
+  const label = `${date.getUTCDate()} ${date.toLocaleString('en-IE', { month: 'long', timeZone: 'UTC' })} ${date.getUTCFullYear()}`;
+  const cards = ['range-a', 'range-b', 'range-c', 'session-a', 'session-b', 'session-c'];
+  const index = cards.map(name => `<article class="event card" data-start-date="${epoch}" data-end-date="${epoch + (name.startsWith('range') ? 2 * 86400 : 0)}"><a href="${base}listings/${name}/">${name}</a></article>`).join('');
+  const visited = [];
+  const htmlResponse = html => new Response(html, { headers: { 'content-type': 'text/html' } });
+  t.mock.method(globalThis, 'fetch', async url => {
+    visited.push(url);
+    if (new URL(url).pathname === '/robots.txt') return new Response('User-agent: *\nAllow: /');
+    if (url === base) return htmlResponse(index);
+    const name = new URL(url).pathname.split('/').filter(Boolean).at(-1);
+    return htmlResponse(`<h1>${name}</h1><div class="event-info"><dl><dt>Date:</dt><dd>${name.startsWith('range') ? 'Dates vary' : label}</dd><dt>Time:</dt><dd>7pm</dd><dt>Address:</dt><dd>Test venue, Dublin 2, Ireland</dd></dl></div>`);
+  });
+  const picks = [];
+  const result = await collectWebSource(env, { id: 'test-programme', name: 'Test programme', url: base, link_path: '/whats-on/', keywords: '' }, async pick => picks.push(pick));
+  assert.equal(result.count, 3);
+  assert.deepEqual(picks.map(p => p.title), ['session-a', 'session-b', 'session-c']);
+  assert.equal(visited.length, 5, 'one robots check, one programme and three detail pages');
+  assert.ok(picks.every(p => p.review_status === 'candidate'));
+  db.close();
 });
 test("import rejects private URLs, lookalike hosts and unsafe redirects before fetching them", async (t) => {
   for (const url of [

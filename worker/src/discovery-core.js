@@ -64,7 +64,7 @@ const themeRules = [
     /\b(couples?|partners? welcome|date night|romantic)\b/i,
     18,
   ],
-  ["creative", /\b(watercolou?r|paint(?:ing)?|pottery|ceramics?|crafts?|sewing|floral|drawing|printmaking|art class|workshop)\b/i, 20],
+  ["creative", /\b(watercolou?r|paint(?:ing)?|pottery|ceramics?|crafts?|sewing|floral|drawing(?!\s+on\b)|printmaking|art class|workshop)\b/i, 20],
   ["dance", /\b(dance|dancing|salsa|bachata|ballet|movement|zumba|heels class)\b/i, 20],
   ["wellbeing", /\b(retreat|wellness|wellbeing|yoga|pilates|mindful(?:ness)?|spa|sound bath|meditat(?:e|ion))\b/i, 20],
   ["seasonal", /\b(christmas|xmas|elf|santa|winter lights?|halloween|pumpkin|festive market)\b/i, 20],

@@ -63,6 +63,10 @@ test("focused discovery explains women, caregiving, creative and seasonal matche
   assert.match(match.reason, /family & caregiving topic/i);
   assert.doesNotMatch(match.reason, /caregiving-friendly|childcare provided/i);
 });
+test("drawing on folklore does not label a live podcast as a creative class", () => {
+  assert.ok(!discoveryMatch({name:'Irish Mythology Podcast',info:'Drawing on mythology and folklore, a live Halloween performance.'}).themes.includes('creative'));
+  assert.ok(discoveryMatch({name:'Life drawing workshop'}).themes.includes('creative'));
+});
 test("partner discovery includes broad shared activities without gender assumptions", () => {
   const match = discoveryMatch({
     name: "Friday live comedy and music",

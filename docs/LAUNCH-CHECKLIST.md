@@ -1,4 +1,4 @@
-# Launch checklist — 9 October 2026
+# Launch checklist — updated 25 October 2026
 
 **Release target: an allowlisted, creator-led pilot. Not yet verified for public launch.**
 
@@ -17,9 +17,9 @@
 
 - [x] RESEND_API_KEY and EMAIL_FROM exist; a real sign-in code was received earlier.
 - [x] Production health endpoint responded at audit time.
-- [ ] Configure an authorised live event source, or curate reviewed manual listings. The production discovery feed was empty and Ticketmaster key absent at audit time.
+- [x] Enable a permitted live source and populate reviewed listings. Dublin.ie enabled; real queue collected three candidates, all three manually reviewed and published after a classifier correction. Ticketmaster remains optional.
 - [ ] Register the production Resend webhook and configure its signing secret. RESEND_WEBHOOK_SECRET was absent at audit time.
-- [ ] Confirm the production migration set and deploy the reviewed build. This pass has not changed production.
+- [x] Apply migrations through 0013 and deploy frontend/Worker to both custom domains. Live health, matching assets and anonymous host protection checked. [Activation evidence](./LAUNCH-2026-10-25.md).
 
 ## Required live verification
 
@@ -30,5 +30,7 @@
 - [ ] Host allowlisting remains the advertised pilot scope. Public organiser signup is not implemented.
 
 The scheduled collector queues candidates; approval remains mandatory before public listing or newsletter sending. Ticketmaster does not cover every independent class, retreat or community event. No listing guarantees safety, accessibility, availability or a booking.
+
+Partial live checks completed on 25 October: creator inbox received sign-in and newsletter confirmation messages, newsletter preferences/unsubscribe/deletion worked with no subscriber remaining, public discovery filters and event-to-plan handoff worked, and a local-first friend plan retained its date/venue/guest after reload at phone widths. A private backup restored into a separate local database with integrity OK and no foreign-key violations. These checks do not close the remaining authenticated event, edition, callback, sync, physical-device and operational-owner requirements above.
 
 After implementation checks, re-run a focused browser audit and complete these live checks before declaring the pilot ready.

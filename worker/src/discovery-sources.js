@@ -175,6 +175,9 @@ export async function collectWebSource(env, source, save) {
       (a, b) =>
         priority(b) - priority(a) ||
         Number(b.day > today) - Number(a.day > today) ||
+        // Range listings need a specific session before they can become a pick.
+        // Spend the bounded detail-page budget on single-date listings first.
+        Number(b.endDay === b.day) - Number(a.endDay === a.day) ||
         a.day.localeCompare(b.day),
     );
     const links = seeds.length

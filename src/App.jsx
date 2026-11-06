@@ -45,6 +45,7 @@ import OriginalHome, { defaultSettings } from "./components/OriginalHome";
 import AffinityMatchMatrix from "./components/AffinityMatchMatrix";
 import SettingsPanel from "./components/SettingsPanel";
 import LoginScreen from "./components/LoginScreen";
+import GoodPlansMobileNav from "./components/GoodPlansMobileNav";
 import {
   createEvent,
   exchangeInvite,
@@ -1245,7 +1246,7 @@ export default function App() {
         />
       )}
       <div
-        className={`gp-app scrapbook-tools ${page === "Overview" ? "home-tools" : ""}`}
+        className={`gp-app scrapbook-tools gp-mobile-shell ${page === "Overview" ? "home-tools" : ""}`}
       >
         {page !== "Overview" && (
           <>
@@ -1890,6 +1891,12 @@ export default function App() {
             </button>
           </div>
         )}
+        <GoodPlansMobileNav
+          page={page}
+          exploreLabel={regionDiscoveryLabel(settings.profile)}
+          onNavigate={(next) => navigate(next)}
+          onCreate={() => start()}
+        />
       </div>
     </>
   );

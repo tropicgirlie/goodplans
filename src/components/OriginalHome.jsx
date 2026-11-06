@@ -21,6 +21,7 @@ import {
 import GoogleMapsExplorer from "./GoogleMapsExplorer";
 import SettingsPanel from "./SettingsPanel";
 import AffinityMatchMatrix from "./AffinityMatchMatrix";
+import InvitationPreviewDemo from "./InvitationPreviewDemo";
 import { FRIENDS_DATA } from "../data/mockData";
 import { importEventLink, readImportedIdea } from "../lib/goodPlansApi";
 import { localDate, wallDateTime } from "../lib/plans";
@@ -187,6 +188,7 @@ export default function OriginalHome({
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [pickedDate, setPickedDate] = useState("");
   const [selectedFriends, setSelectedFriends] = useState(["f1", "f2"]);
+  const [invitePreview, setInvitePreview] = useState(null);
   const [importMessage, setImportMessage] = useState("");
   const city = settings.profile.city;
   const exampleFriends = settings.profile.country === "BR" ? BRAZIL_FRIENDS : settings.profile.country === "ES" ? SPAIN_FRIENDS : FRIENDS_DATA;
@@ -463,16 +465,32 @@ export default function OriginalHome({
           preferences={settings}
           selectedFriends={selectedFriends}
           setSelectedFriends={setSelectedFriends}
-          onOpenPlanModal={recommended => onCreate({
-            title: ui(recommended.name),
-            city,
-            location: [recommended.venue?.name, recommended.venue?.address].filter(Boolean).join(", "),
-            guests: exampleFriends.filter(f => selectedFriends.includes(f.id)).map(f => f.name),
-            notes: ui("Example draft: replace the sample guest names and confirm venue details before inviting anyone."),
-          })}
+          onOpenPlanModal={(recommended) =>
+            setInvitePreview({
+              title: ui(recommended.name),
+              city,
+              location: [recommended.venue?.name, recommended.venue?.address]
+                .filter(Boolean)
+                .join(", "),
+              guests: exampleFriends
+                .filter((f) => selectedFriends.includes(f.id))
+                .map((f) => f.name),
+              notes: ui(
+                "Example draft: replace the sample guest names and confirm venue details before inviting anyone.",
+              ),
+              image: "good-plans-invite-collage.png",
+            })
+          }
           onPersonalise={() => onManage("My people")}
         />
       </div>
+      <InvitationPreviewDemo
+        open={Boolean(invitePreview)}
+        initial={invitePreview || {}}
+        city={city}
+        onClose={() => setInvitePreview(null)}
+        onSavePlan={(draft) => onCreate(draft)}
+      />
       <section className="planner-section" id="planner">
         <div className="section-intro">
           <p className="eyebrow">{ui("the clever bit")}</p>
@@ -637,7 +655,28 @@ export default function OriginalHome({
           <p className="eyebrow">{ui("when it comes together")}</p>
           <h2>{ui("Send an invite")}<br />{ui("worth opening.")}</h2>
           <p>{ui("Every finished plan becomes a warm, simple page your friends can keep, read, and RSVP to.")}</p>
-          <button onClick={openPlan}>{ui("See an event page ")}<ArrowUpRight />
+          <button
+            type="button"
+            onClick={() =>
+              setInvitePreview({
+                title: activityCopy(selectedActivity) || ui("A good day together"),
+                guests: friend
+                  .split(",")
+                  .map((n) => n.trim())
+                  .filter(Boolean),
+                location: selectedVenue
+                  ? [selectedVenue.name, selectedVenue.address]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "",
+                date: pickedDate,
+                notes: ui(moment),
+                image: "good-plans-invite-collage.png",
+              })
+            }
+          >
+            {ui("See an event page ")}
+            <ArrowUpRight />
           </button>
         </div>
         <div className="event-aside">

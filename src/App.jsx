@@ -45,6 +45,9 @@ import OriginalHome, { defaultSettings } from "./components/OriginalHome";
 import AffinityMatchMatrix from "./components/AffinityMatchMatrix";
 import SettingsPanel from "./components/SettingsPanel";
 import LoginScreen from "./components/LoginScreen";
+import GoodPlansMobileNav from "./components/GoodPlansMobileNav";
+import IosHome from "./components/IosHome";
+import { useIosAppMode } from "./lib/iosApp";
 import {
   createEvent,
   exchangeInvite,
@@ -813,6 +816,12 @@ function PlanDetail({
 export default function App() {
   const language = useLocale();
   useEffect(() => { updateDocumentLanguage(); }, [language]);
+  const ios = useIosAppMode();
+  useEffect(() => {
+    document.documentElement.classList.toggle("ios-app", ios.appMode);
+    document.documentElement.classList.toggle("ios-standalone", ios.standalone);
+    document.body.classList.toggle("ios-app", ios.appMode);
+  }, [ios.appMode, ios.standalone]);
   const [plans, setPlans, storageError] = useSaved(PLAN_KEY, []);
   const [saved, setSaved] = useSaved("good-plans-saved-ideas", []);
   const [people, setPeople, peopleError] = useSaved(
@@ -1224,7 +1233,7 @@ export default function App() {
     );
   return (
     <>
-      {page === "Overview" && (
+      {page === "Overview" && !ios.appMode && (
         <OriginalHome
           syncError={cloud.error}
           syncRecovery={<SyncRecovery cloud={cloud} />}
@@ -1244,8 +1253,20 @@ export default function App() {
           }
         />
       )}
+      {page === "Overview" && ios.appMode && (
+        <IosHome
+          settings={settings}
+          plans={plans}
+          friends={friends}
+          currentUser={user}
+          showInstallTip={ios.showInstallTip}
+          onNavigate={navigate}
+          onCreate={() => start()}
+          onLogin={() => setLogin(true)}
+        />
+      )}
       <div
-        className={`gp-app scrapbook-tools ${page === "Overview" ? "home-tools" : ""}`}
+        className={`gp-app scrapbook-tools gp-mobile-shell ${page === "Overview" ? "home-tools" : ""} ${ios.appMode ? "ios-shell" : ""}`}
       >
         {page !== "Overview" && (
           <>
@@ -1890,6 +1911,12 @@ export default function App() {
             </button>
           </div>
         )}
+        <GoodPlansMobileNav
+          page={page}
+          exploreLabel={regionDiscoveryLabel(settings.profile)}
+          onNavigate={(next) => navigate(next)}
+          onCreate={() => start()}
+        />
       </div>
     </>
   );

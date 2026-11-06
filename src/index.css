@@ -168,3 +168,510 @@ input::placeholder, textarea::placeholder { color: #665e50; opacity: 1; }
   .about-mark img { width: 108px; height: 108px; }
   .about-promises { grid-column: 2; }
 }
+
+/* Invitation page preview (public demo, no login gate) */
+.invite-preview-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.invite-preview-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(35, 34, 27, 0.45);
+  backdrop-filter: blur(4px);
+}
+.invite-preview-panel {
+  position: relative;
+  width: min(920px, calc(100vw - 32px));
+  max-height: min(900px, calc(100vh - 32px));
+  overflow: auto;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 12px 12px 0 var(--orange);
+  padding: 28px 28px 32px;
+}
+.invite-preview-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.invite-preview-header h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 0.94;
+}
+.invite-preview-header button {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border: 1.5px solid var(--ink);
+  background: var(--pink);
+  color: var(--ink);
+  flex: 0 0 auto;
+}
+.invite-preview-header button svg {
+  width: 20px;
+  height: 20px;
+}
+.invite-preview-steps {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  margin: 0 0 22px;
+}
+.invite-preview-steps button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.invite-preview-steps button span {
+  color: var(--hot);
+  font: 700 10px "DM Mono", monospace;
+}
+.invite-preview-steps button.active {
+  background: var(--pink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.invite-preview-form {
+  max-width: 520px;
+}
+.invite-preview-form textarea {
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  padding: 13px 14px;
+  border-radius: 5px;
+  outline: none;
+  resize: vertical;
+  font: inherit;
+}
+.how-demo-picked {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ink);
+  background: #ded7f1;
+  font-size: 12px;
+}
+.how-demo-note {
+  margin: 0;
+  color: #746750;
+  font: 500 11px/1.4 "DM Mono", monospace;
+}
+.how-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+}
+.how-invite-preview {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 36px;
+  align-items: start;
+}
+.how-invite-card {
+  padding: 24px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--orange);
+}
+.how-invite-cover {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border: 1.5px solid var(--ink);
+  margin-bottom: 16px;
+}
+.how-invite-card h3 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 0.94;
+  color: var(--hot);
+}
+.how-invite-meta {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  border-top: 1.5px solid var(--hot);
+}
+.how-invite-meta p {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.how-invite-meta svg {
+  color: var(--hot);
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.how-invite-meta span {
+  display: grid;
+  gap: 3px;
+}
+.how-invite-meta small {
+  color: #625b47;
+}
+.how-invite-notes {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+.how-invite-rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.how-invite-rsvp button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 2px solid var(--ink);
+  background: var(--hot);
+  color: white;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.85;
+  cursor: default;
+}
+.how-invite-rsvp button:nth-child(2),
+.how-invite-rsvp button:nth-child(3) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.how-invite-aside h3 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  line-height: 0.94;
+}
+.how-invite-aside > p:not(.eyebrow) {
+  margin: 14px 0 0;
+  line-height: 1.5;
+  max-width: 340px;
+}
+@media (max-width: 800px) {
+  .how-invite-preview {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .invite-preview-panel {
+    padding: 20px 16px 24px;
+  }
+}
+
+/* Good Plans mobile app shell */
+.gp-mobile-shell {
+  padding-bottom: 0;
+}
+.gp-mobile-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 2px solid var(--ink);
+}
+.gp-mobile-nav button {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: #625b47;
+  font: 700 10px/1.1 "DM Mono", monospace;
+  text-transform: uppercase;
+  padding: 8px 4px;
+  min-height: 52px;
+}
+.gp-mobile-nav button svg {
+  width: 20px;
+  height: 20px;
+}
+.gp-mobile-nav button.active {
+  color: var(--hot);
+}
+.gp-mobile-nav .gp-mobile-create {
+  width: 48px;
+  height: 48px;
+  margin: -18px auto 0;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--hot);
+  color: white;
+  box-shadow: 3px 3px 0 var(--ink);
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 0;
+}
+.gp-mobile-nav .gp-mobile-create span {
+  display: none;
+}
+@media (max-width: 760px) {
+  .gp-mobile-shell {
+    padding-bottom: 84px;
+  }
+  .gp-mobile-shell .scrapbook-links {
+    display: none;
+  }
+  .gp-mobile-nav {
+    display: grid;
+  }
+}
+
+.gp-phone-stage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: #2a2720;
+}
+.gp-phone-frame {
+  width: min(430px, 100%);
+  min-height: min(860px, 92vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--pink);
+  overflow: hidden;
+  position: relative;
+}
+.gp-phone-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font: 700 11px "DM Mono", monospace;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.gp-phone-body {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 84px;
+}
+.gp-phone-nav {
+  display: grid !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* —— iOS / phone app shell —— */
+html.ios-app,
+body.ios-app {
+  background: var(--cream);
+}
+html.ios-standalone body {
+  overscroll-behavior-y: none;
+}
+.ios-shell.home-tools {
+  pointer-events: none;
+}
+.ios-shell.home-tools .gp-mobile-nav,
+.ios-shell.home-tools .gp-toast,
+.ios-shell.home-tools dialog,
+.ios-shell.home-tools .gp-modal-layer {
+  pointer-events: auto;
+}
+
+.ios-home {
+  min-height: 100dvh;
+  padding: calc(18px + env(safe-area-inset-top)) 18px calc(100px + env(safe-area-inset-bottom));
+  max-width: 480px;
+  margin: 0 auto;
+  background:
+    radial-gradient(120% 80% at 100% -10%, #ffd6c8 0%, transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, #ded7f1 0%, transparent 50%),
+    var(--cream);
+}
+.ios-home-header {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.ios-home-brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.ios-home-mark {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  flex: 0 0 auto;
+}
+.ios-home-brand h1 {
+  margin: 4px 0 0;
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 0.94;
+  color: var(--hot);
+}
+.ios-home-today {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 700 12px/1 "DM Mono", monospace;
+  color: #625b47;
+}
+.ios-install-tip {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--pink);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ios-install-tip svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--hot);
+}
+.ios-home-actions {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.ios-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.ios-action.primary {
+  background: var(--hot);
+  color: #fffaf0;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.ios-action svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+.ios-action span {
+  display: grid;
+  gap: 2px;
+}
+.ios-action b {
+  font-size: 15px;
+}
+.ios-action small {
+  font: 500 11px/1.3 "DM Mono", monospace;
+  opacity: 0.85;
+}
+.ios-home-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ios-home-section-head h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+.ios-plan-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.ios-plan-list button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+.ios-plan-date {
+  font: 700 10px/1 "DM Mono", monospace;
+  color: var(--hot);
+  text-transform: uppercase;
+}
+.ios-plan-list b {
+  font-size: 16px;
+}
+.ios-plan-list small {
+  color: #625b47;
+  font-size: 12px;
+}
+.ios-empty {
+  padding: 28px 18px;
+  border: 2px dashed var(--ink);
+  background: rgba(255, 250, 240, 0.7);
+  text-align: center;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+.ios-empty h3 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.05;
+}
+.ios-empty p {
+  margin: 0;
+  max-width: 28ch;
+  color: #625b47;
+  font-size: 14px;
+}
+.ios-home-foot {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: #625b47;
+}
+.gp-mobile-nav {
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+@media (max-width: 760px) {
+  .ios-shell .scrapbook-nav {
+    padding-top: env(safe-area-inset-top);
+  }
+}

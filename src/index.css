@@ -383,7 +383,7 @@ input::placeholder, textarea::placeholder { color: #665e50; opacity: 1; }
 
 /* Good Plans mobile app shell */
 .gp-mobile-shell {
-  padding-bottom: 84px;
+  padding-bottom: 0;
 }
 .gp-mobile-nav {
   position: fixed;
@@ -435,6 +435,9 @@ input::placeholder, textarea::placeholder { color: #665e50; opacity: 1; }
   display: none;
 }
 @media (max-width: 760px) {
+  .gp-mobile-shell {
+    padding-bottom: 84px;
+  }
   .gp-mobile-shell .scrapbook-links {
     display: none;
   }

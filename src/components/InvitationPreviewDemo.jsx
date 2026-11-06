@@ -18,6 +18,25 @@ import { localDate, prettyDate } from "../lib/plans";
  * “See an event page” CTA. Does not require sign-in; saving still creates a
  * local draft the visitor can publish later as a host.
  */
+function sampleGuests(cityName = "") {
+  const place = cityName.toLowerCase();
+  if (place.includes("paulo") || place.includes("rio") || place.includes("brasil")) {
+    return "Ana, Beatriz";
+  }
+  if (
+    place.includes("barcelona") ||
+    place.includes("madrid") ||
+    place.includes("espa")
+  ) {
+    return "Lucía, Sofía";
+  }
+  return "Maya, Aoife";
+}
+
+function fallbackVenue(cityName = "Dublin") {
+  return `${ui("Somewhere lovely in")} ${cityName || "Dublin"}`;
+}
+
 export default function InvitationPreviewDemo({
   open,
   onClose,
@@ -37,12 +56,14 @@ export default function InvitationPreviewDemo({
   useEffect(() => {
     if (!open) return;
     setActivity(initial.title || ui("A good day together"));
-    setFriendNames((initial.guests || []).join(", ") || ui("Maya, Aoife"));
+    setFriendNames(
+      (initial.guests || []).join(", ") || sampleGuests(city),
+    );
     setLocation(initial.location || "");
     setNotes(initial.notes || "");
     setDate(initial.date || "");
     setStep("details");
-  }, [open, initial.title, initial.location, initial.date, initial.notes, initial.guests]);
+  }, [open, city, initial.title, initial.location, initial.date, initial.notes, initial.guests]);
 
   if (!open) return null;
 
@@ -56,7 +77,7 @@ export default function InvitationPreviewDemo({
     date,
     time: initial.time || "14:00",
     endTime: initial.endTime || "16:00",
-    location: location.trim() || ui("Somewhere lovely in Dublin"),
+    location: location.trim() || fallbackVenue(city),
     guests,
     notes: notes.trim(),
     capacity: initial.capacity || 12,
@@ -153,7 +174,7 @@ export default function InvitationPreviewDemo({
               <input
                 value={friendNames}
                 onChange={(e) => setFriendNames(e.target.value)}
-                placeholder={ui("Maya, Aoife")}
+                placeholder={sampleGuests(city)}
               />
             </label>
             <label>
@@ -168,9 +189,7 @@ export default function InvitationPreviewDemo({
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder={ui(
-                  "A café, gallery, or ‘we’ll decide together’",
-                )}
+                placeholder={fallbackVenue(city)}
               />
             </label>
             <label>

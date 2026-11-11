@@ -257,7 +257,7 @@ export function matchesInterests(events, interests) {
 }
 export function issueText(issue, unsubscribeUrl) {
   const events = JSON.parse(issue.events_json);
-  return `${issue.intro}\n\n${events.map((e) => `${e.title}\n${new Date(e.starts_at).toLocaleString("en-IE", { timeZone: "Europe/Dublin", dateStyle: "full", timeStyle: "short" })} · Dublin time\n${e.venue}\n${e.price}\nAdd to my plans: ${issue.origin}/?discover=${encodeURIComponent(e.id)}\nDetails & tickets: ${e.url}`).join("\n\n")}\n\nAdding a plan does not reserve tickets. Check the source for availability and changes.\n\nYou opted in to Good Plans Dublin. Manage interests or unsubscribe: ${unsubscribeUrl}`;
+  return `${issue.intro}\n\n${events.map((e) => `${e.title}\n${new Date(e.starts_at).toLocaleString("en-IE", { timeZone: "Europe/Dublin", dateStyle: "full", timeStyle: "short" })} · Dublin time\n${e.venue}\n${e.price}\nAdd to my plans: ${issue.origin}/?discover=${encodeURIComponent(e.id)}\nDetails & tickets: ${e.url}`).join("\n\n")}\n\nAdding a plan does not reserve tickets. Check the source for availability and changes.\n\nYou opted in to Us & About Dublin. Manage interests or unsubscribe: ${unsubscribeUrl}`;
 }
 
 export function newsletterHtml(text, subject) {
@@ -281,10 +281,10 @@ export function newsletterHtml(text, subject) {
           ? line.indexOf("https://")
           : line.indexOf("http://");
       if (at < 0) return escape(line) || "<br>";
-      const label = line.slice(0, at).replace(/:\s*$/, "") || "Open Good Plans";
+      const label = line.slice(0, at).replace(/:\s*$/, "") || "Open Us & About";
       const link = line.slice(at);
       return `<a href="${escape(link)}" style="color:#58468d;font-weight:bold">${escape(label)}</a>`;
     })
     .join("<br>");
-  return `<!doctype html><html><body style="margin:0;background:#fff0ca;color:#28241f;font-family:Arial,sans-serif"><div style="max-width:620px;margin:0 auto;padding:32px 24px"><p style="font-weight:bold;letter-spacing:2px">GOOD PLANS DUBLIN</p><h1 style="font-family:Georgia,serif;color:#58468d">${escape(subject)}</h1><div style="background:#fffaf0;border:2px solid #28241f;padding:24px;line-height:1.6">${content}</div><p>Make time. Make it good.</p></div></body></html>`;
+  return `<!doctype html><html><body style="margin:0;background:#fff0ca;color:#28241f;font-family:Arial,sans-serif"><div style="max-width:620px;margin:0 auto;padding:32px 24px"><p style="font-weight:bold;letter-spacing:2px">US &amp; ABOUT DUBLIN</p><h1 style="font-family:Georgia,serif;color:#58468d">${escape(subject)}</h1><div style="background:#fffaf0;border:2px solid #28241f;padding:24px;line-height:1.6">${content}</div><p>Make time. Make it good.</p></div></body></html>`;
 }

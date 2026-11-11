@@ -6,6 +6,7 @@ import { SPAIN_FRIENDS } from "../../shared/spain";
 import LanguageSwitcher from "../i18n/LanguageSwitcher";
 import { ui, localeHref } from "../i18n/core";
 import Artwork from "./Artwork";
+import BrandLogo from "./BrandLogo";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
@@ -336,17 +337,8 @@ export default function OriginalHome({
         }}
       />
       <nav className="nav">
-        <a className="brand" href="#top" aria-label={ui("Good Plans home")}>
-          <Artwork
-            className="brand-mark"
-            src="/images/good-plans-mark.png"
-            alt=""
-          />
-          <span>
-            good
-            <br />
-            <i>plans</i>
-          </span>
+        <a className="brand" href="#top" aria-label={ui("Us & About home")}>
+          <BrandLogo />
         </a>
         <div className="nav-links">
           <a href="#about">{ui("About")}</a>
@@ -383,7 +375,7 @@ export default function OriginalHome({
           <h1>{ui("Make time.")}<br />
             <em>{ui("Make it good.")}</em>
           </h1>
-          <p className="hero-lede">{ui("Your friends are not another task on the list. Good Plans helps you turn “we should catch up” into a break that works for the people you love.")}</p>
+          <p className="hero-lede">{ui("Your friends are not another task on the list. Us & About helps you turn “we should catch up” into a break that works for the people you love.")}</p>
           <div className="hero-actions">
             <button className="primary" onClick={scrollToPlanner}>{ui("Plan something ")}<ArrowUpRight />
             </button>
@@ -423,13 +415,13 @@ export default function OriginalHome({
         <div className="about-mark">
           <Artwork
             src="/images/good-plans-mark.png"
-            alt={ui("The Good Plans calendar and map-pin mark")}
+            alt={ui("The Us & About calendar and map-pin mark")}
           />
         </div>
         <div className="about-copy">
-          <p className="eyebrow">{ui("why good plans exists")}</p>
+          <p className="eyebrow">{ui("why us & about exists")}</p>
           <h2>{ui("Friendship needs a place in the diary.")}</h2>
-          <p>{ui("Life gets full. Work, motherhood and other care, travel, family and the never-ending group chat can make seeing each other feel strangely hard. Good Plans gives the people you care about a little more thought, so a real break can actually happen.")}</p>
+          <p>{ui("Life gets full. Work, motherhood and other care, travel, family and the never-ending group chat can make seeing each other feel strangely hard. Us & About gives the people you care about a little more thought, so a real break can actually happen.")}</p>
         </div>
         <div className="about-promises">
           <div>
@@ -594,7 +586,7 @@ export default function OriginalHome({
         <div className="ideas-head">
           <p className="eyebrow">{ui("start anywhere")}</p>
           <h2>{ui("The plan is the excuse.")}</h2>
-          <p>{ui("Good Plans thinks about the details. You get to show up.")}</p>
+          <p>{ui("Us & About thinks about the details. You get to show up.")}</p>
         </div>
         <div className="idea-grid">
           {ideas.map(({ mark, title, note, color }) => (
@@ -649,18 +641,9 @@ export default function OriginalHome({
           <b>{ui("Meet there")}</b>
         </div>
       </section>
-      <footer><a href={localeHref("/?page=privacy")}>{ui("Privacy")}</a><a href={localeHref("/?page=support")}>{ui("Help & data requests")}</a>
-        <a className="brand" href="#top">
-          <Artwork
-            className="brand-mark"
-            src="/images/good-plans-mark.png"
-            alt=""
-          />
-          <span>
-            good
-            <br />
-            <i>plans</i>
-          </span>
+      <footer><a href={localeHref("/?page=app")}>{ui("iPhone app")}</a><a href={localeHref("/?page=privacy")}>{ui("Privacy")}</a><a href={localeHref("/?page=support")}>{ui("Help & data requests")}</a>
+        <a className="brand" href="#top" aria-label={ui("Us & About home")}>
+          <BrandLogo />
         </a>
         <p>{ui("for busy women who want to see their people more.")}</p>
         <button onClick={() => onManage("Organiser portal")}>{ui("My events")}</button>

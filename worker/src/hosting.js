@@ -84,7 +84,7 @@ export async function hosting(
       await sendEmail(env, {
         key: codeId,
         to: email,
-        subject: "Your Good Plans sign-in code",
+        subject: "Your Us & About sign-in code",
         text: `Your sign-in code is ${code}. It expires in five minutes. If you did not request it, ignore this email.`,
       });
     } catch (error) {

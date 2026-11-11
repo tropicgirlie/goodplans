@@ -24,7 +24,7 @@ async function request(path, options = {}) {
   if (!response.ok)
     throw new Error(
       data?.error ||
-        "Good Plans could not complete that request. Please try again.",
+        "Us & About could not complete that request. Please try again.",
     );
   if (!contentType.includes("application/json"))
     throw new Error(

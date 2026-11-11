@@ -15,7 +15,7 @@ export function receiptContent(event, invitation, rsvp, privateUrl, origin) {
   const time = new Intl.DateTimeFormat('en-IE',{timeZone:event.timezone,dateStyle:'full',timeStyle:'short'});
   const schedule=`${time.format(new Date(event.starts_at))} – ${time.format(new Date(event.ends_at))} (${event.timezone})`;
   const meaning=status==='accepted'?`You have a place in ${host}’s group.`:status==='waitlisted'?'You do not have a confirmed place in the group yet. We’ll email you if a place opens.':status==='maybe'?'You have not confirmed attendance. You can change your response using your private link.':status==='declined'?'You are not counted as attending.':'Our group meet-up is cancelled; check the original organiser about the underlying event.';
-  const ticketNote=event.plan_type==='attend'?'Your Good Plans RSVP does not buy or reserve a ticket. Book your own ticket with the original organiser.':'';
+  const ticketNote=event.plan_type==='attend'?'Your Us & About RSVP does not buy or reserve a ticket. Book your own ticket with the original organiser.':'';
   const details=[`${host} is inviting you to ${event.title}.`,schedule,event.venue_name,`${rsvp.party_size||1} ${rsvp.party_size===2?'people':'person'} in your party.`,meaning,event.booking_url?`Tickets / booking: ${event.booking_url}`:'',ticketNote].filter(Boolean);
   const calendarEvent={...event,title:status==='waitlisted'?`Waitlist — ${event.title}`:status==='maybe'?`Maybe — ${event.title}`:event.title,description:[event.description,`Your response: ${label}.`,meaning].filter(Boolean).join('\n\n'),calendar_status:['declined','cancelled'].includes(status)?'CANCELLED':status==='accepted'?'CONFIRMED':'TENTATIVE'};
   const google=calendarUrls(calendarEvent,origin).google;
@@ -26,7 +26,7 @@ export function receiptContent(event, invitation, rsvp, privateUrl, origin) {
 <style>@media only screen and (max-width:560px){.email-shell{padding:16px 10px!important}.email-content{padding:24px 20px!important}.cover-cell{display:block!important;width:100%!important;padding:0 0 24px!important}.title-cell{display:block!important;width:100%!important}.email-title{font-size:30px!important}}</style></head>
 <body style="margin:0;padding:0;background:#fff0ca;color:#28241f;font-family:Arial,Helvetica,sans-serif">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff0ca"><tr><td class="email-shell" align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px"><tr><td style="padding:0 0 20px;text-align:center;font-size:12px;font-weight:bold;letter-spacing:3px">GOOD PLANS &nbsp; / &nbsp; TIME WELL SPENT</td></tr>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px"><tr><td style="padding:0 0 20px;text-align:center;font-size:12px;font-weight:bold;letter-spacing:3px">US &amp; ABOUT &nbsp; / &nbsp; TIME WELL SPENT</td></tr>
 <tr><td style="background:#f49ac2;padding:0 6px 6px 0">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fffdf8;border:2px solid #28241f">
 <tr><td class="email-content" style="padding:28px">

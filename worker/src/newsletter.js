@@ -379,7 +379,7 @@ export async function newsletter(
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       fail("Enter a valid email address.");
     if (input.consent !== true)
-      fail("Please choose to receive Good Plans Dublin.");
+      fail("Please choose to receive Us & About Dublin.");
     const choices = interests(input.interests || []);
     await throttle(
       env,
@@ -426,8 +426,8 @@ export async function newsletter(
       to: email,
       subject:
         existing?.status === "active"
-          ? "Your Good Plans Dublin preferences"
-          : "Confirm your Good Plans Dublin subscription",
+          ? "Your Us & About Dublin preferences"
+          : "Confirm your Us & About Dublin subscription",
       text: `${existing?.status === "active" ? "Manage your interests or unsubscribe" : "Confirm that you want the weekly Dublin event picks. This confirmation expires in 24 hours"}:\n\n${link}\n\nIf you did not request this, ignore this email.`,
     });
     return response({

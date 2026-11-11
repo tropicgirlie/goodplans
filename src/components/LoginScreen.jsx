@@ -54,7 +54,7 @@ export default function LoginScreen({ onBack, onLoginSuccess }) {
       <button className="gp-text-button" onClick={onBack}>
         <ArrowLeft />{ui("Back to planner")}</button>
       <section className="gp-auth-card">
-        <p className="gp-eyebrow">{ui("GOOD PLANS · HOST SIGN-IN")}</p>
+        <p className="gp-eyebrow">{ui("US & ABOUT · HOST SIGN-IN")}</p>
         <h1>{ui("A good host starts here.")}</h1>
         <p>{ui("Sign in to publish private invitations and collect RSVPs. Your drafts stay saved on this device.")}</p>
         <form

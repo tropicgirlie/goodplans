@@ -93,7 +93,7 @@ export function calendarData(plan) {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Good Plans//Planner//EN",
+    "PRODID:-//Us & About//Planner//EN",
     "BEGIN:VEVENT",
     `UID:${plan.id}@goodplans`,
     `DTSTAMP:${stamp(new Date())}`,

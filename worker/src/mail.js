@@ -100,7 +100,7 @@ export async function queueEventNotice(env, event, kind, invitationId = null) {
       event_cancelled: "Plan cancelled",
       waitlist_promoted: "A place opened for you",
       reminder: "Your plan is coming up",
-    }[kind] || "Good Plans update";
+    }[kind] || "Us & About update";
   const statements = guests.results.map((g) =>
     emailStatement(env, {
       key: `${kind}-${event.id}-${kind === "reminder" ? event.starts_at : event.revision}-${g.id}`,

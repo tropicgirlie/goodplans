@@ -29,3 +29,10 @@ worker/.wrangler/
 !.env.example
 worker/.dev.vars
 *.backup.sql
+
+# Native app local build and user state
+mobile/**/.build/
+mobile/**/.swiftpm/
+mobile/**/DerivedData/
+mobile/**/xcuserdata/
+mobile/**/*.xcuserstate

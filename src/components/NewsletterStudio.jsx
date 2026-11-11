@@ -47,7 +47,7 @@ export default function NewsletterStudio({ selected, onSelect: setSelected }) {
   }
   return (
     <section className="newsletter-studio">
-      <span className="gp-eyebrow">{ui("GOOD PLANS DUBLIN")}</span>
+      <span className="gp-eyebrow">{ui("US & ABOUT DUBLIN")}</span>
       <h1>{ui("Dublin event manager")}</h1>
       <p>
         {ui(

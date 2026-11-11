@@ -10,7 +10,7 @@ People in Dublin who want to spend meaningful time with friends, partners, famil
 
 ## Product Purpose
 
-Good Plans helps someone find a worthwhile activity, choose the right people and time, send invitations, and manage the event through completion. Success means users discover plans that fit the people they are with, including women-centred gatherings and broad partner or group activities, then create a practical plan without losing the warmth of the original idea.
+Us & About helps someone find a worthwhile activity, choose the right people and time, send invitations, and manage the event through completion. Success means users discover plans that fit the people they are with, including women-centred gatherings and broad partner or group activities, then create a practical plan without losing the warmth of the original idea.
 
 ## Brand Personality
 

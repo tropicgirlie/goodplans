@@ -92,7 +92,7 @@ export function NewsletterSignup() {
   return (
     <section className="dublin-signup">
       <div>
-        <span className="gp-eyebrow">{ui("GOOD PLANS, IN YOUR INBOX")}</span>
+        <span className="gp-eyebrow">{ui("US & ABOUT, IN YOUR INBOX")}</span>
         <h2>{ui("Your weekly nudge to get together.")}</h2>
         <p>{ui("A small edit of Dublin events, ready to turn into a plan with your people. One weekly email. Leave whenever you like.")}</p>
       </div>
@@ -136,7 +136,7 @@ export function NewsletterSignup() {
         </div>
         <InterestChoices value={interests} onChange={setInterests} />
         <label className="dublin-consent">
-          <input name="consent" type="checkbox" required />{ui("Yes, send me Good Plans Dublin each week.")}</label>
+          <input name="consent" type="checkbox" required />{ui("Yes, send me Us & About Dublin each week.")}</label>
         <button className="gp-button" disabled={busy}>
           <Mail />
           {ui(busy ? "Sending confirmation…" : "Send me the good plans")}
@@ -272,7 +272,7 @@ export function NewsletterPreferences() {
   return (
     <main className="gp-app">
       <section className="dublin-preferences gp-form">
-        <a className="gp-text-button" href={localeHref("/")}>{ui("← Good Plans home")}</a>
+        <a className="gp-text-button" href={localeHref("/")}>{ui("← Us & About home")}</a>
         <h1>{ui("Your Dublin good plans.")}</h1>
         {error && (
           <p className="gp-error" role="alert">
@@ -292,7 +292,7 @@ export function NewsletterPreferences() {
         )}
         {data?.status === "active" && (
           <>
-            <p>{ui("You’re subscribed to Good Plans Dublin. We send issues that include at least one of your interests; leave all unchecked to receive every edition.")}</p>
+            <p>{ui("You’re subscribed to Us & About Dublin. We send issues that include at least one of your interests; leave all unchecked to receive every edition.")}</p>
             <InterestChoices value={choices} onChange={setChoices} />
             <button
               className="gp-button"

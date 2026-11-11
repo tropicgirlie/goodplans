@@ -5,7 +5,9 @@ import LanguageSwitcher, { useLocale } from "./i18n/LanguageSwitcher";
 import { updateDocumentLanguage } from "./i18n/core";
 import { ui, dateLocale, localeHref } from "./i18n/core";
 import Artwork from "./components/Artwork";
+import BrandLogo from "./components/BrandLogo";
 import ServicePages from "./components/ServicePages";
+import AppDownload from "./components/AppDownload";
 import DublinDiscovery, {
   NewsletterPreferences,
 } from "./components/DublinDiscovery";
@@ -205,12 +207,7 @@ function SyncRecovery({ cloud }) {
 function Brand() {
   return (
     <span className="gp-brand">
-      <span className="gp-brand-icon">
-        <CalendarDays size={23} />
-        <Heart size={10} />
-      </span>
-      good<span>plans</span>
-      <i>✳</i>
+      <BrandLogo />
     </span>
   );
 }
@@ -1178,7 +1175,9 @@ export default function App() {
     new URLSearchParams(window.location.search).get("newsletter") === "manage"
   )
     return <NewsletterPreferences />;
-  if (["privacy", "support"].includes(new URLSearchParams(window.location.search).get("page"))) return <ServicePages page={new URLSearchParams(window.location.search).get("page")} />;
+  const servicePage = new URLSearchParams(window.location.search).get("page");
+  if (servicePage === "app") return <AppDownload />;
+  if (["privacy", "support"].includes(servicePage)) return <ServicePages page={servicePage} />;
   if (login)
     return (
       <LoginScreen
@@ -1206,7 +1205,7 @@ export default function App() {
             <p>
               {ui(inviteError || "Ask your host for a fresh invitation.")}
             </p>
-            <a className="gp-button" href={localeHref("/")}>{ui("Go to Good Plans")}<ArrowRight />
+            <a className="gp-button" href={localeHref("/")}>{ui("Go to Us & About")}<ArrowRight />
             </a>
           </div>
         ) : (
@@ -1253,22 +1252,14 @@ export default function App() {
             <nav className="nav scrapbook-nav" aria-label={ui("Planning tools")}>
               <a
                 className="brand"
+                aria-label={ui("Us & About home")}
                 href={localeHref("/")}
                 onClick={(e) => {
                   e.preventDefault();
                   navigate("Overview");
                 }}
               >
-                <Artwork
-                  className="brand-mark"
-                  src="/images/good-plans-mark.png"
-                  alt=""
-                />
-                <span>
-                  good
-                  <br />
-                  <i>plans</i>
-                </span>
+                <BrandLogo />
               </a>
               <div className="scrapbook-links">
                 {[
@@ -1776,7 +1767,7 @@ export default function App() {
                     )}
                   </section>
                 )}
-                <footer className="gp-footer"><a href={localeHref("/?page=privacy")}>{ui("Privacy")}</a><a href={localeHref("/?page=support")}>{ui("Help & data requests")}</a>
+                <footer className="gp-footer"><a href={localeHref("/?page=app")}>{ui("iPhone app")}</a><a href={localeHref("/?page=privacy")}>{ui("Privacy")}</a><a href={localeHref("/?page=support")}>{ui("Help & data requests")}</a>
                   <span>
                     <Heart />{ui("Made for real life. And the people in it.")}</span>
                   <button
@@ -1786,7 +1777,7 @@ export default function App() {
                     {ui(user ? "Host account" : "Host sign-in")}
                     <ArrowUpRight />
                   </button>
-                  <span>{ui("good plans · by luana.systems")}</span>
+                  <span>{ui("us & about · by luana.systems")}</span>
                 </footer>
               </main>
             </div>

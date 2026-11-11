@@ -6,9 +6,9 @@ const dictionaries = Object.fromEntries(Object.entries({ es: spanish, 'pt-BR': p
   Object.assign(Object.create(null), Object.fromEntries(Object.entries(entries).map(([key, value]) => [key.trim().replace(/\s+/g, ' '), value])))
 ]));
 const metadata = {
-  en: { date: 'en-IE', title: 'Good Plans — Make time for your people', description: 'Plan catch-ups, outings and events with your people. Private plans stay on your device.' },
-  es: { date: 'es-ES', title: 'Good Plans — Haz un hueco para tu gente', description: 'Organiza encuentros, escapadas y eventos con tu gente. Tus planes privados se guardan en tu dispositivo.' },
-  'pt-BR': { date: 'pt-BR', title: 'Good Plans — Reserve tempo para quem você gosta', description: 'Planeje encontros, passeios e eventos com sua turma. Seus planos privados ficam salvos no seu dispositivo.' },
+  en: { date: 'en-IE', title: 'Us & About — Make time for your people', description: 'Plan catch-ups, outings and events with your people. Private plans stay on your device.' },
+  es: { date: 'es-ES', title: 'Us & About — Haz un hueco para tu gente', description: 'Organiza encuentros, escapadas y eventos con tu gente. Tus planes privados se guardan en tu dispositivo.' },
+  'pt-BR': { date: 'pt-BR', title: 'Us & About — Reserve tempo para quem você gosta', description: 'Planeje encontros, passeios e eventos com sua turma. Seus planos privados ficam salvos no seu dispositivo.' },
 };
 const STORAGE_KEY = 'good-plans-language';
 const listeners = new Set();

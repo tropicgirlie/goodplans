@@ -160,7 +160,6 @@ export default function SettingsPanel({
       <aside className="settings-panel">
         <header className="settings-header">
           <div>
-            <p className="eyebrow">{ui("make the plan yours")}</p>
             <h2>{ui("Planning settings")}</h2>
           </div>
           <button onClick={onClose} aria-label={ui("Close settings")}>

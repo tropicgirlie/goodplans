@@ -180,7 +180,6 @@ export default function DublinDiscovery({ onAdd }) {
   const visible = filterDiscoveryEvents(events,filters).filter(event=>fitsPlanningContext(event,planningContext));
   return (
     <section className="dublin-discovery">
-      <span className="gp-eyebrow">{ui("A LITTLE INSPIRATION, CLOSE TO HOME")}</span>
       <h1>{ui("This week in Dublin.")}</h1>
       <p>{ui("Good reasons to meet up over the next two weeks. Pick an event, make it a plan, and bring your people.")}</p>
       <fieldset className="dublin-context-picker">

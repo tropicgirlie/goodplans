@@ -1,98 +1,10 @@
 @font-face {
   font-family: 'Bricolage Grotesque';
   font-style: normal;
-  font-weight: 500;
-  font-stretch: condensed;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
   font-display: swap;
-  src: url(/fonts/00f847ecae62.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: semi-condensed;
-  font-display: swap;
-  src: url(/fonts/2726f052535f.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-  font-display: swap;
-  src: url(/fonts/69dffb6078c7.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 600;
-  font-stretch: condensed;
-  font-display: swap;
-  src: url(/fonts/0a808272d79d.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 600;
-  font-stretch: semi-condensed;
-  font-display: swap;
-  src: url(/fonts/76e18870e6a2.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 600;
-  font-stretch: normal;
-  font-display: swap;
-  src: url(/fonts/7f8e7b9c5a19.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 700;
-  font-stretch: condensed;
-  font-display: swap;
-  src: url(/fonts/0a982805aea1.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 700;
-  font-stretch: semi-condensed;
-  font-display: swap;
-  src: url(/fonts/2f4e04845fef.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 700;
-  font-stretch: normal;
-  font-display: swap;
-  src: url(/fonts/b7162943aa64.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 800;
-  font-stretch: condensed;
-  font-display: swap;
-  src: url(/fonts/5dbcbafd7747.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 800;
-  font-stretch: semi-condensed;
-  font-display: swap;
-  src: url(/fonts/a5a8f2f28d02.woff2) format('truetype');
-}
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 800;
-  font-stretch: normal;
-  font-display: swap;
-  src: url(/fonts/556c0d0e9e35.woff2) format('truetype');
+  src: url(/fonts/bricolage-grotesque-variable.woff2) format('woff2');
 }
 @font-face {
   font-family: 'DM Mono';

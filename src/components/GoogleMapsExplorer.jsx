@@ -101,7 +101,6 @@ export default function GoogleMapsExplorer({
   return (
     <section className="maps-section" id="map">
       <div className="maps-intro">
-        <p className="eyebrow">{ui("where could this happen?")}</p>
         <h2>{ui("Let the city")}<br />{ui("join the plan.")}</h2>
         <p>{ui("Start with your activity palette, then keep a small shortlist that makes sense for the day you actually have.")}</p>
         <span className="maps-note">

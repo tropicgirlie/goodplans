@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T10:21:29Z",
+  "title": "Design System: Us & About",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "canonical": "oklch(53.0% 0.169 31.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.056 31.3)",
+          "oklch(25.0% 0.094 31.3)",
+          "oklch(37.0% 0.139 31.3)",
+          "oklch(49.0% 0.169 31.3)",
+          "oklch(61.0% 0.169 31.3)",
+          "oklch(73.0% 0.169 31.3)",
+          "oklch(84.0% 0.108 31.3)",
+          "oklch(95.0% 0.034 31.3)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary hover",
+        "canonical": "oklch(56.1% 0.164 30.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.055 30.9)",
+          "oklch(25.0% 0.091 30.9)",
+          "oklch(37.0% 0.134 30.9)",
+          "oklch(49.0% 0.164 30.9)",
+          "oklch(61.0% 0.164 30.9)",
+          "oklch(73.0% 0.164 30.9)",
+          "oklch(84.0% 0.105 30.9)",
+          "oklch(95.0% 0.033 30.9)"
+        ]
+      },
+      "coral": {
+        "role": "primary",
+        "displayName": "Coral",
+        "canonical": "oklch(63.7% 0.194 31.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.065 31.3)",
+          "oklch(25.0% 0.108 31.3)",
+          "oklch(37.0% 0.160 31.3)",
+          "oklch(49.0% 0.194 31.3)",
+          "oklch(61.0% 0.194 31.3)",
+          "oklch(73.0% 0.194 31.3)",
+          "oklch(84.0% 0.124 31.3)",
+          "oklch(95.0% 0.039 31.3)"
+        ]
+      },
+      "violet": {
+        "role": "secondary",
+        "displayName": "Violet",
+        "canonical": "oklch(49.1% 0.113 291.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.038 291.3)",
+          "oklch(25.0% 0.063 291.3)",
+          "oklch(37.0% 0.093 291.3)",
+          "oklch(49.0% 0.113 291.3)",
+          "oklch(61.0% 0.113 291.3)",
+          "oklch(73.0% 0.113 291.3)",
+          "oklch(84.0% 0.072 291.3)",
+          "oklch(95.0% 0.023 291.3)"
+        ]
+      },
+      "blue": {
+        "role": "secondary",
+        "displayName": "Blue",
+        "canonical": "oklch(48.1% 0.159 261.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.053 261.3)",
+          "oklch(25.0% 0.088 261.3)",
+          "oklch(37.0% 0.131 261.3)",
+          "oklch(49.0% 0.159 261.3)",
+          "oklch(61.0% 0.159 261.3)",
+          "oklch(73.0% 0.159 261.3)",
+          "oklch(84.0% 0.102 261.3)",
+          "oklch(95.0% 0.032 261.3)"
+        ]
+      },
+      "pink": {
+        "role": "tertiary",
+        "displayName": "Pink",
+        "canonical": "oklch(79.3% 0.109 352.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.036 352.6)",
+          "oklch(25.0% 0.060 352.6)",
+          "oklch(37.0% 0.090 352.6)",
+          "oklch(49.0% 0.109 352.6)",
+          "oklch(61.0% 0.109 352.6)",
+          "oklch(73.0% 0.109 352.6)",
+          "oklch(84.0% 0.070 352.6)",
+          "oklch(95.0% 0.022 352.6)"
+        ]
+      },
+      "orange": {
+        "role": "tertiary",
+        "displayName": "Orange",
+        "canonical": "oklch(73.8% 0.161 54.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.054 54.0)",
+          "oklch(25.0% 0.089 54.0)",
+          "oklch(37.0% 0.132 54.0)",
+          "oklch(49.0% 0.161 54.0)",
+          "oklch(61.0% 0.161 54.0)",
+          "oklch(73.0% 0.161 54.0)",
+          "oklch(84.0% 0.103 54.0)",
+          "oklch(95.0% 0.032 54.0)"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "canonical": "oklch(95.7% 0.052 89.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.017 89.0)",
+          "oklch(25.0% 0.029 89.0)",
+          "oklch(37.0% 0.043 89.0)",
+          "oklch(49.0% 0.052 89.0)",
+          "oklch(61.0% 0.052 89.0)",
+          "oklch(73.0% 0.052 89.0)",
+          "oklch(84.0% 0.033 89.0)",
+          "oklch(95.0% 0.010 89.0)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(98.6% 0.014 84.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 84.6)",
+          "oklch(25.0% 0.008 84.6)",
+          "oklch(37.0% 0.012 84.6)",
+          "oklch(49.0% 0.014 84.6)",
+          "oklch(61.0% 0.014 84.6)",
+          "oklch(73.0% 0.014 84.6)",
+          "oklch(84.0% 0.009 84.6)",
+          "oklch(95.0% 0.003 84.6)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(25.1% 0.013 100.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 100.5)",
+          "oklch(25.0% 0.007 100.5)",
+          "oklch(37.0% 0.011 100.5)",
+          "oklch(49.0% 0.013 100.5)",
+          "oklch(61.0% 0.013 100.5)",
+          "oklch(73.0% 0.013 100.5)",
+          "oklch(84.0% 0.008 100.5)",
+          "oklch(95.0% 0.003 100.5)"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted ink",
+        "canonical": "oklch(48.5% 0.024 81.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.008 81.7)",
+          "oklch(25.0% 0.013 81.7)",
+          "oklch(37.0% 0.020 81.7)",
+          "oklch(49.0% 0.024 81.7)",
+          "oklch(61.0% 0.024 81.7)",
+          "oklch(73.0% 0.024 81.7)",
+          "oklch(84.0% 0.015 81.7)",
+          "oklch(95.0% 0.005 81.7)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "oklch(83.7% 0.067 89.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.022 89.0)",
+          "oklch(25.0% 0.037 89.0)",
+          "oklch(37.0% 0.055 89.0)",
+          "oklch(49.0% 0.067 89.0)",
+          "oklch(61.0% 0.067 89.0)",
+          "oklch(73.0% 0.067 89.0)",
+          "oklch(84.0% 0.043 89.0)",
+          "oklch(95.0% 0.013 89.0)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "oklch(100.0% 0.000 0.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 0.0)",
+          "oklch(25.0% 0.000 0.0)",
+          "oklch(37.0% 0.000 0.0)",
+          "oklch(49.0% 0.000 0.0)",
+          "oklch(61.0% 0.000 0.0)",
+          "oklch(73.0% 0.000 0.0)",
+          "oklch(84.0% 0.000 0.0)",
+          "oklch(95.0% 0.000 0.0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Homepage hero at 92% width."
+      },
+      "heading": {
+        "displayName": "Heading",
+        "purpose": "Section, service and planner titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading copy and form text."
+      },
+      "action": {
+        "displayName": "Action",
+        "purpose": "Button text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Short descriptions of tasks or states."
+      },
+      "stamp": {
+        "displayName": "Stamp",
+        "purpose": "Dates, venue indexes and ordered steps."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "5px 5px 0 #23221b",
+        "purpose": "Homepage idea card."
+      },
+      {
+        "name": "dialog",
+        "value": "5px 5px 0 #f29ec2",
+        "purpose": "Planner dialog."
+      },
+      {
+        "name": "action",
+        "value": "3px 3px 0 #23221b",
+        "purpose": "Planner action."
+      }
+    ],
+    "motion": [
+      {
+        "name": "planner-button",
+        "value": "160ms ease",
+        "purpose": "Button background and transform feedback."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow-phone",
+        "value": "400px"
+      },
+      {
+        "name": "planner-phone",
+        "value": "600px"
+      },
+      {
+        "name": "settings-tabs",
+        "value": "700px"
+      },
+      {
+        "name": "home-stack",
+        "value": "760px"
+      },
+      {
+        "name": "nav-wrap",
+        "value": "1250px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary planner button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Use for the main action in a planner screen or dialog.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Save my plan</button>",
+      "css": ".ds-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 18px; border: 2px solid var(--ink, #23221b); border-radius: 999px; box-sizing: border-box; box-shadow: 3px 3px 0 var(--ink, #23221b); font: 600 13px var(--font-body, \"DM Sans\", sans-serif); cursor: pointer; background: var(--hot, #b93825); color: white; } .ds-primary:hover:not(:disabled) { filter: brightness(.96); } .ds-primary:focus-visible { outline: 3px solid #cc7451; outline-offset: 4px; } .ds-primary:disabled { opacity: .55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary planner button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Use for an alternate action alongside the main action.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Choose another date</button>",
+      "css": ".ds-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 18px; border: 2px solid var(--ink, #23221b); border-radius: 999px; box-sizing: border-box; box-shadow: 3px 3px 0 var(--ink, #23221b); font: 600 13px var(--font-body, \"DM Sans\", sans-serif); cursor: pointer; background: var(--paper, #fffaf0); color: var(--ink, #23221b); } .ds-secondary:hover:not(:disabled) { filter: brightness(.96); } .ds-secondary:focus-visible { outline: 3px solid #cc7451; outline-offset: 4px; } .ds-secondary:disabled { opacity: .55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Planner text field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "A visible label and a paper input with an ink boundary.",
+      "html": "<label class=\"ds-label\">Plan name<input class=\"ds-field\" placeholder=\"Coffee on Saturday\"></label>",
+      "css": ".ds-label { display: block; color: var(--ink, #23221b); font: 600 12px var(--font-body, \"DM Sans\", sans-serif); } .ds-field { display: block; box-sizing: border-box; width: 100%; min-height: 44px; margin-top: 7px; padding: 11px 12px; border: 1.5px solid var(--ink, #23221b); border-radius: 0; background: var(--paper, #fffaf0); color: var(--ink, #23221b); font: 400 13px var(--font-body, \"DM Sans\", sans-serif); } .ds-field::placeholder { color: #665e50; opacity: 1; } .ds-field:focus-visible { outline: 3px solid #cc7451; outline-offset: 4px; } @media (max-width: 600px) { .ds-field { font-size: 1rem; } }"
+    },
+    {
+      "name": "Homepage idea card",
+      "kind": "card",
+      "refersTo": "idea-card",
+      "description": "A square paper surface with an ink offset.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Make something</h3><p class=\"ds-card-copy\">Pottery, collage, or an after-hours workshop</p></article>",
+      "css": ".ds-card { padding: 24px; color: var(--ink, #23221b); background: var(--paper, #fffaf0); border: 2px solid var(--ink, #23221b); box-shadow: 5px 5px 0 var(--ink, #23221b); } .ds-card-title { margin: 0; font: 400 29px/.92 var(--font-heading, \"Bricolage Grotesque\", sans-serif); letter-spacing: -.035em; } .ds-card-copy { margin: 8px 0 0; font: 400 13px/1.35 var(--font-body, \"DM Sans\", sans-serif); }"
+    },
+    {
+      "name": "Planner category tag",
+      "kind": "chip",
+      "refersTo": "category-tag",
+      "description": "A compact text label for a category or status.",
+      "html": "<span class=\"ds-tag\">Workshops</span>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 4px; background: var(--pink, #f29ec2); color: var(--ink, #23221b); font: 600 var(--text-label, .75rem) var(--font-body, \"DM Sans\", sans-serif); letter-spacing: .02em; }"
+    },
+    {
+      "name": "Workspace navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Underline the active page and keep the links on the same baseline.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Planning tools\"><a class=\"ds-nav-link\" href=\"/?view=plans\" aria-current=\"page\">My plans</a><a class=\"ds-nav-link\" href=\"/?view=people\">My people</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 18px; } .ds-nav-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink, #23221b); text-decoration: none; font: 400 13px/1.2 var(--font-body, \"DM Sans\", sans-serif); } .ds-nav-link:hover, .ds-nav-link[aria-current=\"page\"] { color: var(--hot, #b93825); text-decoration: underline; text-underline-offset: 7px; } .ds-nav-link:focus-visible { outline: 3px solid #cc7451; outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "An illustrated invitation with clear planning controls.",
+    "overview": "Us & About pairs the warmth of a paper invitation with the clarity people need to settle a date, check a venue, or reply. Cream backgrounds and ink outlines hold together the cut-paper illustration, red actions, and violet lettering. Keep the illustrations at moments where people imagine or share a plan. Let fields, dates, and response states carry the planning screens.\n\nThe web brand combines the illustrated calendar and map pin with the lowercase **us & about** wordmark. The custom violet ampersand belongs to the wordmark. Use the accessible name **Us & About** when the wordmark appears on its own and **Us & About home** when it links home. The native app uses the same calendar illustration as its app icon.",
+    "keyCharacteristics": [
+      "Cream and paper surfaces",
+      "Crisp offset edges",
+      "Custom ampersand"
+    ],
+    "rules": [],
+    "dos": [
+      "Give each screen a clear heading and one main action. Add a section label when it identifies a task, a collection, or a real step.",
+      "Use the illustrated brand where it helps people picture an outing. Give forms and guest lists room to breathe.",
+      "Check a narrow phone width and keyboard focus when changing a shared component. Verify that long guest names, titles, and locations can wrap."
+    ],
+    "donts": [
+      "Avoid the look of a generic corporate events directory or nightlife-only feed. Show a range of outings and use the existing palette throughout.",
+      "Avoid gender stereotypes in illustrations, categories, and suggestions. Use the interests and context people choose for themselves."
+    ]
+  }
+}

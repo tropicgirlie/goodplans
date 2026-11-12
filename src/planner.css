@@ -16,8 +16,9 @@
 .gp-app h1,
 .gp-app h2,
 .gp-app h3 {
-  font-family: "Bricolage Grotesque", sans-serif;
-  letter-spacing: -0.045em;
+  font-family: var(--font-heading);
+  font-weight: 650;
+  letter-spacing: -.035em;
   line-height: 1.15;
 }
 .gp-app button,
@@ -119,10 +120,8 @@
   font-size: 12px !important;
 }
 .gp-eyebrow {
-  font:
-    500 10px/1.4 "DM Mono",
-    monospace;
-  letter-spacing: 0.13em;
+  font: 700 var(--text-label)/1.4 var(--font-body);
+  letter-spacing: 0.045em;
   color: var(--gp-muted);
   margin: 0 0 11px;
 }
@@ -144,10 +143,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font:
-    750 30px/1 "Bricolage Grotesque",
-    sans-serif;
-  letter-spacing: -1.7px;
+  font: 750 30px/1 var(--font-heading);
+  letter-spacing: -.035em;
   white-space: nowrap;
 }
 .gp-brand > span:not(.gp-brand-icon) {
@@ -186,8 +183,7 @@
 }
 .gp-sidebar-caption {
   font:
-    400 7px "DM Mono",
-    monospace;
+    600 10px var(--font-body);
   letter-spacing: 1.1px;
   margin: 17px 0 37px;
   white-space: nowrap;
@@ -363,33 +359,15 @@
   position: relative;
   z-index: 1;
 }
-.gp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #5d775c;
-  font:
-    9px "DM Mono",
-    monospace;
-  letter-spacing: 0.07em;
-}
-.gp-pill > span {
-  width: 6px;
-  height: 6px;
-  background: #6b8a5c;
-  border-radius: 50%;
-}
 .gp-hero h2 {
   font-size: 45px;
   line-height: 1.08;
   margin: 18px 0 13px;
-  letter-spacing: -2px;
+  letter-spacing: -.035em;
 }
 .gp-hero h2 em {
-  font-family: Georgia, serif;
-  font-weight: 400;
+  font-weight: 500;
   color: #476746;
-  letter-spacing: -1.8px;
 }
 .gp-hero p {
   font-size: 12px;
@@ -440,15 +418,13 @@
   padding: 16px 30px 19px 19px;
   transform: rotate(7deg);
   font-size: 23px;
-  font-family: "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-heading);
   line-height: 1.05;
   box-shadow: 0 3px 14px #26352820;
   z-index: 2;
 }
 .gp-paper-note em {
-  font:
-    italic 23px Georgia,
-    serif;
+  font: italic 500 23px var(--font-heading);
 }
 .gp-paper-note svg {
   position: absolute;
@@ -529,8 +505,7 @@
 }
 .gp-section-heading h2 > span {
   font:
-    500 11px "DM Sans",
-    sans-serif;
+    500 11px var(--font-body);
   padding: 4px 7px;
   border-radius: 5px;
   background: #e9eddf;
@@ -762,12 +737,13 @@
   background: #fffdf4;
   min-width: 40px;
   border-radius: 5px;
-  font-size: 9px;
+  font: 500 11px/1.25 var(--font-stamp);
   padding: 5px;
   text-transform: uppercase;
 }
 .gp-date-stamp b {
   font-size: 18px;
+  font-weight: 500;
   line-height: 1.1;
 }
 .gp-plan-body {
@@ -889,7 +865,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 8px;
+  font-size: var(--text-label);
+  font-weight: 600;
   letter-spacing: 0.02em;
   border-radius: 4px;
   background: #fffaf2;
@@ -1331,8 +1308,7 @@
 .gp-invite-text pre {
   white-space: pre-wrap;
   font:
-    12px/1.7 "DM Sans",
-    sans-serif;
+    12px/1.7 var(--font-body);
   background: #f2f2e9;
   padding: 15px;
   border-radius: 6px;
@@ -1542,10 +1518,7 @@
   .gp-hero-copy {
     padding: 26px 0 25px 23px;
   }
-  .gp-pill {
-    font-size: 7px;
-  }
-  .gp-shortcuts > button > svg {
+    .gp-shortcuts > button > svg {
     display: none;
   }
   .gp-shortcuts small {
@@ -2126,8 +2099,7 @@
   margin: 0 auto 16px;
   padding: 0 24px;
   font:
-    10px "DM Mono",
-    monospace;
+    var(--text-label) var(--font-body);
   color: #746750;
 }
 .host-portal {
@@ -2247,7 +2219,6 @@
 /* Dublin discovery and the organiser's weekly edit share the scrapbook palette. */
 .dublin-discovery h1,
 .newsletter-studio h1 {
-  font-family: Georgia, serif;
   font-size: clamp(2.3rem, 5vw, 4rem);
   line-height: 1.05;
   color: #58468d;
@@ -2277,7 +2248,6 @@
   color: #4f3b7a;
 }
 .dublin-pick h3 {
-  font-family: Georgia, serif;
   font-size: 1.55rem;
   line-height: 1.2;
   margin: 20px 0 12px;
@@ -2343,7 +2313,6 @@
   border-radius: 8px;
 }
 .dublin-signup h2 {
-  font-family: Georgia, serif;
   font-size: 2.1rem;
   line-height: 1.15;
   margin: 18px 0;
@@ -2513,9 +2482,9 @@
   border-radius: 0;
 }
 
-.service-page h1 { font-family: Georgia, serif; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.12; letter-spacing: -.035em; margin: 24px 0 12px; }
-.service-page h2 { font-family: Georgia, serif; font-size: 1.55rem; margin: 24px 0 6px; }
-.service-page p { line-height: 1.7; }
+.service-page h1 { font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.12; margin: 24px 0 12px; }
+.service-page h2 { font-size: 1.55rem; margin: 24px 0 6px; }
+.service-page p { max-width: 65ch; font-size: var(--text-body); line-height: 1.7; }
 .service-page a { text-decoration: underline; text-underline-offset: 4px; }
 .service-page select { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d8d4cc; border-radius: 6px; background: #fffdfa; color: inherit; }
 .service-page button { min-height: 44px; }
@@ -2551,7 +2520,6 @@
 .gp-storage-status details[open] { flex-basis: 100%; margin-left: 0; }
 .gp-storage-status details p { max-width: 65ch; padding-bottom: 12px; }
 .gp-app { --gp-muted: #665e50; }
-.gp-app h1, .gp-app h2, .gp-app h3 { letter-spacing: -.035em; }
 .gp-text-button, .gp-footer a { min-height: 44px; display: inline-flex; align-items: center; }
 .gp-footer a { padding-inline: 4px; }
 .gp-main .circle-heading { margin-bottom: 24px; }

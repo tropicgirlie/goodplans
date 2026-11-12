@@ -12,16 +12,12 @@
   margin-bottom: 36px;
 }
 .circle-eyebrow {
-  font:
-    700 11px/1.4 "DM Mono",
-    monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font: 700 var(--text-label)/1.4 var(--font-body);
   color: var(--olive);
   margin: 0 0 16px;
 }
 .circle-heading h2 {
-  font-family: "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(36px, 4.4vw, 58px);
   font-weight: 600;
   letter-spacing: -0.035em;
@@ -62,9 +58,7 @@
   gap: 11px;
 }
 .circle-step > span {
-  font:
-    500 11px "DM Mono",
-    monospace;
+  font: 500 11px var(--font-stamp);
   color: var(--olive);
 }
 .circle-step h3 {
@@ -214,7 +208,7 @@
 }
 .circle-idea-copy > b {
   display: block;
-  font-family: "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 650;
   font-size: 20px;
   line-height: 1.2;
@@ -230,11 +224,7 @@
 }
 .circle-pick-label {
   display: block;
-  text-transform: uppercase;
-  font:
-    500 9px "DM Mono",
-    monospace;
-  letter-spacing: 0.1em;
+  font: 600 var(--text-label)/1.4 var(--font-body);
   color: var(--olive);
   margin-bottom: 7px;
 }
@@ -256,9 +246,7 @@
   background: transparent;
   border: 0;
   color: var(--olive);
-  font:
-    700 12px "DM Sans",
-    sans-serif;
+  font: 700 12px var(--font-body);
   cursor: pointer;
   margin-top: 12px;
   text-decoration: underline;

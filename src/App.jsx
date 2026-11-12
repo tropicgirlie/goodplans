@@ -247,7 +247,6 @@ function Modal({ title, onClose, children, wide = false, compact = false, invita
       <div className="gp-dialog-content">
         <header>
           <div>
-            {!compact && <p className="gp-eyebrow">{ui("A LITTLE TIME TOGETHER")}</p>}
             <h2>{title}</h2>
           </div>
           <div className="gp-dialog-controls">
@@ -1329,7 +1328,6 @@ export default function App() {
                 {page !== "Organiser portal" && page !== "Dublin this week" && (
                   <div className="gp-heading">
                     <div>
-                      <p className="gp-eyebrow">{ui("YOUR PEOPLE. YOUR KIND OF PLANS.")}</p>
                       <h1>
                         {ui(page === "Overview"
                           ? "Good things start with a plan."
@@ -1363,8 +1361,6 @@ export default function App() {
                   <>
                     <section className="gp-hero">
                       <div className="gp-hero-copy">
-                        <span className="gp-pill">
-                          <span />{ui("MAKE TIME FOR THE GOOD STUFF")}</span>
                         <h2>{ui("Less “we should.”")}<br />{ui("More ")}<em>{ui("“see you there.”")}</em>
                         </h2>
                         <p>{ui("Get your favourite people out of the group chat")}<br className="gp-desktop" />{ui(" and into a really good day.")}</p>
@@ -1625,7 +1621,6 @@ export default function App() {
                   <section className="gp-inspiration">
                     <div className="gp-section-heading">
                       <div>
-                        <p className="gp-eyebrow">{ui("A LITTLE INSPIRATION")}</p>
                         <h2>
                           {ui(page === "Saved ideas"
                             ? "Your someday starts here."

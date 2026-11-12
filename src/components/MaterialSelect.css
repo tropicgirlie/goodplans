@@ -18,12 +18,12 @@
   --md-outlined-select-text-field-outline-color: #8b7d60;
   --md-outlined-select-text-field-hover-outline-color: var(--ink, #23221b);
   --md-outlined-select-text-field-focus-outline-color: var(--olive, #62539b);
-  --md-outlined-select-text-field-input-text-font: 'DM Sans', sans-serif;
+  --md-outlined-select-text-field-input-text-font: var(--font-body);
   --md-outlined-select-text-field-input-text-size: 14px;
   --md-outlined-select-text-field-input-text-weight: 500;
   --md-menu-container-color: var(--paper, #fffaf0);
   --md-menu-container-shape: 8px;
-  --md-menu-item-label-text-font: 'DM Sans', sans-serif;
+  --md-menu-item-label-text-font: var(--font-body);
   --md-menu-item-label-text-size: 14px;
   --md-menu-item-one-line-container-height: 48px;
 }

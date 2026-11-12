@@ -371,7 +371,6 @@ export default function OriginalHome({
       </nav>
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">{ui("for busy lives and better friendships")}</p>
           <h1>{ui("Make time.")}<br />
             <em>{ui("Make it good.")}</em>
           </h1>
@@ -419,23 +418,19 @@ export default function OriginalHome({
           />
         </div>
         <div className="about-copy">
-          <p className="eyebrow">{ui("why us & about exists")}</p>
           <h2>{ui("Friendship needs a place in the diary.")}</h2>
           <p>{ui("Life gets full. Work, motherhood and other care, travel, family and the never-ending group chat can make seeing each other feel strangely hard. Us & About gives the people you care about a little more thought, so a real break can actually happen.")}</p>
         </div>
         <div className="about-promises">
           <div>
-            <span>01</span>
             <b>{ui("Context, not guesswork")}</b>
             <p>{ui("Keep the small details that make a plan feel right: energy, tastes, travel and what to avoid.")}</p>
           </div>
           <div>
-            <span>02</span>
             <b>{ui("A plan for the actual people")}</b>
             <p>{ui("Build around a one-to-one, familiar friends, or a new mixed group with different comfort levels.")}</p>
           </div>
           <div>
-            <span>03</span>
             <b>{ui("Less arranging, more showing up")}</b>
             <p>{ui("Find a place, agree a time, then send an invite people want to open.")}</p>
           </div>
@@ -467,7 +462,6 @@ export default function OriginalHome({
       </div>
       <section className="planner-section" id="planner">
         <div className="section-intro">
-          <p className="eyebrow">{ui("the clever bit")}</p>
           <h2>{ui("Start with your people.")}</h2>
           <p>{ui("Try this illustrative planner with a sample name. Review an editable draft, or open your dashboard to save your own friends and private notes. No account needed; sign in when you want to send invitations.")}</p>
           <button
@@ -584,7 +578,6 @@ export default function OriginalHome({
       </div>
       <section className="ideas" id="ideas">
         <div className="ideas-head">
-          <p className="eyebrow">{ui("start anywhere")}</p>
           <h2>{ui("The plan is the excuse.")}</h2>
           <p>{ui("Us & About thinks about the details. You get to show up.")}</p>
         </div>
@@ -626,7 +619,6 @@ export default function OriginalHome({
               alt={ui("A handmade collage of friends gathering around an invitation")}
             />
           </div>
-          <p className="eyebrow">{ui("when it comes together")}</p>
           <h2>{ui("Send an invite")}<br />{ui("worth opening.")}</h2>
           <p>{ui("Every finished plan becomes a warm, simple page your friends can keep, read, and RSVP to.")}</p>
           <button onClick={openPlan}>{ui("See an event page ")}<ArrowUpRight />
